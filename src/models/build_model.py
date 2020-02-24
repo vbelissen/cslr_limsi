@@ -1,9 +1,3 @@
-import numpy as np
-from pandas import DataFrame
-import os, os.path
-import csv
-from itertools import groupby
-from time import time
 import sys
 
 import keras.backend as K
@@ -13,9 +7,6 @@ from keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Input, Den
 from keras.layers.core import *
 from keras.models import *
 from keras.utils import to_categorical, plot_model
-
-from attention.attention_utils import get_activations, get_data_recurrent
-
 
 
 def attention_timewise(inputs, time_steps, single=False, attention_layer_descriptor=''):
@@ -89,7 +80,8 @@ def get_model(output_names,
               features_number=420,
               print_summary=True):
     """
-        Returns Keras model
+        Keras recurrent neural network model builder.
+        It can include a convolutional layer, attention on the input, several RNN layers, attention on RNN output, additional dense layers.
 
         Inputs:
             output_names: list of outputs (strings)
