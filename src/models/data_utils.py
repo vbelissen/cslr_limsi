@@ -247,6 +247,12 @@ def get_data_concatenated_DictaSign(output_names,
             X: a numpy array [1, total_time_steps, features_number] for features
             Y: a list, comprising annotations
     """
+
+    if preloaded_features is None:
+        preloaded_features_new = get_all_features_DictaSign(features_dict)
+    if preloaded_annotations is None:
+        get_all_annotations_DictaSign(output_names, output_categories)
+
     video_number = video_indices.size
     annotation_raw = np.load('../../data/processed/DictaSign/annotations.npz', encoding='latin1')['dataBrut_DS']  # for counting nb of images
     video_lengths = np.zeros(video_number, dtype=int)
