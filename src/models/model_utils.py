@@ -90,7 +90,7 @@ def get_model(output_names,
             conv (bool): if True, applies convolution on input
             conv_filt: number of convolution filters
             conv_ker: size of convolution kernel
-            conv_strides: number of convolution strides
+            conv_strides: size of convolution strides
             rnn_number: number of recurrent layers
             rnn_type: type of recurrent layers (string)
             rnn_hidden_units: number of hidden units
