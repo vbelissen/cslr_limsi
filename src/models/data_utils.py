@@ -26,31 +26,38 @@ def categorical_conversion_seq_DictaSign(data, nonZeroCategories=[1]):
     return converted_data
 
 
-def categorical_conversion_allVideos_DictaSign(data, nonZeroCategories=[1]):
+def categorical_conversion_videos_DictaSign(data, nonZeroCategories=[1], video_indices=None):
     """
         Converting annotations to categorical values (for all videos).
 
         Inputs:
             data: a list of numpy array of annotations (for each video)
             nonZeroCategories: list of meaningful annotation categories
+            video_indices: list or numpy array of wanted videos
 
         Outputs:
             converted_data: categorical values of annotations
     """
+    data_copy = []
     video_number = len(data)
-    for i_video in range(video_number):
-        data[i_video] = categorical_conversion_seq_DictaSign(data[i_video], nonZeroCategories)
-    return data
+    if video_indices is None:
+        range_idx = range(video_number)
+    else:
+        range_idx = video_indices
+    for i_video in range_idx:
+        data_copy.append(categorical_conversion_seq_DictaSign(data[i_video], nonZeroCategories))
+    return data_copy
 
 
-def get_all_annotations_DictaSign(output_names, output_categories):
+def get_annotations_videos_DictaSign(output_names, output_categories, video_indices=np.arange(94)):
     """
         Gets all wanted annotations.
-            e.g.: get_all_annotations_DictaSign(['fls', 'DS'], [[41891,43413,43422,42992],[1]])
+            e.g.: get_all_annotations_DictaSign(['fls', 'DS'], [[41891,43413,43422,42992],[1]], np.arange(10))
 
         Inputs:
             output_names: list of outputs (strings)
             output_categories: list of lists of meaningful annotation categories for each output
+            video_indices: list or numpy array of wanted videos
 
         Outputs:
             annotations (list (categories) of lists (videos) of numpy arrays)
@@ -59,11 +66,11 @@ def get_all_annotations_DictaSign(output_names, output_categories):
     output_number = len(output_names)
     annotation_raw = np.load('../../data/processed/DictaSign/annotations.npz', encoding='latin1')
     for i_output in range(output_number):
-        annotations.append(categorical_conversion_allVideos_DictaSign(annotation_raw['dataBrut_'+output_names[i_output]], output_categories[i_output]))
+        annotations.append(categorical_conversion_videos_DictaSign(annotation_raw['dataBrut_'+output_names[i_output]], output_categories[i_output], video_indices))
     return annotations
 
 
-def get_all_features_DictaSign(features_dict={'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}, video_number=94):
+def get_features_videos_DictaSign(features_dict={'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}, video_indices=np.arange(94)):
     """
         Gets all wanted features.
 
@@ -71,6 +78,7 @@ def get_all_features_DictaSign(features_dict={'features_HS':np.arange(0, 420), '
             features_dict: a dictionary indication which features to keep
                 e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
             video_number: the number of videos in the corpus
+            video_indices: list or numpy array of wanted videos
 
         Outputs:
             features (list  of numpy arrays [1, time_steps, features_number])
@@ -84,7 +92,7 @@ def get_all_features_DictaSign(features_dict={'features_HS':np.arange(0, 420), '
 
     annotation_raw = np.load('../../data/processed/DictaSign/annotations.npz', encoding='latin1')['dataBrut_DS'] # for counting nb of images
 
-    for vid_idx in range(video_number):
+    for vid_idx in video_indices:
         time_steps = annotation_raw[vid_idx].shape[0]
         features.append(np.zeros((1, time_steps, features_number)))
 
@@ -94,8 +102,10 @@ def get_all_features_DictaSign(features_dict={'features_HS':np.arange(0, 420), '
         key_features_number = key_features_idx.size
         if key_features_number > 0:
             key_features = np.load('../../data/processed/DictaSign/'+key+'.npy', encoding='latin1')
-            for vid_idx in range(video_number):
-                features[vid_idx][0, :, features_number_idx:features_number_idx+key_features_number] = key_features[vid_idx][:, key_features_idx]
+            index_vid_tmp = 0
+            for vid_idx in video_indices:
+                features[index_vid_tmp][0, :, features_number_idx:features_number_idx+key_features_number] = key_features[vid_idx][:, key_features_idx]
+                index_vid_tmp += 1
             features_number_idx += key_features_number
 
     return features
@@ -105,7 +115,6 @@ def get_sequence_features_DictaSign(vid_idx=0,
                            img_start_idx=0,
                            features_dict={'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])},
                            time_steps=100,
-                           strides=1,
                            preloaded_features=None):
     """
         For returning features for a sequence, from DictaSign.
@@ -117,7 +126,6 @@ def get_sequence_features_DictaSign(vid_idx=0,
             features_dict: a dictionary indication which features to keep
                 e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
             time_steps: length of sequences (int)
-            strides: size of convolution strides
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
             preloaded_annotations: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
 
@@ -182,7 +190,8 @@ def get_sequence_annotations_DictaSign(output_names,
             Y.append(categorical_conversion_seq_DictaSign(annotation_output['dataBrut_'+output_names[i_output]][vid_idx][img_start_idx:img_start_idx + time_steps, :], nonZeroCategories=output_categories[i_output]).reshape(1, time_steps, output_classes))
         else:
             Y.append(preloaded_annotations[i_output][vid_idx][0, img_start_idx:img_start_idx+time_steps, :].reshape(1, time_steps, output_classes))
-        Y[-1] = np.roll(Y[-1], -int(strides / 2), axis=1)[:, ::strides, :]
+        if strides > 1:
+            Y[-1] = np.roll(Y[-1], -int(strides / 2), axis=1)[:, ::strides, :]
 
     return Y
 
@@ -224,7 +233,6 @@ def get_sequence_DictaSign(output_names,
 def get_data_concatenated_DictaSign(output_names,
                                     output_categories,
                                     features_dict={'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])},
-                                    strides=1,
                                     preloaded_features=None,
                                     preloaded_annotations=None,
                                     video_indices=np.arange(94),
@@ -237,7 +245,6 @@ def get_data_concatenated_DictaSign(output_names,
             output_categories: list of lists of meaningful annotation categories for each output
             features_dict: a dictionary indication which features to keep
                 e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
-            strides: size of convolution strides
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
             preloaded_annotations: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
             video_indices: numpy array for a list of videos
@@ -249,26 +256,20 @@ def get_data_concatenated_DictaSign(output_names,
     """
 
     if preloaded_features is None:
-        preloaded_features_new = get_all_features_DictaSign(features_dict)
+        preloaded_features = get_features_videos_DictaSign(features_dict, video_indices)
     if preloaded_annotations is None:
-        get_all_annotations_DictaSign(output_names, output_categories)
+        preloaded_annotations = get_annotations_videos_DictaSign(output_names, output_categories, video_indices)
 
     video_number = video_indices.size
-    annotation_raw = np.load('../../data/processed/DictaSign/annotations.npz', encoding='latin1')['dataBrut_DS']  # for counting nb of images
     video_lengths = np.zeros(video_number, dtype=int)
     total_length = 0
     for i_vid in range(video_number):
         vid_idx = video_indices[i_vid]
-        video_lengths[i_vid] = annotation_raw[vid_idx].shape[0]
+        video_lengths[i_vid] = preloaded_features[i_vid].shape[1]
         total_length += video_lengths[i_vid]
         total_length += separation
 
-    if preloaded_features is None:
-        features_number = 0
-        for key in features_dict:
-            features_number += features_dict[key].size
-    else:
-        features_number = preloaded_features[0].shape[1]
+    features_number = preloaded_features[0].shape[2]
 
     X = np.zeros((1, total_length, features_number))
     Y = []
@@ -280,21 +281,9 @@ def get_data_concatenated_DictaSign(output_names,
     img_start_idx = 0
     for i_vid in range(video_number):
         vid_idx = video_indices[i_vid]
-        X[0, img_start_idx:img_start_idx+video_lengths[i_vid], :] \
-            = get_sequence_features_DictaSign(vid_idx,
-                                              img_start_idx=0,
-                                              features_dict=features_dict,
-                                              time_steps=video_lengths[i_vid],
-                                              strides=strides,
-                                              preloaded_features=preloaded_features)
-        y = get_sequence_annotations_DictaSign(output_names,
-                                               output_categories,
-                                               vid_idx, img_start_idx=0,
-                                               time_steps=video_lengths[i_vid],
-                                               strides=strides,
-                                               preloaded_annotations=preloaded_annotations)
+        X[0, img_start_idx:img_start_idx+video_lengths[i_vid], :] = preloaded_features[i_vid][0, :, :]
         for i_output in range(output_number):
-            Y[i_output][0, img_start_idx:img_start_idx + video_lengths[i_vid], :] = y[i_output]
+            Y[i_output][0, img_start_idx:img_start_idx + video_lengths[i_vid], :] = preloaded_annotations[i_output][i_vid][0, :, :]
             Y[i_output][0, img_start_idx + video_lengths[i_vid]:img_start_idx + video_lengths[i_vid]+separation, 0] = 1
         img_start_idx += video_lengths[i_vid]
         img_start_idx += separation
