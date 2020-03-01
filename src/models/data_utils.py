@@ -2,9 +2,9 @@ import numpy as np
 
 from keras.utils import to_categorical
 
-def categorical_conversion_seq_DictaSign(data, nonZeroCategories=[1]):
+def categorical_conversion_seq(data, nonZeroCategories=[1]):
     """
-        Converting annotations to categorical values (for a sequence or a video).
+        Converting annotations of one type to categorical values (for a sequence or a video).
 
         Inputs:
             data: a numpy array of annotations [time_steps, 1]
@@ -26,9 +26,25 @@ def categorical_conversion_seq_DictaSign(data, nonZeroCategories=[1]):
     return converted_data
 
 
-def categorical_conversion_videos_DictaSign(data, nonZeroCategories=[1], video_indices=None):
+def binary_conversion_seq(data):
     """
-        Converting annotations to categorical values (for all videos).
+        Converting annotations of one type, with different values, to binary values (for a sequence or a video).
+
+        Inputs:
+            data: a numpy array of annotations [time_steps, 1] or [time_steps]
+
+        Outputs:
+            converted_data: categorical values of annotations [1, time_steps, 1]
+    """
+    time_steps = data.shape[0]
+    converted_data = np.zeros((1, time_steps, 1))
+    converted_data[0, :, 0] = (data > 0).reshape(time_steps)
+    return converted_data
+
+
+def categorical_conversion_videos(data, nonZeroCategories=[1], video_indices=None):
+    """
+        Converting annotations of one type to categorical values (for all videos).
 
         Inputs:
             data: a list of numpy array of annotations (for each video)
@@ -36,7 +52,7 @@ def categorical_conversion_videos_DictaSign(data, nonZeroCategories=[1], video_i
             video_indices: list or numpy array of wanted videos
 
         Outputs:
-            converted_data: categorical values of annotations
+            data_copy: list of categorical values of annotations
     """
     data_copy = []
     video_number = len(data)
@@ -45,17 +61,20 @@ def categorical_conversion_videos_DictaSign(data, nonZeroCategories=[1], video_i
     else:
         range_idx = video_indices
     for i_video in range_idx:
-        data_copy.append(categorical_conversion_seq_DictaSign(data[i_video], nonZeroCategories))
+        data_copy.append(categorical_conversion_seq(data[i_video], nonZeroCategories))
     return data_copy
 
 
-def get_annotations_videos_DictaSign(output_names, output_categories, video_indices=np.arange(94)):
+def get_annotations_videos_categories(corpus, output_names, output_categories, video_indices=np.arange(94)):
     """
-        Gets all wanted annotations.
-            e.g.: get_all_annotations_DictaSign(['fls', 'DS'], [[41891,43413,43422,42992],[1]], np.arange(10))
+        Gets all wanted annotations, in the form of a list of different categories, each of which is a list of video annotations.
+            e.g.: get_annotations_videos_categories('DictaSign', ['fls', 'DS'], [[41891,43413,43422,42992],[1]], np.arange(10))
 
         Inputs:
+            corpus (string): 'DictaSign' or 'NCSLGR'
             output_names: list of outputs (strings)
+                DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
+                NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
             output_categories: list of lists of meaningful annotation categories for each output
             video_indices: list or numpy array of wanted videos
 
@@ -64,10 +83,56 @@ def get_annotations_videos_DictaSign(output_names, output_categories, video_indi
     """
     annotations = []
     output_number = len(output_names)
-    annotation_raw = np.load('../../data/processed/DictaSign/annotations.npz', encoding='latin1')
+    annotation_raw = np.load('../../data/processed/' + corpus + '/annotations.npz', encoding='latin1')
+    if corpus == 'DictaSign':
+        string_prefix = 'dataBrut_'
+    else:
+        string_prefix = ''
     for i_output in range(output_number):
-        annotations.append(categorical_conversion_videos_DictaSign(annotation_raw['dataBrut_'+output_names[i_output]], output_categories[i_output], video_indices))
+        annotations.append(categorical_conversion_videos(annotation_raw[string_prefix+output_names[i_output]], output_categories[i_output], video_indices))
     return annotations
+
+
+def get_annotations_videos_sign_types_binary(corpus, output_names_final, output_names_original, output_names_matrix, video_indices=np.arange(94)):
+    """
+        Gets all wanted annotations, in the form of a list of video annotations of sign types.
+            e.g.: get_annotations_videos_sign_types_binary('NCSLGR',
+            ['Pointing', 'Classifiers'],
+            ['IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL'],
+            np.array([[1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]]))
+
+        Inputs:
+            corpus (string): 'DictaSign' or 'NCSLGR'
+            output_names_final: list of outputs (strings) corresponding to the desired output_categories
+            output_names_original: original names that are used to compose final outputs
+                DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
+                NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
+            output_names_matrix: binary matrix that relates final outputs (rows) to original outputs (columns)
+            video_indices: list or numpy array of wanted videos
+
+        Outputs:
+            annotations (lists (videos) of numpy arrays)
+    """
+    final_number = len(output_names_final) # should be equal to output_names_matrix.shape[0]
+    original_number = len(output_names_original) # should be equal to output_names_matrix.shape[1]
+    video_annotations = []
+    video_number = len(video_indices)
+    annotation_raw = np.load('../../data/processed/' + corpus + '/annotations.npz', encoding='latin1')
+    if corpus == 'DictaSign':
+        string_prefix = 'dataBrut_'
+    else:
+        string_prefix = ''
+    for i_vid in range(video_number):
+        vid_idx = video_indices[i_vid]
+        video_length = annotation_raw[string_prefix+output_names_original[0]][vid_idx].shape[0]
+        current_video_annotations = np.zeros((1, video_length, final_number+1))
+        for i_final_output in range(final_number):
+            for i_original_output in range(original_number):
+                current_video_annotations[0, :, i_final_output+1] += binary_conversion_seq(annotation_raw[string_prefix+output_names_original[i_original_output]][vid_idx]).reshape(video_length)
+        current_video_annotations = (current_video_annotations > 0)
+        current_video_annotations[0, :, 0] = 1 - (np.sum(current_video_annotations[0, :, 1:], axis=1)>0)
+        video_annotations.append(current_video_annotations)
+    return video_annotations
 
 
 def get_features_videos_DictaSign(features_dict={'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}, video_indices=np.arange(94)):
@@ -187,7 +252,7 @@ def get_sequence_annotations_DictaSign(output_names,
     for i_output in range(output_number):
         output_classes = len(output_categories[i_output])+1
         if preloaded_annotations is None:
-            Y.append(categorical_conversion_seq_DictaSign(annotation_output['dataBrut_'+output_names[i_output]][vid_idx][img_start_idx:img_start_idx + time_steps, :], nonZeroCategories=output_categories[i_output]).reshape(1, time_steps, output_classes))
+            Y.append(categorical_conversion_seq(annotation_output['dataBrut_'+output_names[i_output]][vid_idx][img_start_idx:img_start_idx + time_steps, :], nonZeroCategories=output_categories[i_output]).reshape(1, time_steps, output_classes))
         else:
             Y.append(preloaded_annotations[i_output][vid_idx][0, img_start_idx:img_start_idx+time_steps, :].reshape(1, time_steps, output_classes))
         if strides > 1:
@@ -258,7 +323,7 @@ def get_data_concatenated_DictaSign(output_names,
     if preloaded_features is None:
         preloaded_features = get_features_videos_DictaSign(features_dict, video_indices)
     if preloaded_annotations is None:
-        preloaded_annotations = get_annotations_videos_DictaSign(output_names, output_categories, video_indices)
+        preloaded_annotations = get_annotations_videos_categories('DictaSign', output_names, output_categories, video_indices)
 
     video_number = video_indices.size
     video_lengths = np.zeros(video_number, dtype=int)
