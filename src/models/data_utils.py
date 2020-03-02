@@ -93,13 +93,13 @@ def get_annotations_videos_categories(corpus, output_names, output_categories, v
     return annotations
 
 
-def get_annotations_videos_sign_types_binary(corpus, output_names_final, output_names_original, output_names_matrix, video_indices=np.arange(94)):
+def get_annotations_videos_sign_types_binary(corpus, output_names_final, output_names_original, video_indices=np.arange(94)):
     """
         Gets all wanted annotations, in the form of a list of video annotations of sign types.
             e.g.: get_annotations_videos_sign_types_binary('NCSLGR',
             ['Pointing', 'Classifiers'],
-            ['IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL'],
-            np.array([[1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]]))
+            [['IX_1p', 'IX_2p', 'IX_3p', 'IX_loc'], ['DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']],
+            np.arange(10))
 
         Inputs:
             corpus (string): 'DictaSign' or 'NCSLGR'
@@ -107,14 +107,12 @@ def get_annotations_videos_sign_types_binary(corpus, output_names_final, output_
             output_names_original: original names that are used to compose final outputs
                 DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
                 NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
-            output_names_matrix: binary matrix that relates final outputs (rows) to original outputs (columns)
             video_indices: list or numpy array of wanted videos
 
         Outputs:
             annotations (lists (videos) of numpy arrays)
     """
-    final_number = len(output_names_final) # should be equal to output_names_matrix.shape[0]
-    original_number = len(output_names_original) # should be equal to output_names_matrix.shape[1]
+    final_number = len(output_names_final)
     video_annotations = []
     video_number = len(video_indices)
     annotation_raw = np.load('../../data/processed/' + corpus + '/annotations.npz', encoding='latin1')
@@ -124,11 +122,12 @@ def get_annotations_videos_sign_types_binary(corpus, output_names_final, output_
         string_prefix = ''
     for i_vid in range(video_number):
         vid_idx = video_indices[i_vid]
-        video_length = annotation_raw[string_prefix+output_names_original[0]][vid_idx].shape[0]
+        video_length = annotation_raw[string_prefix+output_names_original[0][0]][vid_idx].shape[0]
         current_video_annotations = np.zeros((1, video_length, final_number+1))
         for i_final_output in range(final_number):
+            original_number = len(output_names_original[i_final_output])
             for i_original_output in range(original_number):
-                current_video_annotations[0, :, i_final_output+1] += binary_conversion_seq(annotation_raw[string_prefix+output_names_original[i_original_output]][vid_idx]).reshape(video_length)
+                current_video_annotations[0, :, i_final_output+1] += binary_conversion_seq(annotation_raw[string_prefix+output_names_original[i_final_output][i_original_output]][vid_idx]).reshape(video_length)
         current_video_annotations = (current_video_annotations > 0)
         current_video_annotations[0, :, 0] = 1 - (np.sum(current_video_annotations[0, :, 1:], axis=1)>0)
         video_annotations.append(current_video_annotations)
