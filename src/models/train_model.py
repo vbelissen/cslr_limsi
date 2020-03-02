@@ -8,7 +8,7 @@ import sys
 
 import tensorflow as tf
 v0 = tf.__version__[0]
-if v0 == 2:
+if v0 == '2':
     # For tensorflow 2, keras in included in tf
     import tensorflow.keras.backend as K
     from tensorflow.keras import optimizers
@@ -17,7 +17,7 @@ if v0 == 2:
     from tensorflow.python.keras.layers.core import *
     from tensorflow.keras.models import *
     from tensorflow.keras.utils import to_categorical, plot_model
-elif v0 == 1:
+elif v0 == '1':
     #For tensorflow 1.2.0
     import keras.backend as K
     from keras import optimizers

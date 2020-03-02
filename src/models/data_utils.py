@@ -3,9 +3,9 @@ import sys
 
 import tensorflow as tf
 v0 = tf.__version__[0]
-if v0 == 2:
+if v0 == '2':
     from tensorflow.keras.utils import to_categorical # For tensorflow 2, keras in included in tf
-elif v0 == 1:
+elif v0 == '1':
     from keras.utils import to_categorical # For tensorflow 1.2.0
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
@@ -91,7 +91,7 @@ def get_annotations_videos_categories(corpus, output_names, output_categories, v
     """
     annotations = []
     output_number = len(output_names)
-    annotation_raw = np.load('../../data/processed/' + corpus + '/annotations.npz', encoding='latin1')
+    annotation_raw = np.load('data/processed/' + corpus + '/annotations.npz', encoding='latin1', allow_pickle=True)
     if corpus == 'DictaSign':
         string_prefix = 'dataBrut_'
     else:
@@ -123,7 +123,7 @@ def get_annotations_videos_sign_types_binary(corpus, output_names_final, output_
     final_number = len(output_names_final)
     video_annotations = []
     video_number = len(video_indices)
-    annotation_raw = np.load('../../data/processed/' + corpus + '/annotations.npz', encoding='latin1')
+    annotation_raw = np.load('data/processed/' + corpus + '/annotations.npz', encoding='latin1', allow_pickle=True)
     if corpus == 'DictaSign':
         string_prefix = 'dataBrut_'
     else:
@@ -163,9 +163,9 @@ def get_features_videos(corpus, features_dict={'features_HS':np.arange(0, 420), 
         features_number += features_dict[key].size
 
     if corpus == 'DictaSign':
-        annotation_raw = np.load('../../data/processed/DictaSign/annotations.npz', encoding='latin1')['dataBrut_DS'] # for counting nb of images
+        annotation_raw = np.load('data/processed/DictaSign/annotations.npz', encoding='latin1', allow_pickle=True)['dataBrut_DS'] # for counting nb of images
     elif corpus == 'NCSLGR':
-        annotation_raw = np.load('../../data/processed/NCSLGR/annotations.npz', encoding='latin1')['lexical_with_ns_not_fs'] # for counting nb of images
+        annotation_raw = np.load('data/processed/NCSLGR/annotations.npz', encoding='latin1', allow_pickle=True)['lexical_with_ns_not_fs'] # for counting nb of images
     else:
         sys.exit('Invalid corpus name')
 
@@ -178,7 +178,7 @@ def get_features_videos(corpus, features_dict={'features_HS':np.arange(0, 420), 
         key_features_idx = features_dict[key]
         key_features_number = key_features_idx.size
         if key_features_number > 0:
-            key_features = np.load('../../data/processed/' + corpus + '/' + key + '.npy', encoding='latin1')
+            key_features = np.load('data/processed/' + corpus + '/' + key + '.npy', encoding='latin1')
             index_vid_tmp = 0
             for vid_idx in video_indices:
                 features[index_vid_tmp][0, :, features_number_idx:features_number_idx+key_features_number] = key_features[vid_idx][:, key_features_idx]
@@ -226,7 +226,7 @@ def get_sequence_features(corpus,
             key_features_idx = features_dict[key]
             key_features_number = key_features_idx.size
             if key_features_number > 0:
-                key_features = np.load('../../data/processed/' + corpus + '/' + key + '.npy', encoding='latin1')[vid_idx]
+                key_features = np.load('data/processed/' + corpus + '/' + key + '.npy', encoding='latin1')[vid_idx]
                 X[0, img_start_idx:img_start_idx + time_steps, features_number_idx:features_number_idx+key_features_number] = key_features[img_start_idx:img_start_idx + time_steps, key_features_idx]
                 features_number_idx += key_features_number
     else:
@@ -274,7 +274,7 @@ def get_sequence_annotations_categories(corpus,
 
     output_number = len(output_names)
     if preloaded_annotations is None:
-        annotation_output = np.load('../../data/processed/' + corpus + '/annotations.npz', encoding='latin1')
+        annotation_output = np.load('data/processed/' + corpus + '/annotations.npz', encoding='latin1', allow_pickle=True)
     for i_output in range(output_number):
         output_classes = len(output_categories[i_output])+1
         if preloaded_annotations is None:

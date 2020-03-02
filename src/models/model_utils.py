@@ -2,7 +2,7 @@ import sys
 
 import tensorflow as tf
 v0 = tf.__version__[0]
-if v0 == 2:
+if v0 == '2':
     # For tensorflow 2, keras in included in tf
     import tensorflow.keras.backend as K
     from tensorflow.keras import optimizers
@@ -11,7 +11,7 @@ if v0 == 2:
     from tensorflow.python.keras.layers.core import *
     from tensorflow.keras.models import *
     from tensorflow.keras.utils import to_categorical, plot_model
-elif v0 == 1:
+elif v0 == '1':
     #For tensorflow 1.2.0
     import keras.backend as K
     from keras import optimizers
@@ -45,7 +45,7 @@ def attention_timewise(inputs, time_steps, single=False, attention_layer_descrip
         a = Lambda(lambda x: K.mean(x, axis=1), name='dim_reduction_'+attention_layer_descriptor)(a)
         a = RepeatVector(input_dim)(a)
     a_probs = Permute((2, 1), name='attention_vec_'+attention_layer_descriptor)(a)
-    if v0 == 2:
+    if v0 == '2':
         output_attention_mul = multiply([inputs, a_probs], name='attention_mul_timewise_'+attention_layer_descriptor)
     else:
         output_attention_mul = merge([inputs, a_probs], name='attention_mul_timewise_'+attention_layer_descriptor, mode='mul')
@@ -68,7 +68,7 @@ def attention_featurewise(inputs, single=False, attention_layer_descriptor=''):
     if single:
         a = Lambda(lambda x: K.mean(x, axis=1), name='dim_reduction_'+attention_layer_descriptor)(a)
         a = RepeatVector(input_dim)(a)
-    if v0 == 2:
+    if v0 == '2':
         output_attention_mul = multiply([inputs, a], name='attention_mul_featurewise_'+attention_layer_descriptor)
     else:
         output_attention_mul = merge([inputs, a], name='attention_mul_featurewise_'+attention_layer_descriptor, mode='mul')
