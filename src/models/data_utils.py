@@ -1,7 +1,14 @@
 import numpy as np
 import sys
 
-from keras.utils import to_categorical
+import tensorflow as tf
+v0 = tf.__version__[0]
+if v0 == 2:
+    from tensorflow.keras.utils import to_categorical # For tensorflow 2, keras in included in tf
+elif v0 == 1:
+    from keras.utils import to_categorical # For tensorflow 1.2.0
+else:
+    sys.exit('Tensorflow version should be 1.X or 2.X')
 
 def categorical_conversion_seq(data, nonZeroCategories=[1]):
     """
