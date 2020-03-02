@@ -39,7 +39,7 @@ def binary_conversion_seq(data):
     time_steps = data.shape[0]
     converted_data = np.zeros((1, time_steps, 1))
     converted_data[0, :, 0] = (data > 0).reshape(time_steps)
-    return converted_data
+    return converted_data.astype(float)
 
 
 def categorical_conversion_videos(data, nonZeroCategories=[1], video_indices=None):
@@ -130,7 +130,7 @@ def get_annotations_videos_sign_types_binary(corpus, output_names_final, output_
                 current_video_annotations[0, :, i_final_output+1] += binary_conversion_seq(annotation_raw[string_prefix+output_names_original[i_final_output][i_original_output]][vid_idx]).reshape(video_length)
         current_video_annotations = (current_video_annotations > 0)
         current_video_annotations[0, :, 0] = 1 - (np.sum(current_video_annotations[0, :, 1:], axis=1)>0)
-        video_annotations.append(current_video_annotations)
+        video_annotations.append(current_video_annotations.astype(float))
     return video_annotations
 
 
