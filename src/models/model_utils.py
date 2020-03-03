@@ -3,7 +3,7 @@ import sys
 import tensorflow as tf
 v0 = tf.__version__[0]
 if v0 == '2':
-    # For tensorflow 2, keras in included in tf
+    # For tensorflow 2, keras is included in tf
     import tensorflow.keras.backend as K
     from tensorflow.keras import optimizers
     from tensorflow.keras.callbacks import TensorBoard
@@ -249,3 +249,4 @@ def get_model(output_names,
     if print_summary:
         model.summary()
     return model
+
