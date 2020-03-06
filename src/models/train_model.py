@@ -36,29 +36,56 @@ def generator(features, annot, batch_size, seq_length, output_form):
     """
     total_length_round = (features.shape[1]//seq_length)*seq_length
     batch_size_time = np.min([batch_size*seq_length, total_length_round])
+    feature_number = features.shape[2]
 
-    batch_features = np.zeros((1, batch_size_time, features.shape[2]))
+    batch_features = np.zeros((1, batch_size_time, feature_number))
+
+    if output_form == 'mixed':
+        batch_labels = []
+        labels_number = len(annot)
+        labels_shape = []
+        for i_label_cat in range(labels_number):
+            labels_shape.append(annot[i_label_cat].shape[2])
+            batch_labels.append(np.zeros((1, batch_size_time, labels_shape[i_label_cat])))
+    elif output_form == 'sign_types':
+        labels_shape = annot.shape[2]
+        batch_labels = np.zeros((1, batch_size_time, labels_shape))
+    else:
+        sys.exit('Wrong annotation format')
 
     while True:
-        # Roll features and labels
-        random_shift = np.random.randint(0, total_length_round)
-
+        # Random start
         random_ini = np.random.randint(0, total_length_round)
         end = random_ini + batch_size_time
         end_modulo = np.mod(end, total_length_round)
 
-        #batch_features = np.roll(features, -random_shift, axis=1)[:, :batch_size_time, :].reshape(-1, seq_length, features.shape[2])
-        # test a modfier
-        batch_features = features[0,0:batch_size_time,:].reshape(-1, seq_length, features.shape[2])
-        if output_form == 'mixed':
-            batch_labels = []
-            labels_number = len(annot)
-            for i_label_cat in range(labels_number):
-                batch_labels.append(np.roll(annot[i_label_cat], -random_shift, axis=1)[:, :batch_size_time, :].reshape(-1, seq_length, annot[i_label_cat].shape[2]))
-        elif output_form == 'sign_types':
-            batch_labels = np.roll(annot, -random_shift, axis=1)[:, :batch_size_time, :].reshape(-1, seq_length, annot.shape[2])
+        # Fill in batch features
+        batch_features = batch_features.reshape(1, batch_size_time, feature_number)
+        if end <= total_length_round:
+            batch_features = features[0, random_ini:end, :].reshape(-1, seq_length, feature_number)
         else:
-            sys.exit('Wrong annotation format')
+            batch_features[0, :(total_length_round - random_ini), :] = features[0, random_ini:total_length_round, :]
+            batch_features[0, (total_length_round - random_ini):, :] = features[0, 0:end_modulo, :]
+            batch_features = batch_features.reshape(-1, seq_length, feature_number)
+
+        # Fill in batch annotations
+        if output_form == 'mixed':
+            for i_label_cat in range(labels_number):
+                batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(1, batch_size_time, labels_shape[i_label_cat])
+                if end <= total_length_round:
+                    batch_labels[i_label_cat] = annot[i_label_cat][0, random_ini:end, :].reshape(-1, seq_length, labels_shape[i_label_cat])
+                else:
+                    batch_labels[i_label_cat][0, :(total_length_round - random_ini), :] = annot[i_label_cat][0, random_ini:total_length_round, :]
+                    batch_labels[i_label_cat][0, (total_length_round - random_ini):, :] = annot[i_label_cat][0, 0:end_modulo, :]
+                    batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(-1, seq_length, labels_shape[i_label_cat])
+        elif output_form == 'sign_types':
+            batch_labels = batch_labels.reshape(1, batch_size_time, labels_shape)
+            if end <= total_length_round:
+                batch_labels = annot[0, random_ini:end, :].reshape(-1, seq_length, labels_shape)
+            else:
+                batch_labels[0, :(total_length_round - random_ini), :] = annot[0, random_ini:total_length_round, :]
+                batch_labels[0, (total_length_round - random_ini):, :] = annot[0, 0:end_modulo, :]
+                batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
 
         yield batch_features, batch_labels
 
@@ -98,5 +125,7 @@ def train_model(model, features_train, annot_train, features_valid, annot_valid,
 
     hist = model.fit_generator(generator(features_train, annot_train, batch_size, seq_length, output_form),
                                epochs=epochs,
-                               steps_per_epoch=np.ceil(time_steps_train/batch_size_time))
+                               steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
+                               validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form),
+                               validation_steps=1)
 
