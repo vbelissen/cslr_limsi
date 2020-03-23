@@ -2,6 +2,10 @@ from src.models.data_utils import *
 from src.models.model_utils import *
 from src.models.train_model import *
 
+# A model with 3 outputs:
+# Pointing signs (binary, weight = 1)
+# Depicting signs (binary, weight = 1)
+# Lexical signs (categorical, 4 different lexical signs (plus one NULL sign), weight = 1)
 model_1 = get_model(['PT', 'DS', 'fls'],[2,2,5],[1,1,1])
 features_1_train, annot_1_train = get_data_concatenated('DictaSign',
                                                         'mixed',
@@ -15,6 +19,8 @@ features_1_valid, annot_1_valid = get_data_concatenated('DictaSign',
                                                         video_indices=np.arange(70,94))
 train_model(model_1, features_1_train, annot_1_train, features_1_valid, annot_1_valid, 2000, 5, 100)
 
+# A model with 1 output matrix:
+# [other, Pointing, Depicting, Lexical]
 model_2 = get_model(['PT-DS-fls'],[4],[1])
 features_2_train, annot_2_train = get_data_concatenated('NCSLGR',
                                                         'sign_types',
