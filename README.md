@@ -21,6 +21,6 @@ If you find the project helpful, please consider citing us:
 ```
 
 ## Dataset
-You can get the original data (video + annotation):
-* of the Dicta-Sign-LSF-v2 corpus [here](https://www.ortolang.fr/market/corpora/dicta-sign-lsf-v2/)
-* of the NCSLGR corpus [here](https://www.bu.edu/asllrp/ncslgr.html)
+The original data (video + annotation):
+* [Dicta-Sign-LSF-v2](https://www.ortolang.fr/market/corpora/dicta-sign-lsf-v2/)
+* [NCSLGR](https://www.bu.edu/asllrp/ncslgr.html)
