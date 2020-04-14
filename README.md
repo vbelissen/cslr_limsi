@@ -32,5 +32,8 @@ If you find the project helpful, please cite:
 ```
 
 ## TODO
+* ~Add a few test examples~
+* ~Add training/testing code~
 * Add video preprocessing code/pipeline
 * Add full documentation
+* Include performance analysis and Tensorboard module
