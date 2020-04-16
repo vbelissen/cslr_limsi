@@ -180,7 +180,6 @@ def get_model(output_names,
             sys.exit('Invalid RNN type')
     else:
         sys.exit('Invalid RNN number')
-    print(rnn_n.shape[-1])
     # attention after RNNs
     if att_out_rnn:
         if rnn_return_sequences:
@@ -249,4 +248,3 @@ def get_model(output_names,
     if print_summary:
         model.summary()
     return model
-
