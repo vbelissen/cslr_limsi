@@ -1,5 +1,7 @@
 # CSLR - LIMSI
 
+![dictasign_fls_pls](dictasign_fls_pls.png)
+
 This is our implementation of the training and testing code for the paper [Dicta-Sign-LSF-v2: Remake of a Continuous LSF Dialogue Corpus and a First Baseline for Automatic SLP, LREC, 2020](https://). It has been tested with two corpora, DictaSign and NCSLGR (see below).
 
 The model is a simple RNN, trained in a supervised fashion, with the following properties:
