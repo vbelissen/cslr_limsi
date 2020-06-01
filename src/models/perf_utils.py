@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import itertools as it
 
-def framewiseAccuracy(dataTrue, dataPred, trueIsCat, predIsCatOrProb):
+def framewiseAccuracy(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """
         Computes accuracy of predictions wrt annotations.
 
@@ -12,13 +12,13 @@ def framewiseAccuracy(dataTrue, dataPred, trueIsCat, predIsCatOrProb):
             dataPred: a numpy array of predictions, shape [timeSteps] (values are classes),
                 or [timeSteps, nbClasses] (probabilities or categorical)
             trueIsCat, predIsCatOrProb: bool
+            idxNotSeparation: binary vector indicating where separations are (0)
 
         Outputs:
             a single accuracy value
     """
 
-    trueLength = dataTrue.shape[0]
-    predLength = dataPred.shape[0]
+    dataIsSeparated = (idxNotSeparation.size > 0)
 
     if not trueIsCat:
         if len(dataTrue.shape) > 1:
@@ -29,6 +29,13 @@ def framewiseAccuracy(dataTrue, dataPred, trueIsCat, predIsCatOrProb):
             if dataPred.shape[1] > 1:
                 sys.exit('Pred data should be a vector (not categorical or probabilities) because predIsCatOrProb=False')
 
+    if dataIsSeparated:
+        dataTrue = dataTrue[idxNotSeparation]
+        dataPred = dataPred[idxNotSeparation]
+
+    trueLength = dataTrue.shape[0]
+    predLength = dataPred.shape[0]
+
     if trueLength != predLength:
         sys.exit('Annotation and prediction data should have the same length')
     if trueIsCat:
@@ -38,7 +45,7 @@ def framewiseAccuracy(dataTrue, dataPred, trueIsCat, predIsCatOrProb):
 
     return np.sum(dataTrue == dataPred)/trueLength
 
-def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb):
+def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """
         Computes precision, recall and f1-score of predictions wrt annotations.
         Data must be binary.
@@ -50,7 +57,7 @@ def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb):
                 or [timeSteps, 2] (probabilities or categorical)
             trueIsCat, predIsCatOrProb: bool (if annotations are categorical,
                 if predictions are categorical/probability values for each category)
-
+            idxNotSeparation: binary vector indicating where separations are (0)
         Outputs:
             a single accuracy value
     """
@@ -81,6 +88,10 @@ def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb):
         dataTrue = np.argmax(dataTrue,axis=1)
     if predIsCatOrProb:
         dataPred = np.argmax(dataPred,axis=1)
+
+    if dataIsSeparated:
+        dataTrue = dataTrue[idxNotSeparation]
+        dataPred = dataPred[idxNotSeparation]
 
     TP = np.sum(dataTrue*dataPred)
     FP = np.sum((1-dataTrue)*dataPred)

@@ -461,7 +461,8 @@ def get_data_concatenated(corpus,
                           preloaded_annotations=None,
                           video_indices=np.arange(10),
                           separation=100,
-                          from_notebook=False):
+                          from_notebook=False,
+                          return_idx_trueData=False):
     """
         For returning concatenated features and annotations for a set of videos (e.g. train set...).
             e.g. features_2_train, annot_2_train = get_data_concatenated('NCSLGR',
@@ -496,6 +497,7 @@ def get_data_concatenated(corpus,
             video_indices: numpy array for a list of videos
             separation: in order to separate consecutive videos
             from_notebook: if notebook script, data is in parent folder
+            return_idx_trueData: if True, returns a binary vector with 0 where separations are
 
         Outputs:
             X: a numpy array [1, total_time_steps, features_number] for features
@@ -532,6 +534,7 @@ def get_data_concatenated(corpus,
     features_number = preloaded_features[0].shape[2]
 
     X = np.zeros((1, total_length, features_number))
+    idx_trueData = np.zeros(total_length)
 
     output_number = len(output_names_final)
     if output_form == 'mixed':
@@ -546,6 +549,7 @@ def get_data_concatenated(corpus,
     for i_vid in range(video_number):
         vid_idx = video_indices[i_vid]
         X[0, img_start_idx:img_start_idx+video_lengths[i_vid], :] = preloaded_features[i_vid][0, :, :]
+        idx_trueData[img_start_idx:img_start_idx+video_lengths[i_vid]] = 1
         if output_form == 'mixed':
             for i_output in range(output_number):
                 Y[i_output][0, img_start_idx:img_start_idx + video_lengths[i_vid], :] = preloaded_annotations[i_output][i_vid][0, :, :]
@@ -556,7 +560,10 @@ def get_data_concatenated(corpus,
         img_start_idx += video_lengths[i_vid]
         img_start_idx += separation
 
-    return X, Y
+    if return_idx_trueData:
+        return X, Y, idx_trueData
+    else:
+        return X, Y
 
 
 def getVideoIndicesSplitNCSLGR(fractionValid=0.10,

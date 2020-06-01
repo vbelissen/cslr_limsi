@@ -18,6 +18,13 @@ catDetails = [
               ['fingerspelling', 'fingerspelled_loan_signs'],
               [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
              ]
+batch_size=200
+epochs=200
+seq_length=60
+separation=50
+dropout=0.5
+rnn_number=1
+mlp_layers_number=1
 
 # Data split
 fractionValid = 0.10
@@ -29,25 +36,20 @@ includeShort=True
 
 
 ## GET VIDEO INDICES
-idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionValid,
-                                                         fractionTest=fractionTest,
-                                                         videosToDelete=videosToDelete,
-                                                         lengthCriterion=lengthCriterion,
-                                                         includeLong=True,
-                                                         includeShort=True)
+idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionValid, fractionTest=fractionTest, videosToDelete=videosToDelete, lengthCriterion=lengthCriterion, includeLong=True, includeShort=True)
 
 
 # A model with 1 output matrix:
 # [other, Pointing, Depicting, Lexical]
-model_2 = get_model(outputNames,[4],[1])
+model_2 = get_model(outputNames,[4],[1],dropout=dropout,rnn_number=rnn_number,mlp_layers_number=mlp_layers_number)
 features_2_train, annot_2_train = get_data_concatenated(corpus,
                                                         'sign_types',
-                                                        catNames,
-                                                        catDetails,
-                                                        video_indices=np.arange(0,10))
+                                                        catNames, catDetails,
+                                                        video_indices=idxTrain,
+                                                        separation=separation)
 features_2_valid, annot_2_valid = get_data_concatenated(corpus,
                                                         'sign_types',
-                                                        catNames,
-                                                        catDetails,
-                                                        video_indices=np.arange(10,20))
-train_model(model_2, features_2_train, annot_2_train, features_2_valid, annot_2_valid, 1000, 10, 100)
+                                                        catNames, catDetails,
+                                                        video_indices=idxValid,
+                                                        separation=separation)
+train_model(model_2, features_2_train, annot_2_train, features_2_valid, annot_2_valid, batch_size=batch_size, epochs=epochs, seq_length=seq_length)
