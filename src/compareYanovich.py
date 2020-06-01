@@ -2,6 +2,7 @@ from models.data_utils import *
 from models.model_utils import *
 from models.train_model import *
 from models.perf_utils import *
+import math
 
 ## PARAMETERS
 # Categories names
@@ -39,8 +40,44 @@ for idxV in range(nVideos):
         else:
             idxKeepShort[idxV] = 1
 
-print(idxKeepLong)
-print(idxKeepShort)
+def getVideoIndices():
+    #Long
+    nbLong = np.sum(idxKeepLong)
+    startTestLong = 0
+    endTestLong = startTestLong + math.ceil(fractionTest*nbLong)
+    startValidLong = endTestLong
+    endValidLong = startValidLong + math.ceil(fractionValid*nbLong)
+    startTrainLong = endValidLong
+    endTrainLong = nbLong
+    #Short
+    nbShort = np.sum(idxKeepShort)
+    startTestShort = 0
+    endTestShort = startTestShort + math.ceil(fractionTest*nbShort)
+    startValidShort = endTestShort
+    endValidShort = startValidShort + math.ceil(fractionValid*nbShort)
+    startTrainShort = endValidShort
+    endTrainShort = nbShort
+
+    idxLong = np.where(idxKeepLong)[0]
+    idxShort = np.where(idxKeepShort)[0]
+    np.random.shuffle(idxLong)
+    np.random.shuffle(idxShort)
+
+    idxTrain = np.hstack([idxShort[startTrainShort, endTrainShort], idxLong[startTrainLong, endTrainLong]])
+    idxValid = np.hstack([idxShort[startValidShort, endValidShort], idxLong[startValidLong, endTValidLong]])
+    idxTest =  np.hstack([idxShort[startTestShort,  endTestShort],  idxLong[startTestLong,  endTestLong]])
+    np.random.shuffle(idxTrain)
+    np.random.shuffle(idxValid)
+    np.random.shuffle(idxTest)
+
+    return idxTrain, idxValid, idxTest
+
+
+idxTrain, idxValid, idxTest = getVideoIndices()
+print(idxTrain)
+print(idxValid)
+print(idxTest)
+
 
 
 # A model with 1 output matrix:

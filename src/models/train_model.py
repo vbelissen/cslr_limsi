@@ -6,6 +6,7 @@ from itertools import groupby
 from time import time
 import sys
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
 import tensorflow as tf
 v0 = tf.__version__[0]
 if v0 == '2':
@@ -128,4 +129,3 @@ def train_model(model, features_train, annot_train, features_valid, annot_valid,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
                                validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form),
                                validation_steps=1)
-

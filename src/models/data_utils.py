@@ -1,6 +1,8 @@
 import numpy as np
 import sys
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 v0 = tf.__version__[0]
 if v0 == '2':
