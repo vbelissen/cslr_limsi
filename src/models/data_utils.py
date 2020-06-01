@@ -557,3 +557,90 @@ def get_data_concatenated(corpus,
         img_start_idx += separation
 
     return X, Y
+
+
+def getVideoIndicesSplitNCSLGR(fractionValid=0.10,
+                               fractionTest=0.05,
+                               videosToDelete=['dorm_prank_1053_small_0_1.mov', 'DSP_DeadDog.mov', 'DSP_Immigrants.mov', 'DSP_Trip.mov'],
+                               lengthCriterion=300,
+                               includeLong=True,
+                               includeShort=True,
+                               from_notebook=False):
+    """
+        Train/valid/test split for NCSLGR
+        it uses a length criterion so that data is balanced between train, valid and test
+
+        Inputs:
+            fractionValid
+            fractionTest
+            videosToDelete: list of videos to ignore (bad quality...)
+            lengthCriterion
+            from_notebook: if notebook script, data is in parent folder
+
+        Outputs:
+            idxTrain, idxValid, idxTest: numpy arrays
+    """
+
+    if from_notebook:
+        parent = '../'
+    else:
+        parent = ''
+
+    tmpAnnot = np.load(parent+'data/processed/NCSLGR/annotations.npz', encoding='latin1', allow_pickle=True)
+    namesVideos = np.load(parent+'data/processed/NCSLGR/list_videos.npy')
+    nVideos = namesVideos.shape[0]
+    idxKeep = np.ones(nVideos)
+    for v in videosToDelete:
+        idxV = np.where(namesVideos==v)[0][0]
+        idxKeep[idxV] = 0
+    idxKeepLong = np.zeros(nVideos)
+    idxKeepShort = np.zeros(nVideos)
+    for idxV in range(nVideos):
+        if idxKeep[idxV]:
+            tmpLength = tmpAnnot['lexical_with_ns_not_fs'][idxV].shape[0]
+            if tmpLength > lengthCriterion:
+                idxKeepLong[idxV] = 1
+            else:
+                idxKeepShort[idxV] = 1
+    #Long
+    nbLong = np.sum(idxKeepLong)
+    startTestLong = 0
+    endTestLong = int(startTestLong + math.ceil(fractionTest*nbLong))
+    startValidLong = endTestLong
+    endValidLong = int(startValidLong + math.ceil(fractionValid*nbLong))
+    startTrainLong = endValidLong
+    endTrainLong = int(nbLong)
+    #Short
+    nbShort = np.sum(idxKeepShort)
+    startTestShort = 0
+    endTestShort = int(startTestShort + math.ceil(fractionTest*nbShort))
+    startValidShort = endTestShort
+    endValidShort = int(startValidShort + math.ceil(fractionValid*nbShort))
+    startTrainShort = endValidShort
+    endTrainShort = int(nbShort)
+
+    idxLong = np.where(idxKeepLong)[0]
+    idxShort = np.where(idxKeepShort)[0]
+    np.random.shuffle(idxLong)
+    np.random.shuffle(idxShort)
+
+    if includeLong and includeShort:
+        idxTrain = np.hstack([idxShort[startTrainShort:endTrainShort], idxLong[startTrainLong:endTrainLong]])
+        idxValid = np.hstack([idxShort[startValidShort:endValidShort], idxLong[startValidLong:endValidLong]])
+        idxTest =  np.hstack([idxShort[startTestShort:endTestShort],   idxLong[startTestLong:endTestLong]])
+    elif includeLong and not includeShort:
+        idxTrain = idxLong[startTrainLong:endTrainLong]
+        idxValid = idxLong[startValidLong:endValidLong]
+        idxTest =  idxLong[startTestLong:endTestLong]
+    elif includeShort and not includeLong:
+        idxTrain = idxShort[startTrainShort:endTrainShort]
+        idxValid = idxShort[startValidShort:endValidShort]
+        idxTest =  idxShort[startTestShort:endTestShort]
+    else:
+        sys.exit('Long or Short videos should be included')
+
+    np.random.shuffle(idxTrain)
+    np.random.shuffle(idxValid)
+    np.random.shuffle(idxTest)
+
+    return idxTrain, idxValid, idxTest
