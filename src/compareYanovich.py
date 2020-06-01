@@ -63,9 +63,9 @@ def getVideoIndices():
     np.random.shuffle(idxLong)
     np.random.shuffle(idxShort)
 
-    idxTrain = np.hstack([idxShort[startTrainShort, endTrainShort], idxLong[startTrainLong, endTrainLong]])
-    idxValid = np.hstack([idxShort[startValidShort, endValidShort], idxLong[startValidLong, endTValidLong]])
-    idxTest =  np.hstack([idxShort[startTestShort,  endTestShort],  idxLong[startTestLong,  endTestLong]])
+    idxTrain = np.hstack([idxShort[startTrainShort:endTrainShort], idxLong[startTrainLong:endTrainLong]])
+    idxValid = np.hstack([idxShort[startValidShort:endValidShort], idxLong[startValidLong:endTValidLong]])
+    idxTest =  np.hstack([idxShort[startTestShort:endTestShort],   idxLong[startTestLong:endTestLong]])
     np.random.shuffle(idxTrain)
     np.random.shuffle(idxValid)
     np.random.shuffle(idxTest)
