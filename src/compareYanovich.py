@@ -22,8 +22,8 @@ lengthCriterion = 300
 
 
 ## GET VIDEO INDICES
-tmpAnnot = np.load('../data/processed/NCSLGR/annotations.npz', encoding='latin1', allow_pickle=True)
-namesVideos = np.load('../data/processed/NCSLGR/list_videos.npy')
+tmpAnnot = np.load('data/processed/NCSLGR/annotations.npz', encoding='latin1', allow_pickle=True)
+namesVideos = np.load('data/processed/NCSLGR/list_videos.npy')
 nVideos = namesVideos.shape[0]
 idxKeep = np.ones(nVideos)
 for v in videosToDelete:
