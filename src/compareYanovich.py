@@ -20,7 +20,7 @@ catDetails = [
              ]
 batch_size=200
 epochs=200
-seq_length=60
+seq_length=70
 separation=50
 dropout=0.5
 rnn_number=1
