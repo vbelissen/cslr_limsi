@@ -20,15 +20,22 @@ catDetails = [
              ]
 batch_size=200
 epochs=200
-seq_length=70
-separation=50
-dropout=0.5
+seq_length=100
+separation=0
+dropout=0
 rnn_number=1
-mlp_layers_number=1
+mlp_layers_number=0
+rnn_hidden_units=5
+learning_rate=0.001
+earlyStopping=True
+saveBest=True
+saveBestName='Yanovich'
+reduceLrOnPlateau=True
+
 
 # Data split
-fractionValid = 0.10
-fractionTest = 0.05
+fractionValid = 0.20
+fractionTest = 0.2
 videosToDelete = ['dorm_prank_1053_small_0_1.mov', 'DSP_DeadDog.mov', 'DSP_Immigrants.mov', 'DSP_Trip.mov']
 lengthCriterion = 300
 includeLong=True
@@ -41,7 +48,13 @@ idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionV
 
 # A model with 1 output matrix:
 # [other, Pointing, Depicting, Lexical]
-model_2 = get_model(outputNames,[4],[1],dropout=dropout,rnn_number=rnn_number,mlp_layers_number=mlp_layers_number,time_steps=seq_length)
+model_2 = get_model(outputNames,[4],[1],
+                    dropout=dropout,
+                    rnn_number=rnn_number,
+                    rnn_hidden_units=rnn_hidden_units,
+                    mlp_layers_number=mlp_layers_number,
+                    time_steps=seq_length,
+                    learning_rate=learning_rate)
 features_2_train, annot_2_train = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,

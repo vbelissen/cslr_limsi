@@ -6,7 +6,7 @@ from itertools import groupby
 from time import time
 import sys
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 v0 = tf.__version__[0]
 if v0 == '2':
@@ -91,7 +91,18 @@ def generator(features, annot, batch_size, seq_length, output_form):
         yield batch_features, batch_labels
 
 
-def train_model(model, features_train, annot_train, features_valid, annot_valid, batch_size, epochs, seq_length):
+def train_model(model,
+                features_train,
+                annot_train,
+                features_valid,
+                annot_valid,
+                batch_size,
+                epochs,
+                seq_length,
+                earlyStopping=False, 
+                saveBest=False,
+                saveBestName='',
+                reduceLrOnPlateau=False):
     """
         Trains a keras model.
 
@@ -124,8 +135,21 @@ def train_model(model, features_train, annot_train, features_valid, annot_valid,
     total_length_train_round = (features_train.shape[1] // seq_length) * seq_length
     batch_size_time = np.min([batch_size * seq_length, total_length_train_round])
 
+    callbacksPerso = []
+    if earlyStopping:
+        callbacksPerso.append(EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='min'))
+    if saveBest:
+        callbacksPerso.append(ModelCheckpoint(filepath='/models/'+saveBestName+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
+                                              save_best_only=True,
+                                              ave_weights_only=False,
+                                              monitor='val_loss',
+                                              mode='min'))
+    if reduceLrOnPlateau:
+        callbacksPerso.append(ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=7, verbose=1, epsilon=1e-4, mode='min'))
+
     hist = model.fit_generator(generator(features_train, annot_train, batch_size, seq_length, output_form),
                                epochs=epochs,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
                                validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form),
-                               validation_steps=1)
+                               validation_steps=1,
+                               callbacks=callbacksPerso)
