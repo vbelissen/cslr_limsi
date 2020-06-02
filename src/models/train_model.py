@@ -139,7 +139,7 @@ def train_model(model,
     if earlyStopping:
         callbacksPerso.append(EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='min'))
     if saveBest:
-        callbacksPerso.append(ModelCheckpoint(filepath='/models/'+saveBestName+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
+        callbacksPerso.append(ModelCheckpoint(filepath='/models',#/'+saveBestName+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
                                               save_best_only=True,
                                               save_weights_only=False,
                                               monitor='val_loss',
