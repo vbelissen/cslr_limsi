@@ -13,7 +13,7 @@ if v0 == '2':
     # For tensorflow 2, keras is included in tf
     import tensorflow.keras.backend as K
     from tensorflow.keras import optimizers
-    from tensorflow.keras.callbacks import TensorBoard
+    from tensorflow.keras.callbacks import TensorBoard, EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
     from tensorflow.keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Input, Dense, Conv1D, Dropout, GlobalAveragePooling1D, multiply
     from tensorflow.python.keras.layers.core import *
     from tensorflow.keras.models import *
@@ -22,7 +22,7 @@ elif v0 == '1':
     #For tensorflow 1.2.0
     import keras.backend as K
     from keras import optimizers
-    from keras.callbacks import TensorBoard
+    from keras.callbacks import TensorBoard, EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
     from keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Input, Dense, Conv1D, Dropout, GlobalAveragePooling1D, merge
     from keras.layers.core import *
     from keras.models import *
@@ -99,7 +99,7 @@ def train_model(model,
                 batch_size,
                 epochs,
                 seq_length,
-                earlyStopping=False, 
+                earlyStopping=False,
                 saveBest=False,
                 saveBestName='',
                 reduceLrOnPlateau=False):
