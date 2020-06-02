@@ -43,7 +43,12 @@ includeShort=True
 
 
 ## GET VIDEO INDICES
-idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionValid, fractionTest=fractionTest, videosToDelete=videosToDelete, lengthCriterion=lengthCriterion, includeLong=True, includeShort=True)
+idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionValid,
+                                                         fractionTest=fractionTest,
+                                                         videosToDelete=videosToDelete,
+                                                         lengthCriterion=lengthCriterion,
+                                                         includeLong=True,
+                                                         includeShort=True)
 
 
 # A model with 1 output matrix:
@@ -65,4 +70,14 @@ features_2_valid, annot_2_valid = get_data_concatenated(corpus,
                                                         catNames, catDetails,
                                                         video_indices=idxValid,
                                                         separation=separation)
-train_model(model_2, features_2_train, annot_2_train, features_2_valid, annot_2_valid, batch_size=batch_size, epochs=epochs, seq_length=seq_length)
+train_model(model_2,
+            features_2_train,
+            annot_2_train,
+            features_2_valid,
+            annot_2_valid,
+            batch_size=batch_size,
+            epochs=epochs,
+            seq_length=seq_length,
+            saveBest=saveBest,
+            saveBestName=saveBestName,
+            reduceLrOnPlateau=reduceLrOnPlateau)
