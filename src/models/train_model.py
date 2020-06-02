@@ -141,7 +141,7 @@ def train_model(model,
     if saveBest:
         callbacksPerso.append(ModelCheckpoint(filepath='/models/'+saveBestName+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
                                               save_best_only=True,
-                                              ave_weights_only=False,
+                                              save_weights_only=False,
                                               monitor='val_loss',
                                               mode='min'))
     if reduceLrOnPlateau:
