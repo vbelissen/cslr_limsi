@@ -28,7 +28,7 @@ catDetails = [
               ['fingerspelling', 'fingerspelled_loan_signs'],
               [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
              ]
-batch_size=500
+batch_size=50
 epochs=200
 seq_length=100
 separation=0
