@@ -2,6 +2,15 @@ import numpy as np
 import sys
 import itertools as it
 
+import tensorflow as tf
+v0 = tf.__version__[0]
+if v0 == '2':
+    # For tensorflow 2, keras is included in tf
+    from tensorflow.keras import backend
+elif v0 == '1':
+    #For tensorflow 1.2.0
+    from keras import backend
+
 def framewiseAccuracy(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """
         Computes accuracy of predictions wrt annotations.
@@ -91,6 +100,20 @@ def framewiseAccuracyYanovich(dataTrue, dataPred, trueIsCat):
     timestepsTotalNotZero = np.sum(timestepsPerClass)
 
     return np.sum(timestepsPerClass*accPerClass)/timestepsTotalNotZero, accPerClass
+
+
+
+def ignore_accuracy_of_class(class_to_ignore=0):
+    def ignore_acc(y_true, y_pred):
+        y_true_class = backend.argmax(y_true, axis=-1)
+        y_pred_class = backend.argmax(y_pred, axis=-1)
+
+        ignore_mask = backend.cast(backend.not_equal(y_pred_class, class_to_ignore), 'int32')
+        matches = backend.cast(backend.equal(y_true_class, y_pred_class), 'int32') * ignore_mask
+        accuracy = backend.sum(matches) / backend.maximum(backend.sum(ignore_mask), 1)
+        return accuracy
+
+    return ignore_acc
 
 def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """

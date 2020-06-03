@@ -35,12 +35,12 @@ separation=0
 dropout=0
 rnn_number=1
 mlp_layers_number=0
-rnn_hidden_units=50
+rnn_hidden_units=5
 learning_rate=0.001
 earlyStopping=True
 saveBest=True
 saveBestName='Yanovich'
-reduceLrOnPlateau=True
+reduceLrOnPlateau=False#True
 optimizer='rms'
 
 

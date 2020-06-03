@@ -25,6 +25,7 @@ elif v0 == '1':
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
 
+from perf_utils import *
 
 def attention_timewise(inputs, time_steps, single=False, attention_layer_descriptor=''):
     """
@@ -247,9 +248,9 @@ def get_model(output_names,
     else:
         sys.exit('Invalid gradient optimizer')
     if output_weights == []:
-        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc'], sample_weight_mode=weight_mode_sequence)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc', ignore_accuracy_of_class], sample_weight_mode=weight_mode_sequence)
     else:
-        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc'], loss_weights=output_weights, sample_weight_mode=weight_mode_sequence)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc', ignore_accuracy_of_class], loss_weights=output_weights, sample_weight_mode=weight_mode_sequence)
     if print_summary:
         model.summary()
     return model
