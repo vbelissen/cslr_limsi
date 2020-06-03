@@ -78,7 +78,7 @@ def attention_featurewise(inputs, single=False, attention_layer_descriptor=''):
 
 def get_model(output_names,
               output_classes,
-              output_weights=np.array([]),
+              output_weights=[],
               conv=True,
               conv_filt=200,
               conv_ker=3,
