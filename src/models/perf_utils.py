@@ -90,7 +90,7 @@ def framewiseAccuracyYanovich(dataTrue, dataPred, trueIsCat):
 
     timestepsTotalNotZero = np.sum(timestepsPerClass)
 
-    return np.sum(timestepsClassC*accPerClass)/timestepsTotalNotZero, accPerClass
+    return np.sum(timestepsPerClass*accPerClass)/timestepsTotalNotZero, accPerClass
 
 def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """
