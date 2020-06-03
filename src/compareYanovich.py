@@ -52,10 +52,7 @@ lengthCriterion = 300
 includeLong=True
 includeShort=True
 
-classWeights = {0: 1.,
-                1: 1.,
-                2: 1.,
-                3: 1.}
+classWeights = np.array([1, 1, 1, 1])
 
 
 ## GET VIDEO INDICES
@@ -76,7 +73,8 @@ model_2 = get_model(outputNames,[4],[1],
                     mlp_layers_number=mlp_layers_number,
                     time_steps=seq_length,
                     learning_rate=learning_rate,
-                    optimizer=optimizer)
+                    optimizer=optimizer,
+                    output_weights=classWeights)
 features_2_train, annot_2_train = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,

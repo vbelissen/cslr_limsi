@@ -88,7 +88,7 @@ def generator(features, annot, batch_size, seq_length, output_form):
                 batch_labels[0, (total_length_round - random_ini):, :] = annot[0, 0:end_modulo, :]
                 batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
 
-        yield batch_features, batch_labels, np.ones(batch_labels.shape)
+        yield batch_features, batch_labels, np.ones((batch_labels.shape[0],batch_labels.shape[1]))
 
 
 def train_model(model,
