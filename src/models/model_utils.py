@@ -137,6 +137,8 @@ def get_model(output_names,
         Output: A Keras model
     """
 
+    print(output_weights)
+
     # input
     main_input = Input(shape=(time_steps, features_number))
     input_transfo = main_input

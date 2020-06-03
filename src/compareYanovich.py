@@ -74,6 +74,7 @@ model_2 = get_model(outputNames,[4],[1],
                     time_steps=seq_length,
                     learning_rate=learning_rate,
                     optimizer=optimizer)
+
 features_2_train, annot_2_train = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
