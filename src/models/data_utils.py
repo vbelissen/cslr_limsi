@@ -1,6 +1,8 @@
 import numpy as np
 import sys
 import math
+from sklearn.utils.class_weight import compute_class_weight
+
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -652,3 +654,10 @@ def getVideoIndicesSplitNCSLGR(fractionValid=0.10,
     np.random.shuffle(idxTest)
 
     return idxTrain, idxValid, idxTest
+
+def weightVectorImbalancedDataOneHot(data):
+    # [samples, classes]
+    # returns vector and dictionary
+    dataIntegers = np.argmax(data, axis=1)
+    class_weights = compute_class_weight('balanced', np.unique(dataIntegers), dataIntegers)
+    return class_weights, dict(enumerate(class_weights))

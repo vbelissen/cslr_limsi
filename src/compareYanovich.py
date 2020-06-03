@@ -46,14 +46,13 @@ optimizer='rms'
 
 # Data split
 fractionValid = 0.20
-fractionTest = 0.2
+fractionTest = 0.1
 videosToDelete = ['dorm_prank_1053_small_0_1.mov', 'DSP_DeadDog.mov', 'DSP_Immigrants.mov', 'DSP_Trip.mov']
 lengthCriterion = 300
 includeLong=True
 includeShort=True
 
-classWeights = np.array([1, 1, 1, 1])
-
+#classWeights = np.array([1, 1, 1, 1])
 
 ## GET VIDEO INDICES
 idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionValid,
@@ -62,6 +61,26 @@ idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionV
                                                          lengthCriterion=lengthCriterion,
                                                          includeLong=True,
                                                          includeShort=True)
+features_2_train, annot_2_train = get_data_concatenated(corpus,
+                                                        'sign_types',
+                                                        catNames, catDetails,
+                                                        video_indices=idxTrain,
+                                                        separation=separation)
+features_2_valid, annot_2_valid = get_data_concatenated(corpus,
+                                                        'sign_types',
+                                                        catNames, catDetails,
+                                                        video_indices=idxValid,
+                                                        separation=separation)
+features_2_test, annot_2_test = get_data_concatenated(corpus,
+                                                        'sign_types',
+                                                        catNames, catDetails,
+                                                        video_indices=idxTest,
+                                                        separation=separation)
+
+classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_2_test[0, :, :])
+
+classWeights[0] = 0.01
+
 
 
 # A model with 1 output matrix:
@@ -76,16 +95,6 @@ model_2 = get_model(outputNames,[4],[1],
                     learning_rate=learning_rate,
                     optimizer=optimizer)
 
-features_2_train, annot_2_train = get_data_concatenated(corpus,
-                                                        'sign_types',
-                                                        catNames, catDetails,
-                                                        video_indices=idxTrain,
-                                                        separation=separation)
-features_2_valid, annot_2_valid = get_data_concatenated(corpus,
-                                                        'sign_types',
-                                                        catNames, catDetails,
-                                                        video_indices=idxValid,
-                                                        separation=separation)
 train_model(model_2,
             features_2_train,
             annot_2_train,
@@ -99,16 +108,8 @@ train_model(model_2,
             saveBestName=saveBestName,
             reduceLrOnPlateau=reduceLrOnPlateau)
 
-
-
 # Test
 model_2.load_weights('Yanovich-best.hdf5')
-
-features_2_test, annot_2_test = get_data_concatenated(corpus,
-                                                        'sign_types',
-                                                        catNames, catDetails,
-                                                        video_indices=idxTest,
-                                                        separation=separation)
 
 #predict_2_test = np.zeros((annot_2_test.shape[1],annot_2_test.shape[2]))
 nRound=annot_2_test.shape[1]//seq_length
