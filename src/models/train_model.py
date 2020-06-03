@@ -54,7 +54,7 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
                 annot_labels_weight = annot_labels_weight*annot_labels_weight_tmp
         elif output_form == 'sign_types':
             nClasses = annot.shape[2]
-            annot_labels_weigh=np.zeros(1, annot.shape[1])
+            annot_labels_weight=np.zeros((1, annot.shape[1]))
             for iClass in range(nClasses):
                 annot_labels_weight[0, np.argmax(annot,axis=2)==iClass] = output_class_weights[0][iClass]
 
