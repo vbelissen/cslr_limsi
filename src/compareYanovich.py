@@ -42,7 +42,9 @@ saveBest=True
 saveMonitor='val_ignore_acc'
 saveMonitorMode='max'
 saveBestName='Yanovich'
-reduceLrOnPlateau=False#True
+reduceLrOnPlateau=True
+reduceLrMonitor='val_ignore_acc'
+reduceLrMonitorMode='max'
 optimizer='rms'
 
 
@@ -111,7 +113,9 @@ train_model(model_2,
             saveMonitor=saveMonitor,
             saveMonitorMode=saveMonitorMode,
             saveBestName=saveBestName,
-            reduceLrOnPlateau=reduceLrOnPlateau)
+            reduceLrOnPlateau=reduceLrOnPlateau,
+            reduceLrMonitor=reduceLrMonitor,
+            reduceLrMonitorMode=reduceLrMonitorMode)
 
 # Test
 model_2.load_weights('Yanovich-best.hdf5')

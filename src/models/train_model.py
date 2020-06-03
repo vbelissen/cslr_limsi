@@ -136,7 +136,9 @@ def train_model(model,
                 saveMonitor='val_loss',
                 saveMonitorMode='min',
                 saveBestName='',
-                reduceLrOnPlateau=False):
+                reduceLrOnPlateau=False,
+                reduceLrMonitor='val_loss',
+                reduceLrMonitorMode='min'):
     """
         Trains a keras model.
 
@@ -181,7 +183,7 @@ def train_model(model,
                                               monitor=saveMonitor,
                                               mode=saveMonitorMode))
     if reduceLrOnPlateau:
-        callbacksPerso.append(ReduceLROnPlateau(monitor='val_loss', factor=0.8, patience=7, verbose=1, epsilon=1e-4, mode='min'))
+        callbacksPerso.append(ReduceLROnPlateau(monitor=reduceLrMonitor, factor=0.8, patience=7, verbose=1, epsilon=1e-4, mode=reduceLrMonitorMode))
 
     hist = model.fit_generator(generator(features_train, annot_train, batch_size, seq_length, output_form, output_class_weights),
                                epochs=epochs,
