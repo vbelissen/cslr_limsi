@@ -189,7 +189,23 @@ def valuesConsecutive(data, isCatOrProb):
     #[(x[0], len(x[1]), x[1][0][0]) for x in l]
     return [(x[0], x[1][0][0], x[1][0][0]+len(x[1]), len(x[1])) for x in l]
 
-def matrixMatch(consecTrue, consecPred, seqLength):
+def windowUnitsPredForTrue(iTrue, nbUnitsTrue, nbUnitsPred, fractionTotal):
+    """
+        Returns a window of pred units indices to look for
+
+        Inputs:
+
+
+        Outputs:
+
+    """
+    iPredApprox = iTrue*nbUnitsPred/nbUnitsTrue
+    windowSizeApprox = fractionTotal*nbUnitsPred
+    min = np.max([0, round(iPredApprox - windowSizeApprox/2)])
+    max = np.min([nbUnitsPred, round(iPredApprox + windowSizeApprox/2)])
+    return min, max
+
+def matrixMatch(consecTrue, consecPred, seqLength, fractionTotal):
     """
         Returns matrix of match score to calculate best matches
         (value, start, end (+1), nb of values) (excluding zero values)
@@ -200,6 +216,7 @@ def matrixMatch(consecTrue, consecPred, seqLength):
             consecPred: list of consecutive values
             (value, start, end (+1), nb of values) (excluding zero values)
             seqLength: original length of sequence
+            fractionTotal: used to define a window, to not calculate all matrix values
 
         Outputs:
             a matrix of match scores (Wolf measure - normalized intersection between units)
@@ -218,7 +235,8 @@ def matrixMatch(consecTrue, consecPred, seqLength):
         valuesUnitTrue = consecTrue[iTrue]
         tempVectorTrue[:valuesUnitTrue[1]] = 0
         tempVectorTrue[valuesUnitTrue[2]:] = 0
-        for iPred in range(nbUnitsPred):
+        min, max = windowUnitsPredForTrue(iTrue, nbUnitsTrue, nbUnitsPred, fractionTotal)
+        for iPred in range(min, max):#range(nbUnitsPred):
             valuesUnitPred = consecPred[iPred]
             tempVectorPred[:valuesUnitPred[1]] = 0
             tempVectorPred[valuesUnitPred[2]:] = 0
@@ -291,7 +309,7 @@ def isMatched(idxTrue, idxPred, tp, tr, consecTrue, consecPred, seqLength):
     else:
         return 0
 
-def prfStar(dataTrue, dataPred, trueIsCat, predIsCatOrProb, step=0.01):
+def prfStar(dataTrue, dataPred, trueIsCat, predIsCatOrProb, step=0.01, fractionTotal=0.1):
     """
         Returns P, R, F1 for thresholds (tp, 0) and (0, tr)
 
@@ -336,7 +354,7 @@ def prfStar(dataTrue, dataPred, trueIsCat, predIsCatOrProb, step=0.01):
     nbUnitsTrue = len(consecTrue)
     nbUnitsPred = len(consecPred)
 
-    M = matrixMatch(consecTrue, consecPred, seqLength)
+    M = matrixMatch(consecTrue, consecPred, seqLength, fractionTotal)
 
     idxBestMatchesTrue, idxBestMatchesPred = idxBestMatches(dataTrue, dataPred, M, trueIsCat, predIsCatOrProb)
 
