@@ -50,13 +50,13 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
                 annot_labels_weight_tmp = np.zeros(1, annot[i_label_cat].shape[1])
                 nClasses = annot[i_label_cat].shape[2]
                 for iClass in range(nClasses):
-                    annot_labels_weight_tmp[0, np.argmax(annot[i_label_cat],axis=2)==iClass] = output_class_weights[i_label_cat][iClass]
+                    annot_labels_weight_tmp[0, np.argmax(annot[i_label_cat][0,:,:],axis=1)==iClass] = output_class_weights[i_label_cat][iClass]
                 annot_labels_weight = annot_labels_weight*annot_labels_weight_tmp
         elif output_form == 'sign_types':
             nClasses = annot.shape[2]
             annot_labels_weight=np.zeros((1, annot.shape[1]))
             for iClass in range(nClasses):
-                annot_labels_weight[0, np.argmax(annot,axis=2)==iClass] = output_class_weights[0][iClass]
+                annot_labels_weight[0, np.argmax(annot[0,:,:],axis=1)==iClass] = output_class_weights[0][iClass]
 
     if output_form == 'mixed':
         batch_labels = []
