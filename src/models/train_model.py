@@ -137,15 +137,15 @@ def train_model(model,
 
     callbacksPerso = []
     if earlyStopping:
-        callbacksPerso.append(EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='min'))
+        callbacksPerso.append(EarlyStopping(monitor='val_loss', patience=10, verbose=1, mode='min'))
     if saveBest:
-        callbacksPerso.append(ModelCheckpoint(filepath=saveBestName+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
+        callbacksPerso.append(ModelCheckpoint(filepath=saveBestName+'-best.hdf5',#+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
                                               save_best_only=True,
                                               save_weights_only=False,
                                               monitor='val_loss',
                                               mode='min'))
     if reduceLrOnPlateau:
-        callbacksPerso.append(ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=7, verbose=1, epsilon=1e-4, mode='min'))
+        callbacksPerso.append(ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=7, verbose=1, epsilon=1e-4, mode='min'))
 
     hist = model.fit_generator(generator(features_train, annot_train, batch_size, seq_length, output_form),
                                epochs=epochs,

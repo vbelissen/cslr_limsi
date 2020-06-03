@@ -45,6 +45,53 @@ def framewiseAccuracy(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSepa
 
     return np.sum(dataTrue == dataPred)/trueLength
 
+def framewiseAccuracyYanovich(dataTrue, dataPred, trueIsCat):
+    """
+        Computes accuracy of predictions wrt annotations, as defined in Yanovich et al.
+
+        Inputs:
+            dataTrue: a numpy array of annotations, shape [timeSteps] (values are classes)
+                or [timeSteps, nbClasses] (categorical data)
+            dataPred: a numpy array of predictions, shape [timeSteps, nbClasses] (probabilities or categorical)
+            trueIsCat: bool
+            idxNotSeparation: binary vector indicating where separations are (0)
+
+        Outputs:
+            a single accuracy value, and the accuracy per class (array)
+    """
+
+    if not trueIsCat:
+        if len(dataTrue.shape) > 1:
+            if dataTrue.shape[1] > 1:
+                sys.exit('True data should be a vector (not categorical) because trueIsCat=False')
+
+
+    trueLength = dataTrue.shape[0]
+    predLength = dataPred.shape[0]
+
+    nClasses = dataPred.shape[1]
+
+    if trueLength != predLength:
+        sys.exit('Annotation and prediction data should have the same length')
+    if trueIsCat:
+        dataTrue = np.argmax(dataTrue[:,1:],axis=1)
+    else:
+        dataTrue = dataTrue - 1
+    dataPred = np.argmax(dataPred[:,1:],axis=1)
+
+    timestepsPerClass = np.zeros(nClasses-1)
+    accPerClass = np.zeros(nClasses-1)
+    for iC in range(nClasses-1):
+        trueC = (dataTrue == iC)
+        predC = (dataPred == iC)
+        trueAndPredC = np.sum(trueC * predC)
+        timestepsClassC[iC] = np.sum(trueC)
+        accPerClass[iC] = trueAndPredC/timestepsClassC[i_c]
+
+    timestepsTotalNotZero = np.sum(timestepsClassC)
+
+    return np.sum(timestepsClassC*accPerClass)/timestepsTotalNotZero, accPerClass
+
 def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """
         Computes precision, recall and f1-score of predictions wrt annotations.

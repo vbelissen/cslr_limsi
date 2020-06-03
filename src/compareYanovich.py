@@ -5,6 +5,16 @@ from models.perf_utils import *
 
 import math
 import numpy as np
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import tensorflow as tf
+v0 = tf.__version__[0]
+if v0 == '2':
+    # For tensorflow 2, keras is included in tf
+    from tensorflow.keras.models import *
+elif v0 == '1':
+    #For tensorflow 1.2.0
+    from keras.models import *
 
 np.random.seed(17)
 
@@ -81,3 +91,24 @@ train_model(model_2,
             saveBest=saveBest,
             saveBestName=saveBestName,
             reduceLrOnPlateau=reduceLrOnPlateau)
+
+
+
+# Test
+model_2.load_weights('Yanovich-best.hdf5')
+
+predict_2_test = np.zeros((annot_2_test.shape[1],annot_2_test.shape[2]))
+nRound=annot_2_test.shape[1]//seq_length
+for i in range(nRound):
+    predict_2_test[i*seq_length:(i+1)*seq_length,:]=model_2.predict(features_2_test[:,i*seq_length:(i+1)*seq_length,:])[0]
+
+acc = framewiseAccuracy(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True)
+accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True)
+pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True)
+P,R,F1 = integralValues(fStarTp, fStarTr)
+
+print('Accuracy : ' + str(acc)
+print('Accuracy Yanovich : ' + str(accYanovich))
+print('Accuracy Yanovich per class :')
+print(accYanovichPerClass)
+print('P, R, F1 (star) = ' + star(P) + ', ' + star(R) + ', ' + star(F1))
