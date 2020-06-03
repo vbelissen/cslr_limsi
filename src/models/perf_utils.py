@@ -254,7 +254,7 @@ def idxBestMatches(dataTrue, dataPred, matMatch, trueIsCat, predIsCatOrProb):
             if dataPred.shape[1] > 1:
                 sys.exit('Pred data should be a vector (not categorical or probabilities) because predIsCatOrProb=False')
 
-    matMatch = matrixMatch(valuesConsecutive(dataTrue, trueIsCat), valuesConsecutive(dataPred, predIsCatOrProb), dataTrue.shape[0])
+    #matMatch = matrixMatch(valuesConsecutive(dataTrue, trueIsCat), valuesConsecutive(dataPred, predIsCatOrProb), dataTrue.shape[0])
     return np.argmax(matMatch,axis=0), np.argmax(matMatch,axis=1)
 
 def isMatched(idxTrue, idxPred, tp, tr, consecTrue, consecPred, seqLength):
