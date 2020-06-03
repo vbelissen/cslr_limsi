@@ -107,7 +107,7 @@ accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_2_test[0,:nRo
 pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True)
 P,R,F1 = integralValues(fStarTp, fStarTr)
 
-print('Accuracy : ' + str(acc)
+print('Accuracy : ' + str(acc))
 print('Accuracy Yanovich : ' + str(accYanovich))
 print('Accuracy Yanovich per class :')
 print(accYanovichPerClass)
