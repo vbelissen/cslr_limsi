@@ -107,13 +107,15 @@ model_2.load_weights('Yanovich-best.hdf5')
 features_2_test, annot_2_test = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
-                                                        video_indices=idxTest,
+                                                        video_indices=np.array([0]),#idxTest,
                                                         separation=separation)
 
-predict_2_test = np.zeros((annot_2_test.shape[1],annot_2_test.shape[2]))
+#predict_2_test = np.zeros((annot_2_test.shape[1],annot_2_test.shape[2]))
 nRound=annot_2_test.shape[1]//seq_length
-for i in range(nRound):
-    predict_2_test[i*seq_length:(i+1)*seq_length,:]=model_2.predict(features_2_test[:,i*seq_length:(i+1)*seq_length,:])[0]
+timestepsRound = nRound*seq_length
+predict_2_test = model_2.predict(features_2_test[:,:timestepsRound,:].reshape(-1, seq_length, 4)).reshape(1, timestepsRound, 4)
+predict_2_test = predict_2_test[0]
+#    predict_2_test[i*seq_length:(i+1)*seq_length,:]=model_2.predict(features_2_test[:,i*seq_length:(i+1)*seq_length,:])[0]
 
 acc = framewiseAccuracy(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True)
 accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True)
