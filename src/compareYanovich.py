@@ -35,7 +35,7 @@ separation=0
 dropout=0
 rnn_number=1
 mlp_layers_number=0
-rnn_hidden_units=5
+rnn_hidden_units=50
 learning_rate=0.001
 earlyStopping=True
 saveBest=True
@@ -45,8 +45,8 @@ optimizer='rms'
 
 
 # Data split
-fractionValid = 0.1
-fractionTest = 0.1
+fractionValid = 0.2
+fractionTest = 0.2
 videosToDelete = ['dorm_prank_1053_small_0_1.mov', 'DSP_DeadDog.mov', 'DSP_Immigrants.mov', 'DSP_Trip.mov']
 lengthCriterion = 300
 includeLong=True
@@ -79,8 +79,8 @@ features_2_test, annot_2_test = get_data_concatenated(corpus,
 
 classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_2_test[0, :, :])
 
-classWeights = np.array([1, 1, 1, 1])
-#classWeights[0] = 0.01
+#classWeights = np.array([1, 1, 1, 1])
+classWeights[0] = 0.01
 
 
 
