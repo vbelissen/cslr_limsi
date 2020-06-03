@@ -41,7 +41,7 @@ earlyStopping=True
 saveBest=True
 saveBestName='Yanovich'
 reduceLrOnPlateau=True
-optimizer='ada'
+optimizer='rms'
 
 
 # Data split
