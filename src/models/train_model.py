@@ -40,6 +40,23 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
     feature_number = features.shape[2]
 
     batch_features = np.zeros((1, batch_size_time, feature_number))
+    batch_labels_weight = np.zeros((1, batch_size_time))
+
+    if output_class_weights != []:
+        if output_form == 'mixed':
+            annot_labels_weight = np.ones(1, annot[0].shape[1])
+            labels_number = len(annot)
+            for i_label_cat in range(labels_number):
+                annot_labels_weight_tmp = np.zeros(1, annot[i_label_cat].shape[1])
+                nClasses = annot[i_label_cat].shape[2]
+                for iClass in range(nClasses):
+                    annot_labels_weight_tmp[0, np.argmax(annot[i_label_cat],axis=2)==iClass] = output_class_weights[i_label_cat][iClass]
+                annot_labels_weight = annot_labels_weight*annot_labels_weight_tmp
+        elif output_form == 'sign_types':
+            nClasses = annot.shape[2]
+            annot_labels_weigh=np.zeros(1, annot.shape[1])
+            for iClass in range(nClasses):
+                annot_labels_weight[0, np.argmax(annot,axis=2)==iClass] = output_class_weights[0][iClass]
 
     if output_form == 'mixed':
         batch_labels = []
@@ -69,6 +86,16 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
             batch_features[0, (total_length_round - random_ini):, :] = features[0, 0:end_modulo, :]
             batch_features = batch_features.reshape(-1, seq_length, feature_number)
 
+        # Fill in batch weights
+        if output_class_weights != []:
+            if end <= total_length_round:
+                batch_labels_weight = annot_labels_weight[0, random_ini:end].reshape(-1, seq_length)
+            else:
+                batch_labels_weight[0, :(total_length_round - random_ini)] = annot_labels_weight[0, random_ini:total_length_round]
+                batch_labels_weight[0, (total_length_round - random_ini):] = annot_labels_weight[0, 0:end_modulo]
+                batch_labels_weight = batch_labels_weight.reshape(-1, seq_length)
+
+
         # Fill in batch annotations
         if output_form == 'mixed':
             for i_label_cat in range(labels_number):
@@ -88,7 +115,10 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
                 batch_labels[0, (total_length_round - random_ini):, :] = annot[0, 0:end_modulo, :]
                 batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
 
-        yield batch_features, batch_labels, np.ones((batch_labels.shape[0],batch_labels.shape[1]))
+        if output_class_weights != []:
+            yield batch_features, batch_labels, batch_labels_weight
+        else:
+            yield batch_features, batch_labels
 
 
 def train_model(model,
