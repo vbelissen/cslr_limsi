@@ -153,6 +153,6 @@ def train_model(model,
     hist = model.fit_generator(generator(features_train, annot_train, batch_size, seq_length, output_form, output_class_weights),
                                epochs=epochs,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
-                               validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form),
+                               validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form, output_class_weights),
                                validation_steps=1,
                                callbacks=callbacksPerso)
