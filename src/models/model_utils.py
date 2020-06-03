@@ -78,7 +78,7 @@ def attention_featurewise(inputs, single=False, attention_layer_descriptor=''):
 
 def get_model(output_names,
               output_classes,
-              output_weights=np.array([]),
+              out_weights=np.array([]),
               conv=True,
               conv_filt=200,
               conv_ker=3,
@@ -109,7 +109,7 @@ def get_model(output_names,
         Inputs:
             output_names: list of outputs (strings)
             output_classes: list of number of classes of each output type
-            output_weights: vector of weights for each_output
+            out_weights: vector of weights for each_output
             conv (bool): if True, applies convolution on input
             conv_filt: number of convolution filters
             conv_ker: size of convolution kernel
@@ -137,7 +137,7 @@ def get_model(output_names,
         Output: A Keras model
     """
 
-    print(output_weights)
+    #print(output_weights)
 
     # input
     main_input = Input(shape=(time_steps, features_number))
@@ -241,14 +241,14 @@ def get_model(output_names,
         opt = optimizers.Adagrad(lr=learning_rate, epsilon=None, decay=0.0)
     else:
         sys.exit('Invalid gradient optimizer')
-    if output_weights.size == 0:
+    if out_weights.size == 0:
         model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc'])
     else:
         if classif_local:
             weight_mode_sequence = 'temporal'
         else:
             weight_mode_sequence = None
-        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc'], loss_weights=output_weights, sample_weight_mode=weight_mode_sequence)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc'], loss_weights=out_weights, sample_weight_mode=weight_mode_sequence)
     if print_summary:
         model.summary()
     return model
