@@ -133,6 +133,8 @@ def train_model(model,
                 output_class_weights=[],
                 earlyStopping=False,
                 saveBest=False,
+                saveMonitor='val_loss',
+                saveMonitorMode='min',
                 saveBestName='',
                 reduceLrOnPlateau=False):
     """

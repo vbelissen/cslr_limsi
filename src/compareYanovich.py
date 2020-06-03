@@ -39,6 +39,8 @@ rnn_hidden_units=5
 learning_rate=0.001
 earlyStopping=True
 saveBest=True
+saveMonitor=ignore_acc
+saveMonitorMode='max'
 saveBestName='Yanovich'
 reduceLrOnPlateau=False#True
 optimizer='rms'
@@ -106,6 +108,8 @@ train_model(model_2,
             epochs=epochs,
             seq_length=seq_length,
             saveBest=saveBest,
+            saveMonitor=saveMonitor,
+            saveMonitorMode=saveMonitorMode,
             saveBestName=saveBestName,
             reduceLrOnPlateau=reduceLrOnPlateau)
 
@@ -128,4 +132,4 @@ print('Accuracy : ' + str(acc))
 print('Accuracy Yanovich : ' + str(accYanovich))
 print('Accuracy Yanovich per class :')
 print(accYanovichPerClass)
-print('P, R, F1 (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
+print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
