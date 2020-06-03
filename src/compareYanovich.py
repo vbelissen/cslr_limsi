@@ -49,8 +49,8 @@ optimizer='rms'
 
 
 # Data split
-fractionValid = 0.2
-fractionTest = 0.2
+fractionValid = 0.08
+fractionTest = 0.08
 videosToDelete = ['dorm_prank_1053_small_0_1.mov', 'DSP_DeadDog.mov', 'DSP_Immigrants.mov', 'DSP_Trip.mov']
 lengthCriterion = 300
 includeLong=True
