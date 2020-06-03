@@ -31,7 +31,7 @@ else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
 
 
-def generator(features, annot, batch_size, seq_length, output_form):
+def generator(features, annot, batch_size, seq_length, output_form, output_class_weights):
     """
     Generator function for batch training models
     """
@@ -99,6 +99,7 @@ def train_model(model,
                 batch_size,
                 epochs,
                 seq_length,
+                output_class_weights=[],
                 earlyStopping=False,
                 saveBest=False,
                 saveBestName='',
@@ -115,6 +116,8 @@ def train_model(model,
             annot_valid: either list of annotation arrays (output_form: 'mixed')
                              or one binary array (output_form: 'sign_types')
             batch_size
+            output_class_weights: list of vector of weights for each class of each output
+
 
         Outputs:
             ?
@@ -147,7 +150,7 @@ def train_model(model,
     if reduceLrOnPlateau:
         callbacksPerso.append(ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=7, verbose=1, epsilon=1e-4, mode='min'))
 
-    hist = model.fit_generator(generator(features_train, annot_train, batch_size, seq_length, output_form),
+    hist = model.fit_generator(generator(features_train, annot_train, batch_size, seq_length, output_form, output_class_weights),
                                epochs=epochs,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
                                validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form),
