@@ -103,7 +103,7 @@ def train_model(model,
                 saveBest=False,
                 saveBestName='',
                 reduceLrOnPlateau=False,
-                classWeights=NULL):
+                classWeights=None):
     """
         Trains a keras model.
 
