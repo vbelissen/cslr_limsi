@@ -107,7 +107,7 @@ def ignore_acc(y_true, y_pred):
     y_true_class = backend.argmax(y_true, axis=-1)
     y_pred_class = backend.argmax(y_pred, axis=-1)
 
-    ignore_mask = backend.cast(backend.not_equal(y_pred_class, 0), 'int32')
+    ignore_mask = backend.cast(backend.not_equal(y_true_class, 0), 'int32')
     matches = backend.cast(backend.equal(y_true_class, y_pred_class), 'int32') * ignore_mask
     accuracy = backend.sum(matches) / backend.maximum(backend.sum(ignore_mask), 1)
     return accuracy
