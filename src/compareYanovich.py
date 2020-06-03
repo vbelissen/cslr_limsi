@@ -35,7 +35,7 @@ separation=0
 dropout=0
 rnn_number=1
 mlp_layers_number=0
-rnn_hidden_units=50
+rnn_hidden_units=5
 learning_rate=0.001
 earlyStopping=True
 saveBest=True
@@ -79,7 +79,7 @@ features_2_test, annot_2_test = get_data_concatenated(corpus,
 
 classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_2_test[0, :, :])
 
-classWeights = np.array([1, 1, 1, 1])
+#classWeights = np.array([1, 1, 1, 1])
 classWeights[0] = 0.01
 
 
