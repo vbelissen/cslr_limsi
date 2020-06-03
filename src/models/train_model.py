@@ -102,7 +102,8 @@ def train_model(model,
                 earlyStopping=False,
                 saveBest=False,
                 saveBestName='',
-                reduceLrOnPlateau=False):
+                reduceLrOnPlateau=False,
+                classWeights=NULL):
     """
         Trains a keras model.
 
@@ -152,4 +153,5 @@ def train_model(model,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
                                validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form),
                                validation_steps=1,
-                               callbacks=callbacksPerso)
+                               callbacks=callbacksPerso,
+                               class_weight=classWeights)

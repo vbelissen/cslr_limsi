@@ -52,6 +52,11 @@ lengthCriterion = 300
 includeLong=True
 includeShort=True
 
+classWeights = {0: 1.,
+                1: 1.,
+                2: 1.,
+                3: 1.}
+
 
 ## GET VIDEO INDICES
 idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionValid,
@@ -92,7 +97,8 @@ train_model(model_2,
             seq_length=seq_length,
             saveBest=saveBest,
             saveBestName=saveBestName,
-            reduceLrOnPlateau=reduceLrOnPlateau)
+            reduceLrOnPlateau=reduceLrOnPlateau,
+            classWeights=classWeights)
 
 
 

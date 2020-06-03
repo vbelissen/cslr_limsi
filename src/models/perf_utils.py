@@ -85,10 +85,10 @@ def framewiseAccuracyYanovich(dataTrue, dataPred, trueIsCat):
         trueC = (dataTrue == iC)
         predC = (dataPred == iC)
         trueAndPredC = np.sum(trueC * predC)
-        timestepsClassC[iC] = np.sum(trueC)
-        accPerClass[iC] = trueAndPredC/timestepsClassC[i_c]
+        timestepsPerClass[iC] = np.sum(trueC)
+        accPerClass[iC] = trueAndPredC/timestepsPerClass[i_c]
 
-    timestepsTotalNotZero = np.sum(timestepsClassC)
+    timestepsTotalNotZero = np.sum(timestepsPerClass)
 
     return np.sum(timestepsClassC*accPerClass)/timestepsTotalNotZero, accPerClass
 
