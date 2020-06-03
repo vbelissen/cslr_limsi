@@ -29,13 +29,13 @@ catDetails = [
               [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
              ]
 batch_size=200
-epochs=200
+epochs=500
 seq_length=100
 separation=0
 dropout=0
 rnn_number=1
 mlp_layers_number=0
-rnn_hidden_units=50
+rnn_hidden_units=5
 learning_rate=0.001
 earlyStopping=True
 saveBest=True
