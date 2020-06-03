@@ -91,13 +91,13 @@ train_model(model_2,
             annot_2_train,
             features_2_valid,
             annot_2_valid,
+            output_class_weights=[classWeights],
             batch_size=batch_size,
             epochs=epochs,
             seq_length=seq_length,
             saveBest=saveBest,
             saveBestName=saveBestName,
-            reduceLrOnPlateau=reduceLrOnPlateau,
-            classWeights=classWeights)
+            reduceLrOnPlateau=reduceLrOnPlateau)
 
 
 
