@@ -35,7 +35,7 @@ separation=0
 dropout=0
 rnn_number=1
 mlp_layers_number=0
-rnn_hidden_units=5
+rnn_hidden_units=50
 learning_rate=0.001
 earlyStopping=True
 saveBest=True
@@ -49,8 +49,8 @@ optimizer='rms'
 
 
 # Data split
-fractionValid = 0.08
-fractionTest = 0.08
+fractionValid = 0.2
+fractionTest = 0.2
 videosToDelete = ['dorm_prank_1053_small_0_1.mov', 'DSP_DeadDog.mov', 'DSP_Immigrants.mov', 'DSP_Trip.mov']
 lengthCriterion = 300
 includeLong=True
