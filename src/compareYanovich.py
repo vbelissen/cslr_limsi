@@ -29,7 +29,7 @@ catDetails = [
               [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
              ]
 batch_size=200
-epochs=10
+epochs=200
 seq_length=100
 separation=0
 dropout=0
@@ -120,10 +120,10 @@ predict_2_test = predict_2_test[0]
 acc = framewiseAccuracy(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True)
 accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True)
 pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True,step=0.1)
-P,R,F1 = integralValues(fStarTp, fStarTr,step=0.1)
+Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=0.1)
 
 print('Accuracy : ' + str(acc))
 print('Accuracy Yanovich : ' + str(accYanovich))
 print('Accuracy Yanovich per class :')
 print(accYanovichPerClass)
-print('P, R, F1 (star) = ' + str(P) + ', ' + str(R) + ', ' + str(F1))
+print('P, R, F1 (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
