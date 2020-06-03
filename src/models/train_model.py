@@ -88,6 +88,7 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
 
         # Fill in batch weights
         if output_class_weights != []:
+            batch_labels_weight = batch_labels_weight.reshape(1, batch_size_time)
             if end <= total_length_round:
                 batch_labels_weight = annot_labels_weight[0, random_ini:end].reshape(-1, seq_length)
             else:
