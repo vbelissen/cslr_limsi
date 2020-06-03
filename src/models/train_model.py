@@ -88,7 +88,7 @@ def generator(features, annot, batch_size, seq_length, output_form):
                 batch_labels[0, (total_length_round - random_ini):, :] = annot[0, 0:end_modulo, :]
                 batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
 
-        yield batch_features, batch_labels
+        yield batch_features, batch_labels, np.ones(batch_labels.shape)
 
 
 def train_model(model,
@@ -153,5 +153,4 @@ def train_model(model,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
                                validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form),
                                validation_steps=1,
-                               callbacks=callbacksPerso,
-                               class_weight=classWeights)
+                               callbacks=callbacksPerso)
