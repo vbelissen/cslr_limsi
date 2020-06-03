@@ -178,10 +178,10 @@ def train_model(model,
         callbacksPerso.append(ModelCheckpoint(filepath=saveBestName+'-best.hdf5',#+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
                                               save_best_only=True,
                                               save_weights_only=False,
-                                              monitor='val_loss',
-                                              mode='min'))
+                                              monitor=saveMonitor,
+                                              mode=saveMonitorMode))
     if reduceLrOnPlateau:
-        callbacksPerso.append(ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=7, verbose=1, epsilon=1e-4, mode='min'))
+        callbacksPerso.append(ReduceLROnPlateau(monitor='val_loss', factor=0.8, patience=7, verbose=1, epsilon=1e-4, mode='min'))
 
     hist = model.fit_generator(generator(features_train, annot_train, batch_size, seq_length, output_form, output_class_weights),
                                epochs=epochs,
