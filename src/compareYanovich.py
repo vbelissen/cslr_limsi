@@ -67,14 +67,14 @@ idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionV
 # A model with 1 output matrix:
 # [other, Pointing, Depicting, Lexical]
 model_2 = get_model(outputNames,[4],[1],
+                    output_weights=classWeights,
                     dropout=dropout,
                     rnn_number=rnn_number,
                     rnn_hidden_units=rnn_hidden_units,
                     mlp_layers_number=mlp_layers_number,
                     time_steps=seq_length,
                     learning_rate=learning_rate,
-                    optimizer=optimizer,
-                    output_weights=classWeights)
+                    optimizer=optimizer)
 features_2_train, annot_2_train = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
