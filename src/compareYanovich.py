@@ -41,6 +41,7 @@ earlyStopping=True
 saveBest=True
 saveBestName='Yanovich'
 reduceLrOnPlateau=True
+optimizer='ada'
 
 
 # Data split
@@ -69,7 +70,8 @@ model_2 = get_model(outputNames,[4],[1],
                     rnn_hidden_units=rnn_hidden_units,
                     mlp_layers_number=mlp_layers_number,
                     time_steps=seq_length,
-                    learning_rate=learning_rate)
+                    learning_rate=learning_rate,
+                    optimizer=optimizer)
 features_2_train, annot_2_train = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
@@ -96,6 +98,12 @@ train_model(model_2,
 
 # Test
 model_2.load_weights('Yanovich-best.hdf5')
+
+features_2_test, annot_2_test = get_data_concatenated(corpus,
+                                                        'sign_types',
+                                                        catNames, catDetails,
+                                                        video_indices=idxTest,
+                                                        separation=separation)
 
 predict_2_test = np.zeros((annot_2_test.shape[1],annot_2_test.shape[2]))
 nRound=annot_2_test.shape[1]//seq_length
