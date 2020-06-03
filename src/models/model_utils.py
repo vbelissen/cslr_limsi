@@ -25,7 +25,7 @@ elif v0 == '1':
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
 
-from perf_utils import *
+from models.perf_utils import *
 
 def attention_timewise(inputs, time_steps, single=False, attention_layer_descriptor=''):
     """
