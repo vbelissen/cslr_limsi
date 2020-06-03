@@ -113,7 +113,7 @@ features_2_test, annot_2_test = get_data_concatenated(corpus,
 #predict_2_test = np.zeros((annot_2_test.shape[1],annot_2_test.shape[2]))
 nRound=annot_2_test.shape[1]//seq_length
 timestepsRound = nRound*seq_length
-predict_2_test = model_2.predict(features_2_test[:,:timestepsRound,:].reshape(-1, seq_length, 4)).reshape(1, timestepsRound, 4)
+predict_2_test = model_2.predict_on_batch(features_2_test[:,:timestepsRound,:].reshape(-1, seq_length, 4)).reshape(1, timestepsRound, 4)
 predict_2_test = predict_2_test[0]
 #    predict_2_test[i*seq_length:(i+1)*seq_length,:]=model_2.predict(features_2_test[:,i*seq_length:(i+1)*seq_length,:])[0]
 
