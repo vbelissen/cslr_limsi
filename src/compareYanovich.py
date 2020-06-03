@@ -79,8 +79,8 @@ features_2_test, annot_2_test = get_data_concatenated(corpus,
 
 classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_2_test[0, :, :])
 
-#classWeights = np.array([1, 1, 1, 1])
-classWeights[0] = 0.01
+classWeights = np.array([1, 1, 1, 1])
+#classWeights[0] = 0.01
 
 
 
