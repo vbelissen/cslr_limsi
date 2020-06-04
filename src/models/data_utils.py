@@ -15,6 +15,9 @@ elif v0 == '1':
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
 
+# 16 signers:
+signerRefsDictaSign = np.array(['A11','B15','A2','B0','A1','B14','A9','B17','A6','B13','A10','B16','A7','B4','A3','B5'])
+
 def categorical_conversion_seq(data, nonZeroCategories=[1]):
     """
         Converting annotations of one type to categorical values (for a sequence or a video).
@@ -654,6 +657,101 @@ def getVideoIndicesSplitNCSLGR(fractionValid=0.10,
     np.random.shuffle(idxTest)
 
     return idxTrain, idxValid, idxTest
+
+def signerRefToSignerIdxDictaSign(signerRef):
+    return np.where(signerRefsDictaSign==signerRef)[0][0]
+
+def signerIdxToSignerRefDictaSign(signerIdx):
+    return signerRefsDictaSign[signerIdx]
+
+def getVideoIndicesSplitDictaSign(sessionsSplit,tasksSplit,signersSplit,from_notebook=False):
+    """
+        Train/valid/test split for DictaSign
+        Returns intersection of sessions, tasks and signers
+
+        Inputs:
+            sessionsSplit: list of 3 lists of session indices (2 to 9) for train, valid, test
+            tasksSplit: list of 3 lists of task indices (1 to 9) for train, valid, test
+            signersSplit: list of 3 lists of signer indices (0 to 15) for train, valid, test
+            from_notebook: if notebook script, data is in parent folder
+
+        Outputs:
+            idxTrain, idxValid, idxTest: numpy arrays
+    """
+    if from_notebook:
+        parent = '../'
+    else:
+        parent = ''
+
+    l = np.load(parent+'data/processed/DictaSign/list_videos.npy')
+    nVideos = len(l)
+    sess = []
+    task = []
+    signer = []
+    for iV in range(nVideos):
+        tmp = l[iV].replace('S','').replace('T','').split('_')
+        sess.append(int(tmp[0]))
+        task.append(int(tmp[1]))
+        signer.append(signerRefToSignerIdxDictaSign(tmp[2]))
+
+    sess = np.array(sess)
+    task = np.array(task)
+    signer = np.array(signer)
+
+    idxTrainSession = np.ones(nVideos)
+    idxTrainTask = np.ones(nVideos)
+    idxTrainSigner = np.ones(nVideos)
+    idxValidSession = np.ones(nVideos)
+    idxValidTask = np.ones(nVideos)
+    idxValidSigner = np.ones(nVideos)
+    idxTestSession = np.ones(nVideos)
+    idxTestTask = np.ones(nVideos)
+    idxTestSigner = np.ones(nVideos)
+
+    for i in range(3):
+        if len(sessionsSplit[i])==0:
+            sessionsSplit[i] = [j for j in range(2,10)]
+        if len(tasksSplit[i])==0:
+            tasksSplit[i] = [j for j in range(1,10)]
+        if len(signersSplit[i])==0:
+            signersSplit[i] = [j for j in range(0,16)]
+
+    for sessionTrain in sessionsSplit[0]:
+        idxTrainSession[sess == sessionTrain] = 0
+    for taskTrain in tasksSplit[0]:
+        idxTrainTask[task == taskTrain] = 0
+    for signerTrain in signersSplit[0]:
+        idxTrainSigner[signer == signerTrain] = 0
+    idxTrainSession = 1-idxTrainSession
+    idxTrainTask = 1-idxTrainTask
+    idxTrainSigner = 1-idxTrainSigner
+    idxTrain = idxTrainSession*idxTrainTask*idxTrainSigner
+
+    for sessionValid in sessionsSplit[1]:
+        idxValidSession[sess == sessionValid] = 0
+    for taskValid in tasksSplit[1]:
+        idxValidTask[task == taskValid] = 0
+    for signerValid in signersSplit[1]:
+        idxValidSigner[signer == signerValid] = 0
+    idxValidSession = 1-idxValidSession
+    idxValidTask = 1-idxValidTask
+    idxValidSigner = 1-idxValidSigner
+    idxValid = idxValidSession*idxValidTask*idxValidSigner
+
+    for sessionTest in sessionsSplit[2]:
+        idxTestSession[sess == sessionTest] = 0
+    for taskTest in tasksSplit[2]:
+        idxTestTask[task == taskTest] = 0
+    for signerTest in signersSplit[2]:
+        idxTestSigner[signer == signerTest] = 0
+    idxTestSession = 1-idxTestSession
+    idxTestTask = 1-idxTestTask
+    idxTestSigner = 1-idxTestSigner
+    idxTest = idxTestSession*idxTestTask*idxTestSigner
+
+    return idxTrain, idxValid, idxTest
+
+
 
 def weightVectorImbalancedDataOneHot(data):
     # [samples, classes]

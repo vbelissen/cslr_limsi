@@ -32,6 +32,7 @@ corpus = 'DictaSign'
 outputName = 'FS'
 flsBinary = True
 flsKeep = []
+signerIndependent=False
 batch_size=200
 epochs=200
 seq_length=100
@@ -53,12 +54,17 @@ optimizer='rms'
 
 
 # Data split
-fractionValid = 0.2
-fractionTest = 0.2
-videosToDelete = ['dorm_prank_1053_small_0_1.mov', 'DSP_DeadDog.mov', 'DSP_Immigrants.mov', 'DSP_Trip.mov']
-lengthCriterion = 300
-includeLong=True
-includeShort=True
+sessionsTrain=[2,3,4,5,6,9]
+sessionsValid=[8]
+sessionsTest=[7] # session 7
+tasksTrain=[]
+tasksValid=[]
+tasksTest=[]
+signersTrain=[]
+signersValid=[]
+signersTest=[]
+
+
 
 # Wolf metrics
 stepWolf=0.01
@@ -66,12 +72,9 @@ stepWolf=0.01
 #classWeights = np.array([1, 1, 1, 1])
 
 ## GET VIDEO INDICES
-idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionValid,
-                                                         fractionTest=fractionTest,
-                                                         videosToDelete=videosToDelete,
-                                                         lengthCriterion=lengthCriterion,
-                                                         includeLong=True,
-                                                         includeShort=True)
+idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSign([sessionsTrain,sessionsValid,sessionsTest],
+                                                            [tasksTrain,tasksValid,tasksTest],
+                                                            [signersTrain,signersValid,signersTest])
 
 if outputName=='fls' and not flsBinary:
     output_form='mixed'
@@ -99,16 +102,13 @@ features_test, annot_test = get_data_concatenated(corpus=corpus,
                                                     separation=separation)
 
 
-classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_test[0, :, :])
+#classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_train[0, :, :])
 
-#classWeights = np.array([1, 1, 1, 1])
-classWeights[0] = 0.01
+classWeights = np.array([1, 1])
+#classWeights[0] = 0.01
 
 
-
-# A model with 1 output matrix:
-# [other, Pointing, Depicting, Lexical]
-model = get_model([outputName],[4],[1],
+model = get_model([outputName],[2],[1],
                     output_class_weights=[classWeights],
                     dropout=dropout,
                     rnn_number=rnn_number,
@@ -146,18 +146,18 @@ predict_test = predict_test[0]
 #    predict_test[i*seq_length:(i+1)*seq_length,:]=model.predict(features_test[:,i*seq_length:(i+1)*seq_length,:])[0]
 
 acc = framewiseAccuracy(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True)
-accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True)
+#accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True)
 pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,step=stepWolf)
 Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=stepWolf)
 
 print('Accuracy : ' + str(acc))
-print('Accuracy Yanovich : ' + str(accYanovich))
-print('Accuracy Yanovich per class :')
-print(accYanovichPerClass)
+#print('Accuracy Yanovich : ' + str(accYanovich))
+#print('Accuracy Yanovich per class :')
+#print(accYanovichPerClass)
 print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
-np.savez('reports/corpora/'+corpus+'/compareYanovich/compareYanovich_prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
+np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
 
-np.savez('reports/corpora/'+corpus+'/compareYanovich/compareYanovich_annot_predict_test.npz',annot=annot_test,predict=predict_test)
+np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_annot_predict_test.npz',annot=annot_test,predict=predict_test)
 
 
 t = np.arange(0,1+stepWolf,stepWolf)
@@ -171,7 +171,7 @@ ax.set_xlabel('tp')
 ax.set_xlim(0,1)
 ax.set_ylim(0,1)
 ax.legend()
-plt.savefig('reports/corpora/'+corpus+'/compareYanovich/compareYanovich_prf1_tp_tr0')
+plt.savefig('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1_tp_tr0')
 fig = plt.figure()
 ax = fig.add_axes([0,0,1,1])
 ax.plot(t,pStarTr,label='pStar')
@@ -182,4 +182,4 @@ ax.set_xlabel('tr')
 ax.set_xlim(0,1)
 ax.set_ylim(0,1)
 ax.legend()
-plt.savefig('reports/corpora/'+corpus+'/compareYanovich/compareYanovich_prf1_tr_tp0')
+plt.savefig('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1_tr_tp0')
