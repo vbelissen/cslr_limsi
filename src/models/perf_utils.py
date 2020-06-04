@@ -103,7 +103,7 @@ def framewiseAccuracyYanovich(dataTrue, dataPred, trueIsCat):
 
 
 
-def ignore_acc(y_true, y_pred):
+def accYanovichKeras(y_true, y_pred):
     y_true_class = backend.argmax(y_true, axis=-1)
     y_pred_class = backend.argmax(y_pred, axis=-1)
 

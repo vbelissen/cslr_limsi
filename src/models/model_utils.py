@@ -248,9 +248,9 @@ def get_model(output_names,
     else:
         sys.exit('Invalid gradient optimizer')
     if output_weights == []:
-        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc', ignore_acc], sample_weight_mode=weight_mode_sequence)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc', accYanovichKeras], sample_weight_mode=weight_mode_sequence)
     else:
-        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc', ignore_acc], loss_weights=output_weights, sample_weight_mode=weight_mode_sequence)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc', accYanovichKeras], loss_weights=output_weights, sample_weight_mode=weight_mode_sequence)
     if print_summary:
         model.summary()
     return model

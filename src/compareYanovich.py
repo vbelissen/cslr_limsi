@@ -47,11 +47,11 @@ rnn_hidden_units=5
 learning_rate=0.001
 earlyStopping=True
 saveBest=True
-saveMonitor='val_ignore_acc'
+saveMonitor='val_accYanovichKeras'
 saveMonitorMode='max'
 saveBestName='Yanovich'
 reduceLrOnPlateau=True
-reduceLrMonitor='val_ignore_acc'
+reduceLrMonitor='val_accYanovichKeras'
 reduceLrMonitorMode='max'
 optimizer='rms'
 
@@ -129,7 +129,7 @@ train_model(model,
             reduceLrMonitorMode=reduceLrMonitorMode)
 
 # Test
-model.load_weights('Yanovich-best.hdf5')
+model.load_weights(saveBestName+'-best.hdf5')
 
 #predict_test = np.zeros((annot_test.shape[1],annot_test.shape[2]))
 nRound=annot_test.shape[1]//seq_length

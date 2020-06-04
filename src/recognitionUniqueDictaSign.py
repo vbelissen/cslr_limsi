@@ -32,13 +32,6 @@ corpus = 'DictaSign'
 outputName = 'FS'
 flsBinary = True
 flsKeep = []
-#outputNames = ['fls-FS-DS']
-catNames = ['fls', 'FS', 'DS']
-catDetails = [
-              ['lexical_with_ns_not_fs'],
-              ['fingerspelling', 'fingerspelled_loan_signs'],
-              [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
-             ]
 batch_size=200
 epochs=200
 seq_length=100
@@ -50,12 +43,12 @@ rnn_hidden_units=5
 learning_rate=0.001
 earlyStopping=True
 saveBest=True
-saveMonitor='val_ignore_acc'
-saveMonitorMode='max'
-saveBestName='Yanovich'
+saveMonitor='val_loss'
+saveMonitorMode='min'
+saveBestName='recognitionUniqueDictaSign'+outputName
 reduceLrOnPlateau=True
-reduceLrMonitor='val_ignore_acc'
-reduceLrMonitorMode='max'
+reduceLrMonitor='val_loss'
+reduceLrMonitorMode='min'
 optimizer='rms'
 
 
@@ -81,37 +74,30 @@ idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionV
                                                          includeShort=True)
 
 if outputName=='fls' and not flsBinary:
-    features_train, annot_train = get_data_concatenated(corpus,
-                                                            'mixed',
-                                                            [outputName], [flsKeep],
-                                                            video_indices=idxTrain,
-                                                            separation=separation)
-    features_valid, annot_valid = get_data_concatenated(corpus,
-                                                            'mixed',
-                                                            [outputName], [flsKeep],
-                                                            video_indices=idxValid,
-                                                            separation=separation)
-    features_test, annot_test = get_data_concatenated(corpus,
-                                                            'mixed',
-                                                            [outputName], [flsKeep],
-                                                            video_indices=idxTest,
-                                                            separation=separation)
+    output_form='mixed'
+    output_categories_or_names_original=[flsKeep]
 else:
-    features_train, annot_train = get_data_concatenated(corpus,
-                                                            'sign_types',
-                                                            [outputName], [[outputName]],
-                                                            video_indices=idxTrain,
-                                                            separation=separation)
-    features_valid, annot_valid = get_data_concatenated(corpus,
-                                                            'sign_types',
-                                                            [outputName], [[outputName]],
-                                                            video_indices=idxValid,
-                                                            separation=separation)
-    features_test, annot_test = get_data_concatenated(corpus,
-                                                            'sign_types',
-                                                            [outputName], [[outputName]],
-                                                            video_indices=idxTest,
-                                                            separation=separation)
+    output_form='sign_types'
+    output_categories_or_names_original=[[outputName]]
+features_train, annot_train = get_data_concatenated(corpus=corpus,
+                                                    output_form=output_form,
+                                                    output_names_final=[outputName],
+                                                    output_categories_or_names_original=output_categories_or_names_original],
+                                                    video_indices=idxTrain,
+                                                    separation=separation)
+features_valid, annot_valid = get_data_concatenated(corpus=corpus,
+                                                    output_form=output_form,
+                                                    output_names_final=[outputName],
+                                                    output_categories_or_names_original=output_categories_or_names_original],
+                                                    video_indices=idxValid,
+                                                    separation=separation)
+features_test, annot_test = get_data_concatenated(corpus=corpus,
+                                                    output_form=output_form,
+                                                    output_names_final=[outputName],
+                                                    output_categories_or_names_original=output_categories_or_names_original],
+                                                    video_indices=idxTest,
+                                                    separation=separation)
+
 
 classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_test[0, :, :])
 
@@ -150,7 +136,7 @@ train_model(model,
             reduceLrMonitorMode=reduceLrMonitorMode)
 
 # Test
-model.load_weights('Yanovich-best.hdf5')
+model.load_weights(saveBestName+'-best.hdf5')
 
 #predict_test = np.zeros((annot_test.shape[1],annot_test.shape[2]))
 nRound=annot_test.shape[1]//seq_length
