@@ -29,7 +29,7 @@ np.random.seed(17)
 ## PARAMETERS
 # Categories names
 corpus = 'DictaSign'
-outputName = 'FS'
+outputName = 'PT'
 flsBinary = True
 flsKeep = []
 signerIndependent=False
