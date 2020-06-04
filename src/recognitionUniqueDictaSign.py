@@ -33,7 +33,7 @@ outputName = 'PT'
 flsBinary = True
 flsKeep = []
 signerIndependent=False
-batch_size=10000
+batch_size=500
 epochs=100
 seq_length=100
 separation=0
@@ -47,9 +47,11 @@ saveBest=True
 saveMonitor='val_f1K'
 saveMonitorMode='max'
 saveBestName='recognitionUniqueDictaSign'+outputName
-reduceLrOnPlateau=False
-reduceLrMonitor='val_loss'
-reduceLrMonitorMode='min'
+reduceLrOnPlateau=True
+reduceLrMonitor='val_f1K'
+reduceLrMonitorMode='max'
+reduceLrPatience=3
+reduceLrFactor=0.5
 optimizer='rms'
 metrics=['acc', f1K, precisionK, recallK]
 
@@ -135,7 +137,9 @@ train_model(model,
             saveBestName=saveBestName,
             reduceLrOnPlateau=reduceLrOnPlateau,
             reduceLrMonitor=reduceLrMonitor,
-            reduceLrMonitorMode=reduceLrMonitorMode)
+            reduceLrMonitorMode=reduceLrMonitorMode,
+            reduceLrPatience=reduceLrPatience,
+            reduceLrFactor=reduceLrFactor)
 
 # Test
 model.load_weights(saveBestName+'-best.hdf5')
