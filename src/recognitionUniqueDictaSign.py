@@ -51,6 +51,7 @@ reduceLrOnPlateau=True
 reduceLrMonitor='val_loss'
 reduceLrMonitorMode='min'
 optimizer='rms'
+metrics=['acc', f1K, precisionK, recallK]
 
 
 # Data split

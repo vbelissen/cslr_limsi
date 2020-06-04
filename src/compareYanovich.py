@@ -47,13 +47,14 @@ rnn_hidden_units=5
 learning_rate=0.001
 earlyStopping=True
 saveBest=True
-saveMonitor='val_accYanovichKeras'
+saveMonitor='val_accYanovichK'
 saveMonitorMode='max'
 saveBestName='Yanovich'
 reduceLrOnPlateau=True
-reduceLrMonitor='val_accYanovichKeras'
+reduceLrMonitor='val_accYanovichK'
 reduceLrMonitorMode='max'
 optimizer='rms'
+metrics=['acc', accYanovichK]
 
 
 # Data split
@@ -109,7 +110,8 @@ model = get_model(outputNames,[4],[1],
                     mlp_layers_number=mlp_layers_number,
                     time_steps=seq_length,
                     learning_rate=learning_rate,
-                    optimizer=optimizer)
+                    optimizer=optimizer,
+                    metrics=metrics)
 
 train_model(model,
             features_train,

@@ -100,6 +100,7 @@ def get_model(output_names,
               mlp_layers_number=0,
               mlp_layers_size=30,
               optimizer='rms',
+              metrics=['acc'],
               learning_rate=0.005,
               time_steps=100,
               features_number=420,
@@ -248,9 +249,9 @@ def get_model(output_names,
     else:
         sys.exit('Invalid gradient optimizer')
     if output_weights == []:
-        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc', accYanovichKeras], sample_weight_mode=weight_mode_sequence)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=metrics, sample_weight_mode=weight_mode_sequence)
     else:
-        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc', accYanovichKeras], loss_weights=output_weights, sample_weight_mode=weight_mode_sequence)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=metrics, loss_weights=output_weights, sample_weight_mode=weight_mode_sequence)
     if print_summary:
         model.summary()
     return model

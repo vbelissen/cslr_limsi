@@ -103,7 +103,7 @@ def framewiseAccuracyYanovich(dataTrue, dataPred, trueIsCat):
 
 
 
-def accYanovichKeras(y_true, y_pred):
+def accYanovichK(y_true, y_pred):
     y_true_class = backend.argmax(y_true, axis=-1)
     y_pred_class = backend.argmax(y_pred, axis=-1)
 
@@ -182,6 +182,27 @@ def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparati
         F1 = 0
 
     return P, R, F1
+
+def recallK(y_true, y_pred):
+    y_true = backend.ones_like(y_true)
+    true_positives = backend.sum(backend.round(backend.clip(y_true * y_pred, 0, 1)))
+    all_positives = backend.sum(backend.round(backend.clip(y_true, 0, 1)))
+
+    recall = true_positives / (all_positives + backend.epsilon())
+    return recall
+
+def precisionK(y_true, y_pred):
+    y_true = backend.ones_like(y_true)
+    true_positives = backend.sum(backend.round(backend.clip(y_true * y_pred, 0, 1)))
+
+    predicted_positives = backend.sum(backend.round(backend.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + backend.epsilon())
+    return precision
+
+def f1K(y_true, y_pred):
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+backend.epsilon()))
 
 def valuesConsecutive(data, isCatOrProb):
     """
