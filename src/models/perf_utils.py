@@ -200,8 +200,8 @@ def precisionK(y_true, y_pred):
     return precision
 
 def f1K(y_true, y_pred):
-    precision = precision_m(y_true, y_pred)
-    recall = recall_m(y_true, y_pred)
+    precision = precisionK(y_true, y_pred)
+    recall = recallK(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall+backend.epsilon()))
 
 def valuesConsecutive(data, isCatOrProb):
