@@ -6,6 +6,7 @@ from models.perf_utils import *
 import math
 import numpy as np
 from matplotlib import pyplot as plt
+plt.switch_backend('agg')
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
