@@ -346,7 +346,10 @@ def idxBestMatches(dataTrue, dataPred, matMatch, trueIsCat, predIsCatOrProb):
 
     print(matMatch.shape)
     #matMatch = matrixMatch(valuesConsecutive(dataTrue, trueIsCat), valuesConsecutive(dataPred, predIsCatOrProb), dataTrue.shape[0])
-    return np.argmax(matMatch,axis=0), np.argmax(matMatch,axis=1)
+    if matMatch.size == 0:
+        return -1,-1
+    else:
+        return np.argmax(matMatch,axis=0), np.argmax(matMatch,axis=1)
 
 def isMatched(idxTrue, idxPred, tp, tr, consecTrue, consecPred, seqLength):
     """
@@ -427,30 +430,32 @@ def prfStar(dataTrue, dataPred, trueIsCat, predIsCatOrProb, step=0.01, fractionT
     nbUnitsTrue = len(consecTrue)
     nbUnitsPred = len(consecPred)
 
-    M = matrixMatch(consecTrue, consecPred, seqLength, fractionTotal)
+    if nbUnitsTrue > 0 and nbUnitsPred > 0:
+        M = matrixMatch(consecTrue, consecPred, seqLength, fractionTotal)
 
-    idxBestMatchesTrue, idxBestMatchesPred = idxBestMatches(dataTrue, dataPred, M, trueIsCat, predIsCatOrProb)
+        idxBestMatchesTrue, idxBestMatchesPred = idxBestMatches(dataTrue, dataPred, M, trueIsCat, predIsCatOrProb)
 
-    for iPred in range(nbUnitsPred):
-        idxBestMatchTrue = idxBestMatchesTrue[iPred]
-        for iTp in range(nbValues):
-            pStarTp[iTp] += isMatched(idxBestMatchTrue, iPred, tpVector[iTp], 0, consecTrue, consecPred, seqLength)
-        for iTr in range(nbValues):
-            pStarTr[iTr] += isMatched(idxBestMatchTrue, iPred, 0, trVector[iTr], consecTrue, consecPred, seqLength)
-    pStarTp /= nbUnitsPred
-    pStarTr /= nbUnitsPred
+        for iPred in range(nbUnitsPred):
+            idxBestMatchTrue = idxBestMatchesTrue[iPred]
+            for iTp in range(nbValues):
+                pStarTp[iTp] += isMatched(idxBestMatchTrue, iPred, tpVector[iTp], 0, consecTrue, consecPred, seqLength)
+            for iTr in range(nbValues):
+                pStarTr[iTr] += isMatched(idxBestMatchTrue, iPred, 0, trVector[iTr], consecTrue, consecPred, seqLength)
+        pStarTp /= nbUnitsPred
+        pStarTr /= nbUnitsPred
 
-    for iTrue in range(nbUnitsTrue):
-        idxBestMatchPred = idxBestMatchesPred[iTrue]
-        for iTp in range(nbValues):
-            rStarTp[iTp] += isMatched(iTrue, idxBestMatchPred, tpVector[iTp], 0, consecTrue, consecPred, seqLength)
-        for iTr in range(nbValues):
-            rStarTr[iTr] += isMatched(iTrue, idxBestMatchPred, 0, trVector[iTr], consecTrue, consecPred, seqLength)
-    rStarTp /= nbUnitsTrue
-    rStarTr /= nbUnitsTrue
+        for iTrue in range(nbUnitsTrue):
+            idxBestMatchPred = idxBestMatchesPred[iTrue]
+            for iTp in range(nbValues):
+                rStarTp[iTp] += isMatched(iTrue, idxBestMatchPred, tpVector[iTp], 0, consecTrue, consecPred, seqLength)
+            for iTr in range(nbValues):
+                rStarTr[iTr] += isMatched(iTrue, idxBestMatchPred, 0, trVector[iTr], consecTrue, consecPred, seqLength)
+        rStarTp /= nbUnitsTrue
+        rStarTr /= nbUnitsTrue
 
-    fStarTp = 2 * 1. / (1. / pStarTp + 1. / rStarTp)
-    fStarTr = 2 * 1. / (1. / pStarTr + 1. / rStarTr)
+        fStarTp = 2 * 1. / (1. / pStarTp + 1. / rStarTp)
+        fStarTr = 2 * 1. / (1. / pStarTr + 1. / rStarTr)
+
 
     #fStarTp = 2 * 1. / (1. / pStarTp + 1. / rStarTp)
     #fStarTr = 2 * 1. / (1. / pStarTr + 1. / rStarTr)
