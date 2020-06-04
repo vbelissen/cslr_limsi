@@ -1,7 +1,8 @@
 '''
-This script is intended to compare results with Yanovich's paper
-It is ran on the NCSLGR corpus, with FLS, FS and DS
+This script is intended for the recognition of a unique output
+It is ran on the DictaSign corpus
 '''
+
 
 from models.data_utils import *
 from models.model_utils import *
@@ -28,7 +29,7 @@ np.random.seed(17)
 
 ## PARAMETERS
 # Categories names
-corpus = 'NCSLGR'
+corpus = 'DictaSign'
 outputNames = ['fls-FS-DS']
 catNames = ['fls', 'FS', 'DS']
 catDetails = [
@@ -148,8 +149,6 @@ print('Accuracy Yanovich : ' + str(accYanovich))
 print('Accuracy Yanovich per class :')
 print(accYanovichPerClass)
 print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
-np.savez('prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
-
 
 t = np.arange(0,1+stepWolf,stepWolf)
 fig = plt.figure()
@@ -162,7 +161,7 @@ ax.set_xlabel('tp')
 ax.set_xlim(0,1)
 ax.set_ylim(0,1)
 ax.legend()
-plt.savefig('prf1_tp_tr0')
+plt.savefig('../reports/prf1_tp_tr0')
 fig = plt.figure()
 ax = fig.add_axes([0,0,1,1])
 ax.plot(t,pStarTr,label='pStar')
@@ -173,4 +172,4 @@ ax.set_xlabel('tr')
 ax.set_xlim(0,1)
 ax.set_ylim(0,1)
 ax.legend()
-plt.savefig('prf1_tr_tp0')
+plt.savefig('../reports/prf1_tr_tp0')
