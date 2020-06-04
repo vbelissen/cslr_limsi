@@ -184,17 +184,13 @@ def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparati
     return P, R, F1
 
 def recallK(y_true, y_pred):
-    y_true = backend.ones_like(y_true)
     true_positives = backend.sum(backend.round(backend.clip(y_true * y_pred, 0, 1)))
-    all_positives = backend.sum(backend.round(backend.clip(y_true, 0, 1)))
-
-    recall = true_positives / (all_positives + backend.epsilon())
+    possible_positives = backend.sum(backend.round(backend.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + backend.epsilon())
     return recall
 
 def precisionK(y_true, y_pred):
-    y_true = backend.ones_like(y_true)
     true_positives = backend.sum(backend.round(backend.clip(y_true * y_pred, 0, 1)))
-
     predicted_positives = backend.sum(backend.round(backend.clip(y_pred, 0, 1)))
     precision = true_positives / (predicted_positives + backend.epsilon())
     return precision
