@@ -749,6 +749,13 @@ def getVideoIndicesSplitDictaSign(sessionsSplit,tasksSplit,signersSplit,from_not
     idxTestSigner = 1-idxTestSigner
     idxTest = idxTestSession*idxTestTask*idxTestSigner
 
+    idxTrain = np.where(idxTrain)[0]
+    idxValid = np.where(idxValid)[0]
+    idxTest = np.where(idxTest)[0]
+    np.random.shuffle(idxTrain)
+    np.random.shuffle(idxValid)
+    np.random.shuffle(idxTest)
+
     return idxTrain.astype(int), idxValid.astype(int), idxTest.astype(int)
 
 
