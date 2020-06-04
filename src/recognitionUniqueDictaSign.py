@@ -29,18 +29,18 @@ np.random.seed(17)
 ## PARAMETERS
 # Categories names
 corpus = 'DictaSign'
-outputName = 'FBUOY'
+outputName = 'PT'
 flsBinary = True
 flsKeep = []
 signerIndependent=False
-batch_size=5000
+batch_size=500
 epochs=100
 seq_length=100
-separation=50
+separation=0
 dropout=0.3
 rnn_number=1
 mlp_layers_number=0
-rnn_hidden_units=30
+rnn_hidden_units=50
 learning_rate=0.005
 earlyStopping=True
 saveBest=True
