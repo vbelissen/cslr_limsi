@@ -184,14 +184,16 @@ def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparati
     return P, R, F1
 
 def recallK(y_true, y_pred):
-    true_positives = backend.sum(backend.round(backend.clip(y_true * y_pred, 0, 1)))
-    possible_positives = backend.sum(backend.round(backend.clip(y_true, 0, 1)))
+    y_true_class = backend.argmax(y_true, axis=-1)
+    y_pred_class = backend.argmax(y_pred, axis=-1)
+    true_positives = backend.sum(backend.round(backend.clip(y_true_class * y_pred_class, 0, 1)))
+    possible_positives = backend.sum(backend.round(backend.clip(y_true_class, 0, 1)))
     recall = true_positives / (possible_positives + backend.epsilon())
     return recall
 
 def precisionK(y_true, y_pred):
-    true_positives = backend.sum(backend.round(backend.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = backend.sum(backend.round(backend.clip(y_pred, 0, 1)))
+    true_positives = backend.sum(backend.round(backend.clip(y_true_class * y_pred_class, 0, 1)))
+    predicted_positives = backend.sum(backend.round(backend.clip(y_pred_class, 0, 1)))
     precision = true_positives / (predicted_positives + backend.epsilon())
     return precision
 
@@ -310,6 +312,7 @@ def idxBestMatches(dataTrue, dataPred, matMatch, trueIsCat, predIsCatOrProb):
             if dataPred.shape[1] > 1:
                 sys.exit('Pred data should be a vector (not categorical or probabilities) because predIsCatOrProb=False')
 
+    print(matMatch.shape)
     #matMatch = matrixMatch(valuesConsecutive(dataTrue, trueIsCat), valuesConsecutive(dataPred, predIsCatOrProb), dataTrue.shape[0])
     return np.argmax(matMatch,axis=0), np.argmax(matMatch,axis=1)
 
