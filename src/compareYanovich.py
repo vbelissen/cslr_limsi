@@ -59,6 +59,9 @@ lengthCriterion = 300
 includeLong=True
 includeShort=True
 
+# Wolf metrics
+stepWolf=0.01
+
 #classWeights = np.array([1, 1, 1, 1])
 
 ## GET VIDEO INDICES
@@ -132,8 +135,8 @@ predict_2_test = predict_2_test[0]
 
 acc = framewiseAccuracy(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True)
 accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True)
-pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True,step=0.1)
-Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=0.1)
+pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True,step=stepWolf)
+Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=stepWolf)
 
 print('Accuracy : ' + str(acc))
 print('Accuracy Yanovich : ' + str(accYanovich))
@@ -141,6 +144,7 @@ print('Accuracy Yanovich per class :')
 print(accYanovichPerClass)
 print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
 
+t = np.arange(0,1+stepWolf,stepWolf)
 fig = plt.figure()
 ax = fig.add_axes([0,0,1,1])
 ax.plot(t,pStarTp,label='pStar')
