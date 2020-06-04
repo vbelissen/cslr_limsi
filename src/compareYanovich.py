@@ -76,23 +76,23 @@ idxTrain, idxValid, idxTest = getVideoIndicesSplitNCSLGR(fractionValid=fractionV
                                                          lengthCriterion=lengthCriterion,
                                                          includeLong=True,
                                                          includeShort=True)
-features_2_train, annot_2_train = get_data_concatenated(corpus,
+features_train, annot_train = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
                                                         video_indices=idxTrain,
                                                         separation=separation)
-features_2_valid, annot_2_valid = get_data_concatenated(corpus,
+features_valid, annot_valid = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
                                                         video_indices=idxValid,
                                                         separation=separation)
-features_2_test, annot_2_test = get_data_concatenated(corpus,
+features_test, annot_test = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
                                                         video_indices=idxTest,
                                                         separation=separation)
 
-classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_2_test[0, :, :])
+classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_test[0, :, :])
 
 #classWeights = np.array([1, 1, 1, 1])
 classWeights[0] = 0.01
@@ -101,7 +101,7 @@ classWeights[0] = 0.01
 
 # A model with 1 output matrix:
 # [other, Pointing, Depicting, Lexical]
-model_2 = get_model(outputNames,[4],[1],
+model = get_model(outputNames,[4],[1],
                     output_class_weights=[classWeights],
                     dropout=dropout,
                     rnn_number=rnn_number,
@@ -111,11 +111,11 @@ model_2 = get_model(outputNames,[4],[1],
                     learning_rate=learning_rate,
                     optimizer=optimizer)
 
-train_model(model_2,
-            features_2_train,
-            annot_2_train,
-            features_2_valid,
-            annot_2_valid,
+train_model(model,
+            features_train,
+            annot_train,
+            features_valid,
+            annot_valid,
             output_class_weights=[classWeights],
             batch_size=batch_size,
             epochs=epochs,
@@ -129,18 +129,18 @@ train_model(model_2,
             reduceLrMonitorMode=reduceLrMonitorMode)
 
 # Test
-model_2.load_weights('Yanovich-best.hdf5')
+model.load_weights('Yanovich-best.hdf5')
 
-#predict_2_test = np.zeros((annot_2_test.shape[1],annot_2_test.shape[2]))
-nRound=annot_2_test.shape[1]//seq_length
+#predict_test = np.zeros((annot_test.shape[1],annot_test.shape[2]))
+nRound=annot_test.shape[1]//seq_length
 timestepsRound = nRound*seq_length
-predict_2_test = model_2.predict(features_2_test[:,:timestepsRound,:].reshape(-1, seq_length, features_2_test.shape[2])).reshape(1, timestepsRound, 4)
-predict_2_test = predict_2_test[0]
-#    predict_2_test[i*seq_length:(i+1)*seq_length,:]=model_2.predict(features_2_test[:,i*seq_length:(i+1)*seq_length,:])[0]
+predict_test = model.predict(features_test[:,:timestepsRound,:].reshape(-1, seq_length, features_test.shape[2])).reshape(1, timestepsRound, 4)
+predict_test = predict_test[0]
+#    predict_test[i*seq_length:(i+1)*seq_length,:]=model.predict(features_test[:,i*seq_length:(i+1)*seq_length,:])[0]
 
-acc = framewiseAccuracy(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True)
-accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True)
-pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_2_test[0,:nRound*seq_length,:],predict_2_test[:nRound*seq_length,:],True,True,step=stepWolf)
+acc = framewiseAccuracy(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True)
+accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True)
+pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,step=stepWolf)
 Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=stepWolf)
 
 print('Accuracy : ' + str(acc))
@@ -148,9 +148,9 @@ print('Accuracy Yanovich : ' + str(accYanovich))
 print('Accuracy Yanovich per class :')
 print(accYanovichPerClass)
 print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
-np.savez('reports/corpora/'+corpus+'compareYanovich/compareYanovich_prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
+np.savez('reports/corpora/'+corpus+'/compareYanovich/compareYanovich_prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
 
-np.savez('reports/corpora/'+corpus+'compareYanovich/compareYanovich_annot_predict_test.npz',annot=annot_2_test,predict=predict_2_test)
+np.savez('reports/corpora/'+corpus+'/compareYanovich/compareYanovich_annot_predict_test.npz',annot=annot_test,predict=predict_test)
 
 
 t = np.arange(0,1+stepWolf,stepWolf)
@@ -164,7 +164,7 @@ ax.set_xlabel('tp')
 ax.set_xlim(0,1)
 ax.set_ylim(0,1)
 ax.legend()
-plt.savefig('reports/corpora/'+corpus+'compareYanovich/compareYanovich_prf1_tp_tr0')
+plt.savefig('reports/corpora/'+corpus+'/compareYanovich/compareYanovich_prf1_tp_tr0')
 fig = plt.figure()
 ax = fig.add_axes([0,0,1,1])
 ax.plot(t,pStarTr,label='pStar')
@@ -175,4 +175,4 @@ ax.set_xlabel('tr')
 ax.set_xlim(0,1)
 ax.set_ylim(0,1)
 ax.legend()
-plt.savefig('reports/corpora/'+corpus+'compareYanovich/compareYanovich_prf1_tr_tp0')
+plt.savefig('reports/corpora/'+corpus+'/compareYanovich/compareYanovich_prf1_tr_tp0')
