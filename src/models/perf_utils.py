@@ -183,21 +183,51 @@ def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparati
 
     return P, R, F1
 
+# def accYanovichK(y_true, y_pred):
+#     y_true_class = backend.argmax(y_true, axis=-1)
+#     y_pred_class = backend.argmax(y_pred, axis=-1)
+#
+#     backend.any(backend.stack([y_true_class, y_true_class], axis=0), axis=0)
+#     A = K.cast(someBooleanTensor, K.floatx())
+#     B = K.cast(anotherBooleanTensor, K.floatx())
+#
+#     TP = y_true_class * y_pred_class #this is also something I use a lot for gathering elements
+#     FP = (1-y_true_class) * y_pred_class
+#     FN = y_true_class * (1-y_pred_class)
+#
+#     true_pos_mask = backend.cast(backend.equal(y_true_class, 1), 'int32')
+#     true_neg_mask = backend.cast(backend.equal(y_true_class, 0), 'int32')
+#
+#     ignore_mask = backend.cast(backend.not_equal(y_true_class, 0), 'int32')
+#     matches = backend.cast(backend.equal(y_true_class, y_pred_class), 'int32') * ignore_mask
+#     accuracy = backend.sum(matches) / backend.maximum(backend.sum(ignore_mask), 1)
+#     return accuracy
+
 def recallK(y_true, y_pred):
     y_true_class = backend.argmax(y_true, axis=-1)
     y_pred_class = backend.argmax(y_pred, axis=-1)
-    true_positives = backend.sum(backend.round(backend.clip(y_true_class * y_pred_class, 0, 1)))
-    possible_positives = backend.sum(backend.round(backend.clip(y_true_class, 0, 1)))
-    recall = true_positives / (possible_positives + backend.epsilon())
-    return recall
+
+    TP = y_true_class * y_pred_class #this is also something I use a lot for gathering elements
+    FP = (1-y_true_class) * y_pred_class
+    FN = y_true_class * (1-y_pred_class)
+
+    #true_positives = backend.sum(backend.round(backend.clip(y_true_class * y_pred_class, 0, 1)))
+    #possible_positives = backend.sum(backend.round(backend.clip(y_true_class, 0, 1)))
+    #recall = true_positives / (possible_positives + backend.epsilon())
+    return backend.sum(TP)/backend.maximum(backend.sum(TP+FN),1)#recall
 
 def precisionK(y_true, y_pred):
     y_true_class = backend.argmax(y_true, axis=-1)
     y_pred_class = backend.argmax(y_pred, axis=-1)
-    true_positives = backend.sum(backend.round(backend.clip(y_true_class * y_pred_class, 0, 1)))
-    predicted_positives = backend.sum(backend.round(backend.clip(y_pred_class, 0, 1)))
-    precision = true_positives / (predicted_positives + backend.epsilon())
-    return precision
+
+    TP = y_true_class * y_pred_class #this is also something I use a lot for gathering elements
+    FP = (1-y_true_class) * y_pred_class
+    FN = y_true_class * (1-y_pred_class)
+
+    #true_positives = backend.sum(backend.round(backend.clip(y_true_class * y_pred_class, 0, 1)))
+    #predicted_positives = backend.sum(backend.round(backend.clip(y_pred_class, 0, 1)))
+    #precision = true_positives / (predicted_positives + backend.epsilon())
+    return backend.sum(TP)/backend.maximum(backend.sum(TP+FP),1)#precision
 
 def f1K(y_true, y_pred):
     precision = precisionK(y_true, y_pred)
