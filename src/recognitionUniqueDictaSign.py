@@ -29,7 +29,7 @@ np.random.seed(17)
 ## PARAMETERS
 # Categories names
 corpus = 'DictaSign'
-outputName = 'PT'
+outputName = 'FBUOY'
 flsBinary = True
 flsKeep = []
 signerIndependent=False
@@ -38,16 +38,16 @@ epochs=100
 seq_length=100
 separation=50
 dropout=0
-rnn_number=1
+rnn_number=2
 mlp_layers_number=0
-rnn_hidden_units=5
-learning_rate=0.001
+rnn_hidden_units=100
+learning_rate=0.005
 earlyStopping=True
 saveBest=True
 saveMonitor='val_loss'
 saveMonitorMode='min'
 saveBestName='recognitionUniqueDictaSign'+outputName
-reduceLrOnPlateau=True
+reduceLrOnPlateau=False
 reduceLrMonitor='val_loss'
 reduceLrMonitorMode='min'
 optimizer='rms'
