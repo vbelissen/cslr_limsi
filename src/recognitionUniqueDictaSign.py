@@ -143,7 +143,7 @@ model.load_weights(saveBestName+'-best.hdf5')
 #predict_test = np.zeros((annot_test.shape[1],annot_test.shape[2]))
 nRound=annot_test.shape[1]//seq_length
 timestepsRound = nRound*seq_length
-predict_test = model.predict(features_test[:,:timestepsRound,:].reshape(-1, seq_length, features_test.shape[2])).reshape(1, timestepsRound, 4)
+predict_test = model.predict(features_test[:,:timestepsRound,:].reshape(-1, seq_length, features_test.shape[2])).reshape(1, timestepsRound, 2)
 predict_test = predict_test[0]
 #    predict_test[i*seq_length:(i+1)*seq_length,:]=model.predict(features_test[:,i*seq_length:(i+1)*seq_length,:])[0]
 
