@@ -34,7 +34,7 @@ flsBinary = True
 flsKeep = []
 signerIndependent=False
 batch_size=2000
-epochs=10
+epochs=100
 seq_length=100
 separation=50
 dropout=0
@@ -141,7 +141,7 @@ train_model(model,
 model.load_weights(saveBestName+'-best.hdf5')
 
 #predict_test = np.zeros((annot_test.shape[1],annot_test.shape[2]))
-nRound=18#annot_test.shape[1]//seq_length
+nRound=annot_test.shape[1]//seq_length
 timestepsRound = nRound*seq_length
 predict_test = model.predict(features_test[:,:timestepsRound,:].reshape(-1, seq_length, features_test.shape[2])).reshape(1, timestepsRound, 2)
 predict_test = predict_test[0]
