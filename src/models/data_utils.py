@@ -749,7 +749,7 @@ def getVideoIndicesSplitDictaSign(sessionsSplit,tasksSplit,signersSplit,from_not
     idxTestSigner = 1-idxTestSigner
     idxTest = idxTestSession*idxTestTask*idxTestSigner
 
-    return idxTrain, idxValid, idxTest
+    return idxTrain.astype(int), idxValid.astype(int), idxTest.astype(int)
 
 
 
