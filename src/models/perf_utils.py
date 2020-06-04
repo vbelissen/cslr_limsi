@@ -192,6 +192,8 @@ def recallK(y_true, y_pred):
     return recall
 
 def precisionK(y_true, y_pred):
+    y_true_class = backend.argmax(y_true, axis=-1)
+    y_pred_class = backend.argmax(y_pred, axis=-1)
     true_positives = backend.sum(backend.round(backend.clip(y_true_class * y_pred_class, 0, 1)))
     predicted_positives = backend.sum(backend.round(backend.clip(y_pred_class, 0, 1)))
     precision = true_positives / (predicted_positives + backend.epsilon())
