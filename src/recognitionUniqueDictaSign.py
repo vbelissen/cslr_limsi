@@ -68,7 +68,7 @@ signersTest=[]
 
 
 # Wolf metrics
-stepWolf=0.01
+stepWolf=0.1
 
 #classWeights = np.array([1, 1, 1, 1])
 
