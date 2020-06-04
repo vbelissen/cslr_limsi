@@ -92,7 +92,7 @@ features_test, annot_test = get_data_concatenated(corpus,
                                                         video_indices=idxTest,
                                                         separation=separation)
 
-classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_test[0, :, :])
+classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_train[0, :, :])
 
 #classWeights = np.array([1, 1, 1, 1])
 classWeights[0] = 0.01

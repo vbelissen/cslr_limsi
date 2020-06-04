@@ -82,19 +82,19 @@ else:
 features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
-                                                    output_categories_or_names_original=output_categories_or_names_original],
+                                                    output_categories_or_names_original=output_categories_or_names_original,
                                                     video_indices=idxTrain,
                                                     separation=separation)
 features_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
-                                                    output_categories_or_names_original=output_categories_or_names_original],
+                                                    output_categories_or_names_original=output_categories_or_names_original,
                                                     video_indices=idxValid,
                                                     separation=separation)
 features_test, annot_test = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
-                                                    output_categories_or_names_original=output_categories_or_names_original],
+                                                    output_categories_or_names_original=output_categories_or_names_original,
                                                     video_indices=idxTest,
                                                     separation=separation)
 
