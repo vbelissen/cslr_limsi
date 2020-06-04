@@ -53,6 +53,8 @@ saveBestName='Yanovich'
 reduceLrOnPlateau=True
 reduceLrMonitor='val_accYanovichK'
 reduceLrMonitorMode='max'
+reduceLrPatience=7
+reduceLrFactor=0.8
 optimizer='rms'
 metrics=['acc', accYanovichK]
 
@@ -128,7 +130,9 @@ train_model(model,
             saveBestName=saveBestName,
             reduceLrOnPlateau=reduceLrOnPlateau,
             reduceLrMonitor=reduceLrMonitor,
-            reduceLrMonitorMode=reduceLrMonitorMode)
+            reduceLrMonitorMode=reduceLrMonitorMode,
+            reduceLrPatience=reduceLrPatience,
+            reduceLrFactor=reduceLrFactor)
 
 # Test
 model.load_weights(saveBestName+'-best.hdf5')
