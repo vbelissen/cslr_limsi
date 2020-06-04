@@ -117,7 +117,8 @@ model = get_model([outputName],[2],[1],
                     mlp_layers_number=mlp_layers_number,
                     time_steps=seq_length,
                     learning_rate=learning_rate,
-                    optimizer=optimizer)
+                    optimizer=optimizer,
+                    metrics=metrics)
 
 train_model(model,
             features_train,
