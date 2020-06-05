@@ -57,7 +57,7 @@ metrics=['acc', f1K, precisionK, recallK]
 
 
 # Data split
-sessionsTrain=[2,3,4,5,6,7,8,9]
+sessionsTrain=[2,3,4,5,6,7,8]
 sessionsValid=[9]
 sessionsTest=[7] # session 7
 tasksTrain=[]
