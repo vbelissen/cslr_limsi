@@ -437,21 +437,25 @@ def prfStar(dataTrue, dataPred, trueIsCat, predIsCatOrProb, step=0.01, fractionT
 
         for iPred in range(nbUnitsPred):
             idxBestMatchTrue = idxBestMatchesTrue[iPred]
-            for iTp in range(nbValues):
+            for iTp in range(nbValues-1):
                 pStarTp[iTp] += isMatched(idxBestMatchTrue, iPred, tpVector[iTp], 0, consecTrue, consecPred, seqLength)
-            for iTr in range(nbValues):
+            for iTr in range(nbValues-1):
                 pStarTr[iTr] += isMatched(idxBestMatchTrue, iPred, 0, trVector[iTr], consecTrue, consecPred, seqLength)
         pStarTp /= nbUnitsPred
         pStarTr /= nbUnitsPred
+        pStarTp[-1] = pStarTp[-2]
+        pStarTr[-1] = pStarTr[-2]
 
         for iTrue in range(nbUnitsTrue):
             idxBestMatchPred = idxBestMatchesPred[iTrue]
-            for iTp in range(nbValues):
+            for iTp in range(nbValues-1):
                 rStarTp[iTp] += isMatched(iTrue, idxBestMatchPred, tpVector[iTp], 0, consecTrue, consecPred, seqLength)
-            for iTr in range(nbValues):
+            for iTr in range(nbValues-1):
                 rStarTr[iTr] += isMatched(iTrue, idxBestMatchPred, 0, trVector[iTr], consecTrue, consecPred, seqLength)
         rStarTp /= nbUnitsTrue
         rStarTr /= nbUnitsTrue
+        rStarTp[-1] = rStarTp[-2]
+        rStarTr[-1] = rStarTr[-2]
 
         fStarTp = 2 * 1. / (1. / pStarTp + 1. / rStarTp)
         fStarTr = 2 * 1. / (1. / pStarTr + 1. / rStarTr)
