@@ -2,15 +2,6 @@ import numpy as np
 import sys
 import itertools as it
 
-import tensorflow as tf
-v0 = tf.__version__[0]
-if v0 == '2':
-    # For tensorflow 2, keras is included in tf
-    from tensorflow.keras import backend
-elif v0 == '1':
-    #For tensorflow 1.2.0
-    from keras import backend
-
 def framewiseAccuracy(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """
         Computes accuracy of predictions wrt annotations.
