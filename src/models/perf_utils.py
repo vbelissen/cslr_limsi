@@ -103,16 +103,6 @@ def framewiseAccuracyYanovich(dataTrue, dataPred, trueIsCat):
 
 
 
-def accYanovichK(y_true, y_pred):
-    y_true_class = backend.argmax(y_true, axis=-1)
-    y_pred_class = backend.argmax(y_pred, axis=-1)
-
-    ignore_mask = backend.cast(backend.not_equal(y_true_class, 0), 'int32')
-    matches = backend.cast(backend.equal(y_true_class, y_pred_class), 'int32') * ignore_mask
-    accuracy = backend.sum(matches) / backend.maximum(backend.sum(ignore_mask), 1)
-    return accuracy
-
-
 def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """
         Computes precision, recall and f1-score of predictions wrt annotations.
@@ -183,56 +173,42 @@ def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparati
 
     return P, R, F1
 
-# def accYanovichK(y_true, y_pred):
-#     y_true_class = backend.argmax(y_true, axis=-1)
-#     y_pred_class = backend.argmax(y_pred, axis=-1)
-#
-#     backend.any(backend.stack([y_true_class, y_true_class], axis=0), axis=0)
-#     A = K.cast(someBooleanTensor, K.floatx())
-#     B = K.cast(anotherBooleanTensor, K.floatx())
-#
-#     TP = y_true_class * y_pred_class #this is also something I use a lot for gathering elements
-#     FP = (1-y_true_class) * y_pred_class
-#     FN = y_true_class * (1-y_pred_class)
-#
-#     true_pos_mask = backend.cast(backend.equal(y_true_class, 1), 'int32')
-#     true_neg_mask = backend.cast(backend.equal(y_true_class, 0), 'int32')
-#
-#     ignore_mask = backend.cast(backend.not_equal(y_true_class, 0), 'int32')
-#     matches = backend.cast(backend.equal(y_true_class, y_pred_class), 'int32') * ignore_mask
-#     accuracy = backend.sum(matches) / backend.maximum(backend.sum(ignore_mask), 1)
-#     return accuracy
+def mesure_perf(dataTrue, dataPred, threshold):
+    # Attend des sequences de 0/1
+    # liste_deb_vrai = []
+    # liste_deb_pred = []
+    # for i in range(taille_seq-1):
+    #     if seq_vrai[i+1] == 1 and seq_vrai[i] == 0:
+    #         liste_deb_vrai.append(i+1)
+    #     if seq_pred[i+1] == 1 and seq_pred[i] == 0:
+    #         liste_deb_pred.append(i+1)
+    #
+    # liste_deb_vrai = np.array(liste_deb_vrai)
+    # liste_deb_pred = np.array(liste_deb_pred)
 
-def recallK(y_true, y_pred):
-    y_true_class = backend.argmax(y_true, axis=-1)
-    y_pred_class = backend.argmax(y_pred, axis=-1)
+    liste_deb_vrai = np.where(seq_vrai[:-1] - seq_vrai[1:] == -1)[0] + 1
+    liste_deb_pred = np.where(seq_pred[:-1] - seq_pred[1:] == -1)[0] + 1
 
-    TP = y_true_class * y_pred_class #this is also something I use a lot for gathering elements
-    FP = (1-y_true_class) * y_pred_class
-    FN = y_true_class * (1-y_pred_class)
+    nb_vrai = np.size(liste_deb_vrai)
+    nb_pred = np.size(liste_deb_pred)
 
-    #true_positives = backend.sum(backend.round(backend.clip(y_true_class * y_pred_class, 0, 1)))
-    #possible_positives = backend.sum(backend.round(backend.clip(y_true_class, 0, 1)))
-    #recall = true_positives / (possible_positives + backend.epsilon())
-    return backend.sum(TP)/backend.maximum(backend.sum(TP+FN),1)#recall
+    #n_vrai = liste_deb_vrai.shape[0]
+    #n_pred = liste_deb_pred.shape[0]
 
-def precisionK(y_true, y_pred):
-    y_true_class = backend.argmax(y_true, axis=-1)
-    y_pred_class = backend.argmax(y_pred, axis=-1)
+    if (nb_vrai != 0 and nb_pred != 0):
+        table_differences = np.abs(liste_deb_vrai[:, None] - liste_deb_pred)
+        min_diff_vrai = np.amin(table_differences, axis=1)
+        min_diff_pred = np.amin(table_differences, axis=0)
 
-    TP = y_true_class * y_pred_class #this is also something I use a lot for gathering elements
-    FP = (1-y_true_class) * y_pred_class
-    FN = y_true_class * (1-y_pred_class)
+        tp = np.sum(min_diff_pred <= threshold)
+        fp = np.sum(min_diff_pred > threshold)
+        fn = np.sum(min_diff_vrai > threshold)
+    else:
+        tp = 0
+        fp = nb_pred
+        fn = nb_vrai
 
-    #true_positives = backend.sum(backend.round(backend.clip(y_true_class * y_pred_class, 0, 1)))
-    #predicted_positives = backend.sum(backend.round(backend.clip(y_pred_class, 0, 1)))
-    #precision = true_positives / (predicted_positives + backend.epsilon())
-    return backend.sum(TP)/backend.maximum(backend.sum(TP+FP),1)#precision
-
-def f1K(y_true, y_pred):
-    precision = precisionK(y_true, y_pred)
-    recall = recallK(y_true, y_pred)
-    return 2*((precision*recall)/(precision+recall+backend.epsilon()))
+    return tp, fp, fn
 
 def valuesConsecutive(data, isCatOrProb):
     """
@@ -302,13 +278,29 @@ def matrixMatch(consecTrue, consecPred, seqLength, fractionTotal):
     #consecPred = valuesConsecutive(dataPred)
     nbUnitsTrue = len(consecTrue)
     nbUnitsPred = len(consecPred)
+
+    vectorStartTrue=np.array([consecTrue[i][1] for i in range(nbUnitsTrue)])
+    vectorStartPred=np.array([consecPred[i][1] for i in range(nbUnitsPred)])
+    matrixStartTrue=np.tile(vectorStartTrue, (nbUnitsPred,1)).transpose()
+    matrixStartPred=np.tile(vectorStartPred, (nbUnitsTrue,1))
+    vectorEndTrue=np.array([consecTrue[i][2] for i in range(nbUnitsTrue)])
+    vectorEndPred=np.array([consecPred[i][2] for i in range(nbUnitsPred)])
+    matrixEndTrue=np.tile(vectorEndTrue, (nbUnitsPred,1)).transpose()
+    matrixEndPred=np.tile(vectorEndPred, (nbUnitsTrue,1))
+    vectorClassTrue=np.array([consecTrue[i][0] for i in range(nbUnitsTrue)])
+    vectorClassPred=np.array([consecPred[i][0] for i in range(nbUnitsPred)])
+    matrixClassTrue=np.tile(vectorClassTrue, (nbUnitsPred,1)).transpose()
+    matrixClassPred=np.tile(vectorClassPred, (nbUnitsTrue,1))
+    matrixPossibleMatches=(1-(matrixStartTrue >= matrixEndPred))*(1-(matrixStartPred >= matrixEndTrue))*(matrixClassTrue==matrixClassPred)
+
     matrixM = np.zeros((nbUnitsTrue,nbUnitsPred))
     for iTrue in range(nbUnitsTrue):
         valuesUnitTrue = consecTrue[iTrue]
         tempVectorTrue[:valuesUnitTrue[1]] = 0
         tempVectorTrue[valuesUnitTrue[2]:] = 0
-        min, max = windowUnitsPredForTrue(iTrue, nbUnitsTrue, nbUnitsPred, fractionTotal)
-        for iPred in range(min, max):#range(nbUnitsPred):
+        possibleMatchesPred = list(np.where(matrixPossibleMatches[iTrue,:])[0])
+        #min, max = windowUnitsPredForTrue(iTrue, nbUnitsTrue, nbUnitsPred, fractionTotal)
+        for iPred in possibleMatchesPred#range(min, max):#range(nbUnitsPred):
             valuesUnitPred = consecPred[iPred]
             tempVectorPred[:valuesUnitPred[1]] = 0
             tempVectorPred[valuesUnitPred[2]:] = 0
@@ -344,7 +336,6 @@ def idxBestMatches(dataTrue, dataPred, matMatch, trueIsCat, predIsCatOrProb):
             if dataPred.shape[1] > 1:
                 sys.exit('Pred data should be a vector (not categorical or probabilities) because predIsCatOrProb=False')
 
-    print(matMatch.shape)
     #matMatch = matrixMatch(valuesConsecutive(dataTrue, trueIsCat), valuesConsecutive(dataPred, predIsCatOrProb), dataTrue.shape[0])
     if matMatch.size == 0:
         return -1,-1
