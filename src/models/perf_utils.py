@@ -300,7 +300,7 @@ def matrixMatch(consecTrue, consecPred, seqLength, fractionTotal):
         tempVectorTrue[valuesUnitTrue[2]:] = 0
         possibleMatchesPred = list(np.where(matrixPossibleMatches[iTrue,:])[0])
         #min, max = windowUnitsPredForTrue(iTrue, nbUnitsTrue, nbUnitsPred, fractionTotal)
-        for iPred in possibleMatchesPred#range(min, max):#range(nbUnitsPred):
+        for iPred in possibleMatchesPred:#range(min, max):#range(nbUnitsPred):
             valuesUnitPred = consecPred[iPred]
             tempVectorPred[:valuesUnitPred[1]] = 0
             tempVectorPred[valuesUnitPred[2]:] = 0
