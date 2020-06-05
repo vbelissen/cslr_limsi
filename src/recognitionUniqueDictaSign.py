@@ -33,14 +33,14 @@ outputName = 'PT'
 flsBinary = True
 flsKeep = []
 signerIndependent=False
-batch_size=500
+batch_size=200
 epochs=100
 seq_length=100
 separation=0
 dropout=0.3
 rnn_number=1
 mlp_layers_number=0
-rnn_hidden_units=100
+rnn_hidden_units=50
 learning_rate=0.005
 earlyStopping=True
 saveBest=True
@@ -57,8 +57,8 @@ metrics=['acc', f1K, precisionK, recallK]
 
 
 # Data split
-sessionsTrain=[2,3,4,5,6,9]
-sessionsValid=[8]
+sessionsTrain=[2,3,4,5,6,7,8,9]
+sessionsValid=[9]
 sessionsTest=[7] # session 7
 tasksTrain=[]
 tasksValid=[]
