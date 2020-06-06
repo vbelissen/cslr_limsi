@@ -33,11 +33,11 @@ outputName = 'PT'
 flsBinary = True
 flsKeep = []
 signerIndependent=False
-batch_size=50
+batch_size=200
 epochs=60
 seq_length=100
 separation=0
-dropout=0.3
+dropout=0.5
 rnn_number=1
 mlp_layers_number=0
 rnn_hidden_units=50
@@ -149,6 +149,72 @@ train_model(model,
 # Test
 model.load_weights(saveBestName+'-best.hdf5')
 
+print('On valid: ')
+nRound=annot_valid.shape[1]//seq_length
+timestepsRound = nRound*seq_length
+predict_valid = model.predict(features_valid[:,:timestepsRound,:].reshape(-1, seq_length, features_valid.shape[2])).reshape(1, timestepsRound, 2)
+predict_valid = predict_valid[0]
+#    predict_valid[i*seq_length:(i+1)*seq_length,:]=model.predict(features_valid[:,i*seq_length:(i+1)*seq_length,:])[0]
+
+acc = framewiseAccuracy(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True)
+#accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True)
+pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,step=stepWolf)
+Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=stepWolf)
+
+print('Accuracy : ' + str(acc))
+#print('Accuracy Yanovich : ' + str(accYanovich))
+#print('Accuracy Yanovich per class :')
+#print(accYanovichPerClass)
+print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
+np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
+
+print('P*(0,0) = ' + str(pStarTp[0]))
+print('R*(0,0) = ' + str(rStarTp[0]))
+print('F1*(0,0) = ' + str(fStarTp[0]))
+
+margin = 0
+print('margin = ' + str(margin))
+oldP, oldR, oldF1 = oldPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+print('P R F1')
+print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
+print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
+print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
+
+margin = 10
+print('margin = ' + str(margin))
+oldP, oldR, oldF1 = oldPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+print('P R F1')
+print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
+print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
+print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
+
+margin = 30
+print('margin = ' + str(margin))
+oldP, oldR, oldF1 = oldPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+print('P R F1')
+print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
+print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
+print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
+
+margin = 50
+print('margin = ' + str(margin))
+oldP, oldR, oldF1 = oldPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
+print('P R F1')
+print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
+print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
+print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
+
+
+
+print('On test:')
 #predict_test = np.zeros((annot_test.shape[1],annot_test.shape[2]))
 nRound=annot_test.shape[1]//seq_length
 timestepsRound = nRound*seq_length
