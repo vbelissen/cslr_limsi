@@ -33,8 +33,8 @@ outputName = 'PT'
 flsBinary = True
 flsKeep = []
 signerIndependent=False
-batch_size=10000#200
-epochs=100
+batch_size=200
+epochs=30
 seq_length=100
 separation=0
 dropout=0.3
@@ -69,8 +69,9 @@ signersTest=[10]
 
 
 
-# Wolf metrics
+# Metrics
 stepWolf=0.1
+margin=50
 
 #classWeights = np.array([1, 1, 1, 1])
 
@@ -162,6 +163,16 @@ print('Accuracy : ' + str(acc))
 #print(accYanovichPerClass)
 print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
 np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
+
+oldP, oldR, oldF1 = oldPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+
+print('P R F1')
+print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
+print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
+print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
+
 
 np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_annot_predict_test.npz',annot=annot_test,predict=predict_test)
 

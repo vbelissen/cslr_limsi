@@ -97,6 +97,7 @@ def framewiseAccuracyYanovich(dataTrue, dataPred, trueIsCat):
 def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """
         Computes precision, recall and f1-score of predictions wrt annotations.
+        Framewise.
         Data must be binary.
 
         Inputs:
@@ -164,42 +165,171 @@ def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparati
 
     return P, R, F1
 
-def mesure_perf(dataTrue, dataPred, threshold):
-    # Attend des sequences de 0/1
-    # liste_deb_vrai = []
-    # liste_deb_pred = []
-    # for i in range(taille_seq-1):
-    #     if seq_vrai[i+1] == 1 and seq_vrai[i] == 0:
-    #         liste_deb_vrai.append(i+1)
-    #     if seq_pred[i+1] == 1 and seq_pred[i] == 0:
-    #         liste_deb_pred.append(i+1)
-    #
-    # liste_deb_vrai = np.array(liste_deb_vrai)
-    # liste_deb_pred = np.array(liste_deb_pred)
+def oldPRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, threshold):
+    """
+        Computes precision, recall and f1-score of predictions wrt annotations.
+        Positives/negatives are counted within a window of +/- threshold,
+        comparing the start of each unit.
+        Data must be binary.
 
-    liste_deb_vrai = np.where(seq_vrai[:-1] - seq_vrai[1:] == -1)[0] + 1
-    liste_deb_pred = np.where(seq_pred[:-1] - seq_pred[1:] == -1)[0] + 1
+        Inputs:
+            dataTrue: a numpy array of annotations, shape [timeSteps] (values are classes)
+                or [timeSteps, 2] (categorical data)
+            dataPred: a numpy array of predictions, shape [timeSteps] (values are classes),
+                or [timeSteps, 2] (probabilities or categorical)
+            trueIsCat, predIsCatOrProb: bool (if annotations are categorical,
+                if predictions are categorical/probability values for each category)
+            threshold: the half widow size
+        Outputs:
+            a single accuracy value
+    """
+
+    if trueIsCat:
+        dataTrue = np.argmax(dataTrue,axis=1)
+    if predIsCatOrProb:
+        dataPred = np.argmax(dataPred,axis=1)
+
+    liste_deb_vrai = np.where(dataTrue[:-1] - dataTrue[1:] == -1)[0] + 1
+    liste_deb_pred = np.where(dataPred[:-1] - dataPred[1:] == -1)[0] + 1
 
     nb_vrai = np.size(liste_deb_vrai)
     nb_pred = np.size(liste_deb_pred)
-
-    #n_vrai = liste_deb_vrai.shape[0]
-    #n_pred = liste_deb_pred.shape[0]
 
     if (nb_vrai != 0 and nb_pred != 0):
         table_differences = np.abs(liste_deb_vrai[:, None] - liste_deb_pred)
         min_diff_vrai = np.amin(table_differences, axis=1)
         min_diff_pred = np.amin(table_differences, axis=0)
 
-        tp = np.sum(min_diff_pred <= threshold)
-        fp = np.sum(min_diff_pred > threshold)
-        fn = np.sum(min_diff_vrai > threshold)
+        TP = np.sum(min_diff_pred <= threshold)
+        FP = np.sum(min_diff_pred > threshold)
+        FN = np.sum(min_diff_vrai > threshold)
     else:
-        tp = 0
-        fp = nb_pred
-        fn = nb_vrai
+        TP = 0
+        FP = nb_pred
+        FN = nb_vrai
 
-    return tp, fp, fn
+    if TP+FP > 0:
+        P = TP/(TP+FP)
+    else:
+        P = 0
+
+    if TP+FN > 0:
+        R = TP/(TP+FN)
+    else:
+        R = 0
+
+    if P+R > 0:
+        F1 = 2*P*R/(P+R)
+    else:
+        F1 = 0
+
+    return P, R, F1
+
+def oldPRF1adapted(dataTrue, dataPred, trueIsCat, predIsCatOrProb, margin=0):
+    """
+        Computes precision, recall and f1-score of predictions wrt annotations.
+        Positives/negatives are counted with a margin allowing for a difference
+        between the middle of a unit and the middle of the other.
+        Data is not required to be binary.
+
+        Inputs:
+            dataTrue: a numpy array of annotations, shape [timeSteps] (values are classes)
+                or [timeSteps, 2] (categorical data)
+            dataPred: a numpy array of predictions, shape [timeSteps] (values are classes),
+                or [timeSteps, 2] (probabilities or categorical)
+            trueIsCat, predIsCatOrProb: bool (if annotations are categorical,
+                if predictions are categorical/probability values for each category)
+            threshold: the half widow size
+        Outputs:
+            a single accuracy value
+    """
+
+    consecTrue = valuesConsecutive(dataTrue, trueIsCat)
+    consecPred = valuesConsecutive(dataPred, predIsCatOrProb)
+    nbUnitsTrue = len(consecTrue)
+    nbUnitsPred = len(consecPred)
+
+    vectorMiddleTrue=np.array([(consecTrue[i][1]+consecTrue[i][2])/2 for i in range(nbUnitsTrue)])
+    vectorMiddlePred=np.array([(consecPred[i][1]+consecPred[i][2])/2 for i in range(nbUnitsPred)])
+    matrixMiddleTrue=np.tile(vectorMiddleTrue, (nbUnitsPred,1)).transpose()
+    matrixMiddlePred=np.tile(vectorMiddlePred, (nbUnitsTrue,1))
+    vectorClassTrue=np.array([consecTrue[i][0] for i in range(nbUnitsTrue)])
+    vectorClassPred=np.array([consecPred[i][0] for i in range(nbUnitsPred)])
+    matrixClassTrue=np.tile(vectorClassTrue, (nbUnitsPred,1)).transpose()
+    matrixClassPred=np.tile(vectorClassPred, (nbUnitsTrue,1))
+
+    matrixPossibleMatches=(1-(matrixMiddleTrue >= vectorMiddlePred+margin))*(1-(vectorMiddlePred >= matrixMiddleTrue+margin))*(matrixClassTrue==matrixClassPred)
+
+    if nbUnitsPred > 0:
+        P = np.sum(np.sum(matrixPossibleMatches,axis=0)>0)/nbUnitsPred
+    else:
+        P = 0
+    if nbUnitsTrue > 0:
+        R = np.sum(np.sum(matrixPossibleMatches,axis=1)>0)/nbUnitsTrue
+    else:
+        R = 0
+
+    if P+R > 0:
+        F1 = 2*P*R/(P+R)
+    else:
+        F1 = 0
+
+    return P, R, F1
+
+def marginUnitPRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, margin=0):
+    """
+        Computes precision, recall and f1-score of predictions wrt annotations.
+        Positives/negatives are counted with a margin allowing for a difference
+        between the end of a unit and the beginning of the other.
+        Data is not required to be binary.
+
+        Inputs:
+            dataTrue: a numpy array of annotations, shape [timeSteps] (values are classes)
+                or [timeSteps, 2] (categorical data)
+            dataPred: a numpy array of predictions, shape [timeSteps] (values are classes),
+                or [timeSteps, 2] (probabilities or categorical)
+            trueIsCat, predIsCatOrProb: bool (if annotations are categorical,
+                if predictions are categorical/probability values for each category)
+            threshold: the half widow size
+        Outputs:
+            a single accuracy value
+    """
+
+    consecTrue = valuesConsecutive(dataTrue, trueIsCat)
+    consecPred = valuesConsecutive(dataPred, predIsCatOrProb)
+    nbUnitsTrue = len(consecTrue)
+    nbUnitsPred = len(consecPred)
+
+    vectorStartTrue=np.array([consecTrue[i][1] for i in range(nbUnitsTrue)])
+    vectorStartPred=np.array([consecPred[i][1] for i in range(nbUnitsPred)])
+    matrixStartTrue=np.tile(vectorStartTrue, (nbUnitsPred,1)).transpose()
+    matrixStartPred=np.tile(vectorStartPred, (nbUnitsTrue,1))
+    vectorEndTrue=np.array([consecTrue[i][2] for i in range(nbUnitsTrue)])
+    vectorEndPred=np.array([consecPred[i][2] for i in range(nbUnitsPred)])
+    matrixEndTrue=np.tile(vectorEndTrue, (nbUnitsPred,1)).transpose()
+    matrixEndPred=np.tile(vectorEndPred, (nbUnitsTrue,1))
+    vectorClassTrue=np.array([consecTrue[i][0] for i in range(nbUnitsTrue)])
+    vectorClassPred=np.array([consecPred[i][0] for i in range(nbUnitsPred)])
+    matrixClassTrue=np.tile(vectorClassTrue, (nbUnitsPred,1)).transpose()
+    matrixClassPred=np.tile(vectorClassPred, (nbUnitsTrue,1))
+
+    matrixPossibleMatches=(1-(matrixStartTrue >= matrixEndPred+margin))*(1-(matrixStartPred >= matrixEndTrue+margin))*(matrixClassTrue==matrixClassPred)
+
+    if nbUnitsPred > 0:
+        P = np.sum(np.sum(matrixPossibleMatches,axis=0)>0)/nbUnitsPred
+    else:
+        P = 0
+    if nbUnitsTrue > 0:
+        R = np.sum(np.sum(matrixPossibleMatches,axis=1)>0)/nbUnitsTrue
+    else:
+        R = 0
+
+    if P+R > 0:
+        F1 = 2*P*R/(P+R)
+    else:
+        F1 = 0
+
+    return P, R, F1
 
 def valuesConsecutive(data, isCatOrProb):
     """
@@ -244,7 +374,7 @@ def windowUnitsPredForTrue(iTrue, nbUnitsTrue, nbUnitsPred, fractionTotal):
     max = np.min([nbUnitsPred, round(iPredApprox + windowSizeApprox/2)])
     return min, max
 
-def matrixMatch(consecTrue, consecPred, seqLength, fractionTotal):
+def matrixMatch(consecTrue, consecPred, seqLength):
     """
         Returns matrix of match score to calculate best matches
         (value, start, end (+1), nb of values) (excluding zero values)
@@ -255,7 +385,6 @@ def matrixMatch(consecTrue, consecPred, seqLength, fractionTotal):
             consecPred: list of consecutive values
             (value, start, end (+1), nb of values) (excluding zero values)
             seqLength: original length of sequence
-            fractionTotal: used to define a window, to not calculate all matrix values
 
         Outputs:
             a matrix of match scores (Wolf measure - normalized intersection between units)
@@ -367,7 +496,7 @@ def isMatched(idxTrue, idxPred, tp, tr, consecTrue, consecPred, seqLength):
     else:
         return 0
 
-def prfStar(dataTrue, dataPred, trueIsCat, predIsCatOrProb, step=0.01, fractionTotal=0.1):
+def prfStar(dataTrue, dataPred, trueIsCat, predIsCatOrProb, step=0.01):
     """
         Returns P, R, F1 for thresholds (tp, 0) and (0, tr)
 
@@ -413,7 +542,7 @@ def prfStar(dataTrue, dataPred, trueIsCat, predIsCatOrProb, step=0.01, fractionT
     nbUnitsPred = len(consecPred)
 
     if nbUnitsTrue > 0 and nbUnitsPred > 0:
-        M = matrixMatch(consecTrue, consecPred, seqLength, fractionTotal)
+        M = matrixMatch(consecTrue, consecPred, seqLength)
 
         idxBestMatchesTrue, idxBestMatchesPred = idxBestMatches(dataTrue, dataPred, M, trueIsCat, predIsCatOrProb)
 
