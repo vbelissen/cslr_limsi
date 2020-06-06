@@ -33,8 +33,8 @@ outputName = 'PT'
 flsBinary = True
 flsKeep = []
 signerIndependent=False
-batch_size=50#200
-epochs=60
+batch_size=200
+epochs=30
 seq_length=100
 separation=0
 dropout=0.3
@@ -79,6 +79,10 @@ margin=50
 idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSign([sessionsTrain,sessionsValid,sessionsTest],
                                                             [tasksTrain,tasksValid,tasksTest],
                                                             [signersTrain,signersValid,signersTest])
+
+idxTrain = np.hstack([np.arange(0, 66), np.arange(67, 72)])
+idxValid = np.arange(72, 94)
+idxTest = np.array([66])
 
 if outputName=='fls' and not flsBinary:
     output_form='mixed'
