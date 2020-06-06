@@ -34,7 +34,7 @@ flsBinary = True
 flsKeep = []
 signerIndependent=False
 batch_size=200
-epochs=30
+epochs=60
 seq_length=100
 separation=0
 dropout=0.3
@@ -164,10 +164,45 @@ print('Accuracy : ' + str(acc))
 print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
 np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
 
+print('P*(0,0) = ' + str(pStarTp[0]))
+print('R*(0,0) = ' + str(rStarTp[0]))
+print('F1*(0,0) = ' + str(fStarTp[0]))
+
+margin = 0
+print('margin = ' + str(margin))
 oldP, oldR, oldF1 = oldPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
 oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
 marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+print('P R F1')
+print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
+print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
+print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
 
+margin = 10
+print('margin = ' + str(margin))
+oldP, oldR, oldF1 = oldPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+print('P R F1')
+print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
+print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
+print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
+
+margin = 30
+print('margin = ' + str(margin))
+oldP, oldR, oldF1 = oldPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+print('P R F1')
+print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
+print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
+print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
+
+margin = 50
+print('margin = ' + str(margin))
+oldP, oldR, oldF1 = oldPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
+marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
 print('P R F1')
 print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
 print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
