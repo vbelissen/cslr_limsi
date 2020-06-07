@@ -184,15 +184,15 @@ def train_model(model,
                                               save_best_only=False,
                                               save_weights_only=False,
                                               monitor=saveMonitor,
-                                              mode=saveMonitorMode),
-                                              verbose=1)
+                                              mode=saveMonitorMode,
+                                              verbose=1))
     elif save=='best':
         callbacksPerso.append(ModelCheckpoint(filepath=saveBestName+'-best.hdf5',#+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
                                               save_best_only=True,
                                               save_weights_only=False,
                                               monitor=saveMonitor,
-                                              mode=saveMonitorMode),
-                                              verbose=1)
+                                              mode=saveMonitorMode,
+                                              verbose=1))
     if reduceLrOnPlateau:
         callbacksPerso.append(ReduceLROnPlateau(monitor=reduceLrMonitor, factor=reduceLrFactor, patience=reduceLrPatience, verbose=1, epsilon=1e-4, mode=reduceLrMonitorMode))
 
