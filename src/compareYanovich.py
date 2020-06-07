@@ -46,7 +46,7 @@ mlp_layers_number=0
 rnn_hidden_units=5
 learning_rate=0.001
 earlyStopping=True
-saveBest=True
+save='best'
 saveMonitor='val_accYanovichK'
 saveMonitorMode='max'
 saveBestName='Yanovich'
@@ -124,7 +124,7 @@ train_model(model,
             batch_size=batch_size,
             epochs=epochs,
             seq_length=seq_length,
-            saveBest=saveBest,
+            save=save,
             saveMonitor=saveMonitor,
             saveMonitorMode=saveMonitorMode,
             saveBestName=saveBestName,

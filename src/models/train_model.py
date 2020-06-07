@@ -132,7 +132,7 @@ def train_model(model,
                 seq_length,
                 output_class_weights=[],
                 earlyStopping=False,
-                saveBest=False,
+                save='no',
                 saveMonitor='val_loss',
                 saveMonitorMode='min',
                 saveBestName='',
@@ -154,6 +154,7 @@ def train_model(model,
                              or one binary array (output_form: 'sign_types')
             batch_size
             output_class_weights: list of vector of weights for each class of each output
+            save: for saving the models ('no' or 'best' or 'all')
 
 
         Outputs:
@@ -178,12 +179,20 @@ def train_model(model,
     callbacksPerso = []
     if earlyStopping:
         callbacksPerso.append(EarlyStopping(monitor='val_loss', patience=10, verbose=1, mode='min'))
-    if saveBest:
+    if save=='all':
+        callbacksPerso.append(ModelCheckpoint(filepath=saveBestName+'-best.hdf5',#+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
+                                              save_best_only=False,
+                                              save_weights_only=False,
+                                              monitor=saveMonitor,
+                                              mode=saveMonitorMode),
+                                              verbose=1)
+    elif save=='best':
         callbacksPerso.append(ModelCheckpoint(filepath=saveBestName+'-best.hdf5',#+'-epoch-{epoch:02d}-val_loss-{val_loss:.2f}.hdf5',
                                               save_best_only=True,
                                               save_weights_only=False,
                                               monitor=saveMonitor,
-                                              mode=saveMonitorMode))
+                                              mode=saveMonitorMode),
+                                              verbose=1)
     if reduceLrOnPlateau:
         callbacksPerso.append(ReduceLROnPlateau(monitor=reduceLrMonitor, factor=reduceLrFactor, patience=reduceLrPatience, verbose=1, epsilon=1e-4, mode=reduceLrMonitorMode))
 
