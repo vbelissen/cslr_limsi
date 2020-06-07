@@ -202,3 +202,6 @@ def train_model(model,
                                validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form, output_class_weights),
                                validation_steps=1,
                                callbacks=callbacksPerso)
+
+    print(hist)
+    print(hist.history)
