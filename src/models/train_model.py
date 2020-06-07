@@ -205,3 +205,4 @@ def train_model(model,
 
     print(hist)
     print(hist.history)
+    print(hist.history['f1K'])
