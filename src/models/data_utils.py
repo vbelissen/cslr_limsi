@@ -758,11 +758,40 @@ def getVideoIndicesSplitDictaSign(sessionsSplit,tasksSplit,signersSplit,from_not
 
     return idxTrain.astype(int), idxValid.astype(int), idxTest.astype(int)
 
-
-
 def weightVectorImbalancedDataOneHot(data):
     # [samples, classes]
     # returns vector and dictionary
     dataIntegers = np.argmax(data, axis=1)
     class_weights = compute_class_weight('balanced', np.unique(dataIntegers), dataIntegers)
     return class_weights, dict(enumerate(class_weights))
+
+def verifSets(idxTrain, idxValid, idxTest):
+    interTrainValid = np.intersect1d(idxTrain, idxValid)
+    interTrainTest  = np.intersect1d(idxTrain, idxTest)
+    interValidTest  = np.intersect1d(idxValid, idxTest)
+    if np.size(idxTrain) == 0:
+        sys.exit('Train set is empty!')
+    if np.size(idxValid) == 0:
+        sys.exit('Valid set is empty!')
+    if np.size(idxTest) == 0:
+        sys.exit('Test set is empty!')
+    if np.size(interTrainValid) > 0:
+        print('Train and valid sets have common videos:')
+        for i in interTrainValid:
+            print('Video ' + str(i))
+        sys.exit()
+    if np.size(interTrainTest) > 0:
+        print('Train and test sets have common videos:')
+        for i in interTrainTest:
+            print('Video ' + str(i))
+        sys.exit()
+    if np.size(interValidTest) > 0:
+        print('Valid and test sets have common videos:')
+        for i in interValidTest:
+            print('Video ' + str(i))
+        sys.exit()
+    print('Number of videos:')
+    print('Train: ' + str(idxTrain.size))
+    print('Valid: ' + str(idxValid.size))
+    print('Test: '  + str(idxTest.size))
+    print('Total: ' + str(idxTrain.size + idxValid.size + idxTest.size))
