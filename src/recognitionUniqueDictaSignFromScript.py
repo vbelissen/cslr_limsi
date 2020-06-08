@@ -32,12 +32,12 @@ parser = argparse.ArgumentParser(description='Trains a Keras-TF model for the re
 #group.add_argument("-q", "--quiet", action="store_true")
 
 # Output type
-parser.add_argument('--outputName', type=string, default='PT', help='The output type that the model is trained to recognize')
+parser.add_argument('--outputName', type=str,    default='PT', help='The output type that the model is trained to recognize')
 parser.add_argument('--flsBinary',  type=int,    default=1,    help='If the output is FLS, if seen as binary',              choices=[0, 1])
 parser.add_argument('--flsKeep',    type=int,    default=[],   help='If the output is FLS, list of FLS indices to consider', nargs='*')
 
 # Training global setting
-parser.add_argument('--videoSplitMode',    type=string, default='manual', choices=['manual', 'auto'], help='Split mode for videos (auto or manually specified)')
+parser.add_argument('--videoSplitMode',    type=str,    default='manual', choices=['manual', 'auto'], help='Split mode for videos (auto or manually specified)')
 parser.add_argument('--fractionValid',     type=float,  default=0.10,                                 help='Fraction of valid data wrt total (if auto split mode)')
 parser.add_argument('--fractionTest',      type=float,  default=0.05,                                 help='Fraction of test data wrt total (if auto split mode)')
 parser.add_argument('--signerIndependent', type=int,    default=0,        choices=[0, 1],             help='Signer independent train/valid/test random shuffle')
@@ -68,18 +68,18 @@ parser.add_argument('--convolution',      type=int,    default=1,         help='
 parser.add_argument('--convFilt',         type=int,    default=200,       help='Number of convolution kernels')
 parser.add_argument('--convFiltSize',     type=int,    default=3,         help='Size of convolution kernels')
 parser.add_argument('--learningRate',     type=float,  default=0.001,     help='Learning rate')
-parser.add_argument('--optimizer',        type=string, default='rms',     help='Training optimizer',           choices=['rms', 'ada', 'sgd'])
+parser.add_argument('--optimizer',        type=str,    default='rms',     help='Training optimizer',           choices=['rms', 'ada', 'sgd'])
 parser.add_argument('--earlyStopping',    type=int,    default=0,         help='Early stopping',               choices=[0, 1])
 parser.add_argument('--redLrOnPlat',      type=int,    default=0,         help='Reduce l_rate on plateau',     choices=[0, 1])
-parser.add_argument('--redLrMonitor',     type=string, default='val_f1K', help='Metric for l_rate reduction')
-parser.add_argument('--redLrMonitorMode', type=string, default='max',     help='Mode for l_rate reduction',    choices=['min', 'max'])
+parser.add_argument('--redLrMonitor',     type=str,    default='val_f1K', help='Metric for l_rate reduction')
+parser.add_argument('--redLrMonitorMode', type=str,    default='max',     help='Mode for l_rate reduction',    choices=['min', 'max'])
 parser.add_argument('--redLrPatience',    type=int,    default=10,        help='Patience before l_rate reduc')
 parser.add_argument('--redLrFactor',      type=float,  default=0.5,       help='Factor for each l_rate reduc')
 
 # save data and monitor best
-parser.add_argument('--saveModel',       type=string, default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
-parser.add_argument('--saveBestMonitor', type=string, default='val_f1K', help='What metric to decide best model')
-parser.add_argument('--saveBestMonMode', type=string, default='max',     help='Mode to define best',                              choices=['min', 'max'])
+parser.add_argument('--saveModel',       type=str,    default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
+parser.add_argument('--saveBestMonitor', type=str,    default='val_f1K', help='What metric to decide best model')
+parser.add_argument('--saveBestMonMode', type=str,    default='max',     help='Mode to define best',                              choices=['min', 'max'])
 
 # Metrics
 parser.add_argument('--stepWolf',        type=float,  default=0.1,       help='Step between Wolf metric eval points',             choices=['rms', 'ada', 'sgd'])
