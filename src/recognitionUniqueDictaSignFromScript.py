@@ -51,9 +51,9 @@ parser.add_argument('--tasksTest',         type=int,    default=[],       choice
 parser.add_argument('--signersTrain',      type=int,    default=[],       choices=range(0,16),        help='Training signer indices',    nargs='*')
 parser.add_argument('--signersValid',      type=int,    default=[],       choices=range(0,16),        help='Validation signer indices',  nargs='*')
 parser.add_argument('--signersTest',       type=int,    default=[],       choices=range(0,16),        help='Test signer indices',        nargs='*')
-parser.add_argument('--idxTrainBypass',    type=int,    default=[],       choices=range(0,94),        help='If you really want to set video indices directly')
-parser.add_argument('--idxValidBypass',    type=int,    default=[],       choices=range(0,94),        help='If you really want to set video indices directly')
-parser.add_argument('--idxTestBypass',     type=int,    default=[],       choices=range(0,94),        help='If you really want to set video indices directly')
+parser.add_argument('--idxTrainBypass',    type=int,    default=[],       choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
+parser.add_argument('--idxValidBypass',    type=int,    default=[],       choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
+parser.add_argument('--idxTestBypass',     type=int,    default=[],       choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
 parser.add_argument('--randSeed',          type=int,    default=17,                                   help='Random seed (numpy)')
 parser.add_argument('--weightCorrection',  type=float,  default=0,                                    help='Correction for data imbalance (from 0 (no correction) to 1)')
 
@@ -163,7 +163,7 @@ if len(idxTrainBypass) + len(idxValidBypass) + len(idxTestBypass) > 0:
 else:
     idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSign(sessionsTrain,
                                                                 sessionsValid,
-                                                                sessionsTest, 
+                                                                sessionsTest,
                                                                 tasksTrain,
                                                                 tasksValid,
                                                                 tasksTest,
