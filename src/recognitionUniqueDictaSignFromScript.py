@@ -65,7 +65,7 @@ parser.add_argument('--epochs',           type=int,    default=100,       help='
 parser.add_argument('--separation',       type=int,    default=0,         help='Separation between videos')
 parser.add_argument('--dropout',          type=float,  default=0.5,       help='Dropout (0 to 1)')
 parser.add_argument('--rnnNumber',        type=int,    default=1,         help='Number of RNN layers')
-parser.add_argument('--rnnHiddenUnits',   type=int,    default=0,         help='Number of hidden units in RNN')
+parser.add_argument('--rnnHiddenUnits',   type=int,    default=50,        help='Number of hidden units in RNN')
 parser.add_argument('--mlpLayersNumber',  type=int,    default=0,         help='Number MLP layers after RNN')
 parser.add_argument('--convolution',      type=int,    default=1,         help='Whether to use a conv. layer', choices=[0, 1])
 parser.add_argument('--convFilt',         type=int,    default=200,       help='Number of convolution kernels')
