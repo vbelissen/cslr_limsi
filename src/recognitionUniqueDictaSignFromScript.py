@@ -82,7 +82,7 @@ parser.add_argument('--saveBestMonitor', type=string, default='val_f1K', help='W
 parser.add_argument('--saveBestMonMode', type=string, default='max',     help='Mode to define best',                              choices=['min', 'max'])
 
 # Metrics
-parser.add_argument('--stepWolf'         type=float,  default=0.1,       help='Step between Wolf metric eval points',             choices=['rms', 'ada', 'sgd'])
+parser.add_argument('--stepWolf',        type=float,  default=0.1,       help='Step between Wolf metric eval points',             choices=['rms', 'ada', 'sgd'])
 
 args = parser.parse_args()
 
