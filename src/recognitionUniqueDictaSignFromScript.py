@@ -37,17 +37,23 @@ parser.add_argument('--flsBinary',  type=int,    default=1,    help='If the outp
 parser.add_argument('--flsKeep',    type=int,    default=[],   help='If the output is FLS, list of FLS indices to consider', nargs='*')
 
 # Training global setting
-parser.add_argument('--signerIndependent', type=int, default=0,   choices=[0, 1],      help='Signer independent train/valid/test')
-parser.add_argument('--taskIndependent',   type=int, default=0,   choices=[0, 1],      help='Task independent train/valid/test')
-parser.add_argument('--sessionsTrain',     type=int, default=[],  choices=range(2,10), help='Training session indices',   nargs='*')
-parser.add_argument('--sessionsValid',     type=int, default=[],  choices=range(2,10), help='Validation session indices', nargs='*')
-parser.add_argument('--sessionsTest',      type=int, default=[],  choices=range(2,10), help='Test session indices',       nargs='*')
-parser.add_argument('--tasksTrain',        type=int, default=[],  choices=range(1,10), help='Training task indices',      nargs='*')
-parser.add_argument('--tasksValid',        type=int, default=[],  choices=range(1,10), help='Validation task indices',    nargs='*')
-parser.add_argument('--tasksTest',         type=int, default=[],  choices=range(1,10), help='Test task indices',          nargs='*')
-parser.add_argument('--signersTrain',      type=int, default=[],  choices=range(0,16), help='Training signer indices',    nargs='*')
-parser.add_argument('--signersValid',      type=int, default=[],  choices=range(0,16), help='Validation signer indices',  nargs='*')
-parser.add_argument('--signersTest',       type=int, default=[],  choices=range(0,16), help='Test signer indices',        nargs='*')
+parser.add_argument('--videoSplitMode',    type=string, default='manual', choices=['manual', 'auto'], help='Split mode for videos (auto or manually specified)')
+parser.add_argument('--fractionValid',     type=float,  default=0.10,                                 help='Fraction of valid data wrt total (if auto split mode)')
+parser.add_argument('--fractionTest',      type=float,  default=0.05,                                 help='Fraction of test data wrt total (if auto split mode)')
+parser.add_argument('--signerIndependent', type=int,    default=0,        choices=[0, 1],             help='Signer independent train/valid/test random shuffle')
+parser.add_argument('--taskIndependent',   type=int,    default=0,        choices=[0, 1],             help='Task independent train/valid/test random shuffle')
+parser.add_argument('--sessionsTrain',     type=int,    default=[],       choices=range(2,10),        help='Training session indices',   nargs='*')
+parser.add_argument('--sessionsValid',     type=int,    default=[],       choices=range(2,10),        help='Validation session indices', nargs='*')
+parser.add_argument('--sessionsTest',      type=int,    default=[],       choices=range(2,10),        help='Test session indices',       nargs='*')
+parser.add_argument('--tasksTrain',        type=int,    default=[],       choices=range(1,10),        help='Training task indices',      nargs='*')
+parser.add_argument('--tasksValid',        type=int,    default=[],       choices=range(1,10),        help='Validation task indices',    nargs='*')
+parser.add_argument('--tasksTest',         type=int,    default=[],       choices=range(1,10),        help='Test task indices',          nargs='*')
+parser.add_argument('--signersTrain',      type=int,    default=[],       choices=range(0,16),        help='Training signer indices',    nargs='*')
+parser.add_argument('--signersValid',      type=int,    default=[],       choices=range(0,16),        help='Validation signer indices',  nargs='*')
+parser.add_argument('--signersTest',       type=int,    default=[],       choices=range(0,16),        help='Test signer indices',        nargs='*')
+parser.add_argument('--randSeed',          type=int,    default=17,                                   help='Random seed (numpy)')
+parser.add_argument('--weightCorrection',  type=float,  default=0,                                    help='Correction for data imbalance (from 0 (no correction) to 1)')
+
 
 # Fine parameters
 parser.add_argument('--seqLength',       type=int,    default=100,       help='Length of sequences')
@@ -57,7 +63,7 @@ parser.add_argument('--separation',      type=int,    default=0,         help='S
 parser.add_argument('--dropout',         type=float,  default=0.5,       help='Dropout (0 to 1)')
 parser.add_argument('--rnnNumber',       type=int,    default=1,         help='Number of RNN layers')
 parser.add_argument('--rnnHiddenUnits',  type=int,    default=0,         help='Number of hidden units in RNN')
-parser.add_argument('--mlpLayersNumber', type=int,    default=0,         help='Number of hidden units in RNN')
+parser.add_argument('--mlpLayersNumber', type=int,    default=0,         help='Number MLP layers after RNN')
 parser.add_argument('--convolution'      type=int,    default=1,         help='Whether to use a conv. layer', choices=[0, 1])
 parser.add_argument('--convFilt'         type=int,    default=200,       help='Number of convolution kernels')
 parser.add_argument('--convFiltSize'     type=int,    default=3,         help='Size of convolution kernels')
@@ -66,19 +72,22 @@ parser.add_argument('--optimizer'        type=string, default='rms',     help='T
 parser.add_argument('--earlyStopping'    type=int,    default=0,         help='Early stopping',               choices=[0, 1])
 parser.add_argument('--redLrOnPlat'      type=int,    default=0,         help='Reduce l_rate on plateau',     choices=[0, 1])
 parser.add_argument('--redLrMonitor'     type=string, default='val_f1K', help='Metric for l_rate reduction')
-parser.add_argument('--redLrMonitorMode' type=string, default='min',     help='Mode for l_rate reduction',    choices=['min', 'max'])
+parser.add_argument('--redLrMonitorMode' type=string, default='max',     help='Mode for l_rate reduction',    choices=['min', 'max'])
 parser.add_argument('--redLrPatience',   type=int,    default=10,        help='Patience before l_rate reduc')
 parser.add_argument('--redLrFactor',     type=float,  default=0.5,       help='Factor for each l_rate reduc')
 
 # save data and monitor best
 parser.add_argument('--saveModel',       type=string, default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
 parser.add_argument('--saveBestMonitor', type=string, default='val_f1K', help='What metric to decide best model')
-parser.add_argument('--saveBestMonMode', type=string, default='max',     help='Mode to define best', choices=['min', 'max'])
+parser.add_argument('--saveBestMonMode', type=string, default='max',     help='Mode to define best',                              choices=['min', 'max'])
 
+# Metrics
+parser.add_argument('--stepWolf'         type=float,  default=0.1,       help='Step between Wolf metric eval points',             choices=['rms', 'ada', 'sgd'])
 
 args = parser.parse_args()
 
-np.random.seed(17)
+# Random initilialization
+np.random.seed(args.randSeed)
 
 ## PARAMETERS
 corpus = 'DictaSign'
@@ -87,20 +96,23 @@ corpus = 'DictaSign'
 outputName = args.outputName#'PT'
 flsBinary  = bool(args.flsBinary)#True
 flsKeep    = args.flsKeep#[]
-save       = args.saveModel
 
 # Training global setting
+videoSplitMode    = args.videoSplitMode
+fractionValid     = args.fractionValid
+fractionTest      = args.fractionTest
 signerIndependent = bool(args.signerIndependent)#False
 taskIndependent   = bool(args.taskIndependent)
-sessionsTrain = args.sessionsTrain#[2,3,4,5,6,7,8]
-sessionsValid = args.sessionsValid#[9]
-sessionsTest  = args.sessionsTest#[7] # session 7
-tasksTrain    = args.tasksTrain#[2,3,4,5,6,7,8]
-tasksValid    = args.tasksValid#[9]
-tasksTest     = args.tasksTest#[7] # session 7
-signersTrain  = args.signersTrain#[2,3,4,5,6,7,8]
-signersValid  = args.signersValid#[9]
-signersTest   = args.signersTest#[7] # session 7
+sessionsTrain     = args.sessionsTrain#[2,3,4,5,6,7,8]
+sessionsValid     = args.sessionsValid#[9]
+sessionsTest      = args.sessionsTest#[7] # session 7
+tasksTrain        = args.tasksTrain#[2,3,4,5,6,7,8]
+tasksValid        = args.tasksValid#[9]
+tasksTest         = args.tasksTest#[7] # session 7
+signersTrain      = args.signersTrain#[2,3,4,5,6,7,8]
+signersValid      = args.signersValid#[9]
+signersTest       = args.signersTest#[7] # session 7
+weightCorrection  = args.weightCorrection
 
 # Fine parameters
 seq_length          = args.seqLength
@@ -123,38 +135,22 @@ reduceLrMonitorMode = args.redLrMonitorMode
 reduceLrPatience    = args.redLrPatience
 reduceLrFactor      = args.redLrFactor
 
-
+# save data and monitor best
+save            = args.saveModel
 saveMonitor     = args.saveBestMonitor
 saveMonitorMode = args.saveBestMonMode
 
+# Metrics
+stepWolf     = args.stepWolf#0.1
+metrics      = ['acc',  f1K,   precisionK,   recallK]
+metricsNames = ['acc', 'f1K', 'precisionK', 'recallK']
 
 
 saveBestName='recognitionUniqueDictaSign'+outputName
-metrics=['acc', f1K, precisionK, recallK]
 
-
-# Data split
-
-
-
-
-# Metrics
-stepWolf=0.1
-margin=50
-
-#classWeights = np.array([1, 1, 1, 1])
 
 ## GET VIDEO INDICES
-idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSign([sessionsTrain,sessionsValid,sessionsTest],
-                                                            [tasksTrain,tasksValid,tasksTest],
-                                                            [signersTrain,signersValid,signersTest])
-
-idxTrain = np.hstack([np.arange(0, 66), np.arange(67, 72)])
-idxValid = np.arange(72, 94)
-idxTest = np.array([66])
-
-
-verifSets(idxTrain, idxValid, idxTest)
+idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSign(sessionsTrain, sessionsValid, sessionsTest, tasksTrain, tasksValid, tasksTest, signersTrain, signersValid, signersTest, signerIndependent, taskIndependent, videoSplitMode, fractionValid, fractionTest, checkSplits=True, checkSets=True)
 
 
 if outputName=='fls' and not flsBinary:
@@ -182,15 +178,15 @@ features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     video_indices=idxTest,
                                                     separation=separation)
 
+nClasses = annot_train.shape[2]
 
-#classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_train[0, :, :])
+classWeightsCorrected, _ = weightVectorImbalancedDataOneHot(annot_train[0, :, :])
+classWeightsNotCorrected = np.ones(nClasses)
+classWeightFinal         = weightCorrection*classWeightsCorrected + (1-weightCorrection)*classWeightsNotCorrected
 
-classWeights = np.array([1, 1])
-#classWeights[0] = 0.01
 
 
-model = get_model([outputName],[2],[1],
-                    output_class_weights=[classWeights],
+model = get_model([outputName],[nClasses],[1],
                     dropout=dropout,
                     rnn_number=rnn_number,
                     rnn_hidden_units=rnn_hidden_units,
@@ -228,7 +224,7 @@ model.load_weights(saveBestName+'-best.hdf5')
 print('On valid: ')
 nRound=annot_valid.shape[1]//seq_length
 timestepsRound = nRound*seq_length
-predict_valid = model.predict(features_valid[:,:timestepsRound,:].reshape(-1, seq_length, features_valid.shape[2])).reshape(1, timestepsRound, 2)
+predict_valid = model.predict(features_valid[:,:timestepsRound,:].reshape(-1, seq_length, features_valid.shape[2])).reshape(1, timestepsRound, nClasses)
 predict_valid = predict_valid[0]
 #    predict_valid[i*seq_length:(i+1)*seq_length,:]=model.predict(features_valid[:,i*seq_length:(i+1)*seq_length,:])[0]
 

@@ -123,7 +123,6 @@ def attention_featurewise(inputs, single=False, attention_layer_descriptor=''):
 def get_model(output_names,
               output_classes,
               output_weights=[],
-              output_class_weights=[],
               conv=True,
               conv_filt=200,
               conv_ker=3,
@@ -156,7 +155,6 @@ def get_model(output_names,
             output_names: list of outputs (strings)
             output_classes: list of number of classes of each output type
             output_weights: list of weights for each_output
-            output_class_weights: list of vector of weights for each class of each output
             conv (bool): if True, applies convolution on input
             conv_filt: number of convolution filters
             conv_ker: size of convolution kernel

@@ -105,7 +105,6 @@ classWeights[0] = 0.01
 # A model with 1 output matrix:
 # [other, Pointing, Depicting, Lexical]
 model = get_model(outputNames,[4],[1],
-                    output_class_weights=[classWeights],
                     dropout=dropout,
                     rnn_number=rnn_number,
                     rnn_hidden_units=rnn_hidden_units,
