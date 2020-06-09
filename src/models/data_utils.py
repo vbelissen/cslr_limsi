@@ -779,6 +779,9 @@ def getVideoIndicesSplitDictaSignManual(sessionsSplit, tasksSplit, signersSplit,
 
 def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fractionValid, fractionTest, from_notebook=False):
 
+    if signerIndependent and taskIndependent:
+        print('Attention, not all videos can be used if SI and TI setting are simultaneous')
+
     signersIdx = np.arange(16)
     tasksIdx = np.arange(1,10)
     np.random.shuffle(signersIdx)
@@ -874,10 +877,12 @@ def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fracti
         signersValidNumber = int(np.max([1, round(apparentFractionValid*16)])) # 16 signers in DictaSign
         signersTest  = signersIdx[:signersTestNumber]
         signersValid = signersIdx[signersTestNumber:signersTestNumber+signersValidNumber]
+        signersTrain = signersIdx[signersTestNumber+signersValidNumber:]
         tasksTestNumber  = int(np.max([1, round(apparentFractionTest*9)])) # 9 tasks in DictaSign
         tasksValidNumber = int(np.max([1, round(apparentFractionValid*9)])) # 9 tasks in DictaSign
         tasksTest  = tasksIdx[:tasksTestNumber]
         tasksValid = tasksIdx[tasksTestNumber:tasksTestNumber+tasksValidNumber]
+        tasksTrain = tasksIdx[tasksTestNumber+tasksValidNumber:]
         for iV in range(nVideos):
             idxVid = idxVideos[iV]
             signerVid = signer[idxVid]
@@ -886,7 +891,7 @@ def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fracti
                 idxTest.append(idxVid)
             elif signerVid in signersValid and taskVid in tasksValid:
                 idxValid.append(idxVid)
-            else:
+            elif signersTrain in signersValid and tasksTrain in tasksValid:
                 idxTrain.append(idxVid)
 
     return np.array(idxTrain).astype(int), np.array(idxValid).astype(int), np.array(idxTest).astype(int)
