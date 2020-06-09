@@ -12,7 +12,7 @@ import math
 import numpy as np
 #from matplotlib import pyplot as plt
 #plt.switch_backend('agg')
-
+import pickle
 import argparse
 
 import os
@@ -74,14 +74,14 @@ parser.add_argument('--learningRate',     type=float,  default=0.001,     help='
 parser.add_argument('--optimizer',        type=str,    default='rms',     help='Training optimizer',           choices=['rms', 'ada', 'sgd'])
 parser.add_argument('--earlyStopping',    type=int,    default=0,         help='Early stopping',               choices=[0, 1])
 parser.add_argument('--redLrOnPlat',      type=int,    default=0,         help='Reduce l_rate on plateau',     choices=[0, 1])
-parser.add_argument('--redLrMonitor',     type=str,    default='val_f1K', help='Metric for l_rate reduction')
+parser.add_argument('--redLrMonitor',     type=str,    default='val_f1Ktest', help='Metric for l_rate reduction')
 parser.add_argument('--redLrMonitorMode', type=str,    default='max',     help='Mode for l_rate reduction',    choices=['min', 'max'])
 parser.add_argument('--redLrPatience',    type=int,    default=10,        help='Patience before l_rate reduc')
 parser.add_argument('--redLrFactor',      type=float,  default=0.5,       help='Factor for each l_rate reduc')
 
 # save data and monitor best
 parser.add_argument('--saveModel',       type=str,    default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
-parser.add_argument('--saveBestMonitor', type=str,    default='val_f1K', help='What metric to decide best model')
+parser.add_argument('--saveBestMonitor', type=str,    default='val_f1Ktest', help='What metric to decide best model')
 parser.add_argument('--saveBestMonMode', type=str,    default='max',     help='Mode to define best',                              choices=['min', 'max'])
 
 # Metrics
@@ -148,8 +148,7 @@ saveMonitorMode = args.saveBestMonMode
 
 # Metrics
 stepWolf     = args.stepWolf#0.1
-metrics      = ['acc',  f1K,   precisionK,   recallK]
-metricsNames = ['acc', 'f1K', 'precisionK', 'recallK']
+
 
 
 saveBestName='recognitionUniqueDictaSign'+outputName
@@ -182,9 +181,13 @@ else:
 if outputName=='fls' and not flsBinary:
     output_form='mixed'
     output_categories_or_names_original=[flsKeep]
+    metrics      = ['acc']
+    metricsNames = ['acc']
 else:
     output_form='sign_types'
     output_categories_or_names_original=[[outputName]]
+    metrics      = ['acc',  f1Ktest,   precisionKtest,   recallKtest]
+    metricsNames = ['acc', 'f1Ktest', 'precisionKtest', 'recallKtest']
 features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],

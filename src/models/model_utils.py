@@ -25,6 +25,37 @@ elif v0 == '1':
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
 
+def recallKtest(y_true, y_pred):
+    y_true_class = K.argmax(y_true, axis=-1)
+    y_pred_class = K.argmax(y_pred, axis=-1)
+
+    TP = K.equal(y_true_class, y_pred_class) #this is also something I use a lot for gathering elements
+    #FP = (1-y_true_class) * y_pred_class
+    #FN = y_true_class * (1-y_pred_class)
+    nonzero_true = K.any(K.not_equal(y_true_class, 0.0), axis=-1)
+    #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
+    #possible_positives = K.sum(K.round(K.clip(y_true_class, 0, 1)))
+    #recall = true_positives / (possible_positives + K.epsilon())
+    return K.sum(TP)/K.maximum(K.sum(nonzero_true),1)#recall
+
+def precisionKtest(y_true, y_pred):
+    y_true_class = K.argmax(y_true, axis=-1)
+    y_pred_class = K.argmax(y_pred, axis=-1)
+
+    TP = K.equal(y_true_class, y_pred_class) #this is also something I use a lot for gathering elements
+    #FP = (1-y_true_class) * y_pred_class
+    #FN = y_true_class * (1-y_pred_class)
+    nonzero_pred = K.any(K.not_equal(y_pred_class, 0.0), axis=-1)
+    #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
+    #possible_positives = K.sum(K.round(K.clip(y_true_class, 0, 1)))
+    #recall = true_positives / (possible_positives + K.epsilon())
+    return K.sum(TP)/K.maximum(K.sum(nonzero_pred),1)#recall
+
+def f1Ktest(y_true, y_pred):
+    precision = precisionKtest(y_true, y_pred)
+    recall = recallKtest(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+
 
 def recallK(y_true, y_pred):
     y_true_class = K.argmax(y_true, axis=-1)
