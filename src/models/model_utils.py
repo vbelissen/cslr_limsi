@@ -25,67 +25,50 @@ elif v0 == '1':
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
 
-def recallKtest(y_true, y_pred):
-    y_true_class = K.argmax(y_true, axis=-1)
-    y_pred_class = K.argmax(y_pred, axis=-1)
-
-    TP = K.cast(K.equal(y_true_class, y_pred_class), dtype='int32') #this is also something I use a lot for gathering elements
-    #FP = (1-y_true_class) * y_pred_class
-    #FN = y_true_class * (1-y_pred_class)
-    nonzero_true = K.cast(K.not_equal(y_true_class, 0), dtype='int32')
-    #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
-    #possible_positives = K.sum(K.round(K.clip(y_true_class, 0, 1)))
-    #recall = true_positives / (possible_positives + K.epsilon())
-    return K.sum(TP*nonzero_true)/K.maximum(K.sum(nonzero_true),1)#recall
-
-def precisionKtest(y_true, y_pred):
-    y_true_class = K.argmax(y_true, axis=-1)
-    y_pred_class = K.argmax(y_pred, axis=-1)
-
-    TP = K.cast(K.equal(y_true_class, y_pred_class), dtype='int32') #this is also something I use a lot for gathering elements
-    #FP = (1-y_true_class) * y_pred_class
-    #FN = y_true_class * (1-y_pred_class)
-    nonzero_pred = K.cast(K.not_equal(y_pred_class, 0), dtype='int32')
-    #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
-    #possible_positives = K.sum(K.round(K.clip(y_true_class, 0, 1)))
-    #recall = true_positives / (possible_positives + K.epsilon())
-    return K.sum(TP*nonzero_pred)/K.maximum(K.sum(nonzero_pred),1)#recall
-
-def f1Ktest(y_true, y_pred):
-    precision = precisionKtest(y_true, y_pred)
-    recall = recallKtest(y_true, y_pred)
-    return 2*((precision*recall)/(precision+recall+K.epsilon()))
-
-
 def recallK(y_true, y_pred):
+    # works with non binary data as well as binary
     y_true_class = K.argmax(y_true, axis=-1)
     y_pred_class = K.argmax(y_pred, axis=-1)
-
-    TP = y_true_class * y_pred_class #this is also something I use a lot for gathering elements
-    FP = (1-y_true_class) * y_pred_class
-    FN = y_true_class * (1-y_pred_class)
-
-    #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
-    #possible_positives = K.sum(K.round(K.clip(y_true_class, 0, 1)))
-    #recall = true_positives / (possible_positives + K.epsilon())
-    return K.sum(TP)/K.maximum(K.sum(TP+FN),1)#recall
+    TP = K.cast(K.equal(y_true_class, y_pred_class), dtype='int32')
+    nonzero_true = K.cast(K.not_equal(y_true_class, 0), dtype='int32')
+    return K.sum(TP*nonzero_true)/K.maximum(K.sum(nonzero_true),1)
 
 def precisionK(y_true, y_pred):
+    # works with non binary data as well as binary
     y_true_class = K.argmax(y_true, axis=-1)
     y_pred_class = K.argmax(y_pred, axis=-1)
-
-    TP = y_true_class * y_pred_class #this is also something I use a lot for gathering elements
-    FP = (1-y_true_class) * y_pred_class
-    FN = y_true_class * (1-y_pred_class)
-
-    #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
-    #predicted_positives = K.sum(K.round(K.clip(y_pred_class, 0, 1)))
-    #precision = true_positives / (predicted_positives + K.epsilon())
-    return K.sum(TP)/K.maximum(K.sum(TP+FP),1)#precision
+    TP = K.cast(K.equal(y_true_class, y_pred_class), dtype='int32')
+    nonzero_pred = K.cast(K.not_equal(y_pred_class, 0), dtype='int32')
+    return K.sum(TP*nonzero_pred)/K.maximum(K.sum(nonzero_pred),1)
 
 def f1K(y_true, y_pred):
+    # works with non binary data as well as binary
     precision = precisionK(y_true, y_pred)
     recall = recallK(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+
+def recallKbinary(y_true, y_pred):
+    # binary only
+    y_true_class = K.argmax(y_true, axis=-1)
+    y_pred_class = K.argmax(y_pred, axis=-1)
+    TP = y_true_class * y_pred_class
+    FP = (1-y_true_class) * y_pred_class
+    FN = y_true_class * (1-y_pred_class)
+    return K.sum(TP)/K.maximum(K.sum(TP+FN),1)
+
+def precisionKbinary(y_true, y_pred):
+    # binary only
+    y_true_class = K.argmax(y_true, axis=-1)
+    y_pred_class = K.argmax(y_pred, axis=-1)
+    TP = y_true_class * y_pred_class
+    FP = (1-y_true_class) * y_pred_class
+    FN = y_true_class * (1-y_pred_class)
+    return K.sum(TP)/K.maximum(K.sum(TP+FP),1)
+
+def f1Kbinary(y_true, y_pred):
+    # binary only
+    precision = precisionKbinary(y_true, y_pred)
+    recall = recallKbinary(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall+K.epsilon()))
 
 

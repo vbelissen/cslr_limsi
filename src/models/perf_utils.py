@@ -94,7 +94,7 @@ def framewiseAccuracyYanovich(dataTrue, dataPred, trueIsCat):
 
 
 
-def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
+def framewisePRF1binary(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparation=np.array([])):
     """
         Computes precision, recall and f1-score of predictions wrt annotations.
         Framewise.
@@ -155,6 +155,65 @@ def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, idxNotSeparati
 
     if TP+FN > 0:
         R = TP/(TP+FN)
+    else:
+        R = 0
+
+    if P+R > 0:
+        F1 = 2*P*R/(P+R)
+    else:
+        F1 = 0
+
+    return P, R, F1
+
+def framewisePRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb):
+    """
+        Computes precision, recall and f1-score of predictions wrt annotations.
+        Framewise.
+        Data does not have to be binary.
+
+        Inputs:
+            dataTrue: a numpy array of annotations, shape [timeSteps] (values are classes)
+                or [timeSteps, classes] (categorical data)
+            dataPred: a numpy array of predictions, shape [timeSteps] (values are classes),
+                or [timeSteps, classes] (probabilities or categorical)
+            trueIsCat, predIsCatOrProb: bool (if annotations are categorical,
+                if predictions are categorical/probability values for each category)
+        Outputs:
+            a single accuracy value
+    """
+
+    trueLength = dataTrue.shape[0]
+    predLength = dataPred.shape[0]
+
+    if not trueIsCat:
+        if len(dataTrue.shape) > 1:
+            if dataTrue.shape[1] > 1:
+                sys.exit('True data should be a vector (not categorical) because trueIsCat=False')
+    if not predIsCatOrProb:
+        if len(dataPred.shape) > 1:
+            if dataPred.shape[1] > 1:
+                sys.exit('Pred data should be a vector (not categorical or probabilities) because predIsCatOrProb=False')
+
+    if trueLength != predLength:
+        sys.exit('Annotation and prediction data should have the same length')
+    if trueIsCat:
+        dataTrue = np.argmax(dataTrue,axis=1)
+    if predIsCatOrProb:
+        dataPred = np.argmax(dataPred,axis=1)
+
+    nonZeroTrue = (dataTrue > 0)
+    nonZeroPred = (dataPred > 0)
+
+    nbNonZeroTrue = np.sum(nonZeroTrue)
+    nbNonZeroPred = np.sum(nonZeroPred)
+
+    if nbNonZeroPred > 0:
+        P = np.sum((dataTrue == dataPred) * nonZeroPred) / nbNonZeroPred
+    else:
+        P = 0
+
+    if nbNonZeroTrue > 0:
+        R = np.sum((dataTrue == dataPred) * nonZeroTrue) / nbNonZeroTrue
     else:
         R = 0
 

@@ -90,3 +90,6 @@ target/
 
 # exclude models for nom
 /models/
+
+# exclude reports for now
+/reports/
