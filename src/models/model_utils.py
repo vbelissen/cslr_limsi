@@ -36,7 +36,7 @@ def recallKtest(y_true, y_pred):
     #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
     #possible_positives = K.sum(K.round(K.clip(y_true_class, 0, 1)))
     #recall = true_positives / (possible_positives + K.epsilon())
-    return K.sum(TP)/K.maximum(K.sum(nonzero_true),1)#recall
+    return K.sum(TP*nonzero_true)/K.maximum(K.sum(nonzero_true),1)#recall
 
 def precisionKtest(y_true, y_pred):
     y_true_class = K.argmax(y_true, axis=-1)
@@ -49,7 +49,7 @@ def precisionKtest(y_true, y_pred):
     #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
     #possible_positives = K.sum(K.round(K.clip(y_true_class, 0, 1)))
     #recall = true_positives / (possible_positives + K.epsilon())
-    return K.sum(TP)/K.maximum(K.sum(nonzero_pred),1)#recall
+    return K.sum(TP*nonzero_pred)/K.maximum(K.sum(nonzero_pred),1)#recall
 
 def f1Ktest(y_true, y_pred):
     precision = precisionKtest(y_true, y_pred)
