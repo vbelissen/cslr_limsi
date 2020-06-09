@@ -17,65 +17,86 @@ FIXED_SIGNERS_TRAIN="0 5 6 7 8 9 10 11 12 13 14 15"
 FIXED_SIGNERS_VALID="1 2"
 FIXED_SIGNERS_TEST="3 4"
 
+lenOut=${#OUTPUTS[@]}
+lenBatch=${#BATCH_SIZE[@]}
+lenDrop=${#DROPOUT[@]}
+lenRNNn=${#RNN_NUMBER[@]}
+lenHUnits=${#HIDDEN_UNITS[@]}
+lenCFilt=${#CONV_FILTERS[@]}
+lenWeightC=${#WEIGHT_CORRECTION[@]}
+lenSeqL=${#SEQ_LENGTH[@]}
+lenExcl=${#EXCLUDE_TASK_9[@]}
 lenConfigs=${#CONFIG_SI[@]}
+lenRandS=${#RANDOM_SEEDS[@]}
+
 
 cd ..
 source activate py36_tf1
 #python src/recognitionUniqueDictaSignFromScript.py --epochs 30 --idxTrainBypass $({ echo {1..10}; echo {50..60}; } | tr "\n" " ") --idxValidBypass {10..20} --idxTestBypass {20..30}
 
 #for (( iOutput=0; iOutput<${tLen}; iOutput++ ));
-for output in OUTPUTS
+for (( iOutput=0; iOutput<${lenOut}; iOutput++ ));
 do
-  echo Output: $output#${OUTPUTS[$iOutput]}
+  output=${OUTPUTS[$iOutput]}
+  echo Output: $output#
   #output=${OUTPUTS[$iOutput]}
 
-  for batchSize in BATCH_SIZE:
+  for (( iOutput=0; iOutput<${lenOut}; iOutput++ ));
   do
-    python src/recognitionUniqueDictaSignFromScript.py --outputName output --comment "variation batch" --batchSize batchSize --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+    output=${OUTPUTS[$iOutput]}
+    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation batch" --batchSize $batchSize --epochs 150 --videoSplitMode $manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
-  for dropout in DROPOUT:
+  for (( iD=0; iD<${lenDrop}; iD++ ));
   do
-    python src/recognitionUniqueDictaSignFromScript.py --outputName output --comment "variation dropout" --dropout dropout --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+    dropout=${DROPOUT[$iD]}
+    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation dropout" --dropout $dropout --epochs 150 --videoSplitMode $manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
-  for rnnNumber in RNN_NUMBER:
+  for (( iR=0; iR<${lenRNNn}; iR++ ));
   do
-    python src/recognitionUniqueDictaSignFromScript.py --outputName output --comment "variation rnn number" --rnnNumber rnnNumber --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+    rnnNumber=${RNN_NUMBER[$iR]}
+    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation rnn number" --rnnNumber $rnnNumber --epochs 150 --videoSplitMode $manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
-  for rnnHiddenUnits in HIDDEN_UNITS:
+  for (( iR=0; iR<${lenHUnits}; iR++ ));
   do
-    python src/recognitionUniqueDictaSignFromScript.py --outputName output --comment "variation rnn units" --rnnHiddenUnits rnnHiddenUnits --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+    rnnHiddenUnits=${HIDDEN_UNITS[$iR]}
+    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation rnn units" --rnnHiddenUnits $rnnHiddenUnits --epochs 150 --videoSplitMode $manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
-  for convFilt in CONV_FILTERS:
+  for (( iCOnvF=0; iCOnvF<${lenCFilt}; iCOnvF++ ));
   do
-    python src/recognitionUniqueDictaSignFromScript.py --outputName output --comment "variation conv filters" --convFilt convFilt --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+    convFilt=${CONV_FILTERS[$iCOnvF]}
+    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation conv filters" --convFilt $convFilt --epochs 150 --videoSplitMode $manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
-  for weightCorrection in WEIGHT_CORRECTION:
+  for (( iWeight=0; iWeight<${lenWeightC}; iWeight++ ));
   do
-    python src/recognitionUniqueDictaSignFromScript.py --outputName output --comment "variation weight correction" --weightCorrection weightCorrection --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+    weightCorrection=${WEIGHT_CORRECTION[$iWeight]}
+    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation weight correction" --weightCorrection $weightCorrection --epochs 150 --videoSplitMode $manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
-  for seqLength in SEQ_LENGTH:
+  for (( iSeqL=0; iSeqL<${lenSeqL}; iSeqL++ ));
   do
-    python src/recognitionUniqueDictaSignFromScript.py --outputName output --comment "variation seq length" --seqLength seqLength --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+    seqLength=${SEQ_LENGTH[$iSeqL]}
+    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation seq length" --seqLength $seqLength --epochs 150 --videoSplitMode $manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
-  for excludeTask9 in EXCLUDE_TASK_9:
+  for (( iExcl=0; iExcl<${lenExcl}; iExcl++ ));
   do
-    python src/recognitionUniqueDictaSignFromScript.py --outputName output --comment "exclude or include task 9" --excludeTask9 excludeTask9 --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+    excludeTask9=${EXCLUDE_TASK_9[$iExcl]}
+    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "exclude or include task 9" --excludeTask9 $excludeTask9 --epochs 150 --videoSplitMode $manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
   for (( iConfig=0; iConfig<${lenConfigs}; iConfig++ ));
   do
     config_SI=${CONFIG_SI[$iConfig]}
     config_TI=${CONFIG_TI[$iConfig]}
-    for randSeed in RANDOM_SEEDS:
+    for (( iRand=0; iRand<${lenRandS}; iRand++ ));
     do
-      python src/recognitionUniqueDictaSignFromScript.py --outputName output --comment "variation config SI TI" --randSeed randSeed --epochs 150 --videoSplitMode auto --signerIndependent config_SI --taskIndependent config_TI
+      randSeed=${RANDOM_SEEDS[$iRand]}
+      python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation config SI TI" --randSeed $randSeed --epochs 150 --videoSplitMode $auto --signerIndependent $config_SI --taskIndependent $config_TI
     done
   done
 
