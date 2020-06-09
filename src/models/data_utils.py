@@ -871,8 +871,8 @@ def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fracti
             else:
                 idxTrain.append(idxVid)
     else: # signerIndependent and taskIndependent
-        apparentFractionTest  = np.sqrt(fractionTest)
-        apparentFractionValid = np.sqrt(fractionValid)
+        apparentFractionTest  = fractionTest#np.sqrt(fractionTest)
+        apparentFractionValid = fractionValid#np.sqrt(fractionValid)
         signersTestNumber  = int(np.max([1, round(apparentFractionTest*16)])) # 16 signers in DictaSign
         signersValidNumber = int(np.max([1, round(apparentFractionValid*16)])) # 16 signers in DictaSign
         signersTest  = signersIdx[:signersTestNumber]
