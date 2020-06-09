@@ -891,7 +891,7 @@ def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fracti
                 idxTest.append(idxVid)
             elif signerVid in signersValid and taskVid in tasksValid:
                 idxValid.append(idxVid)
-            elif signersTrain in signersValid and tasksTrain in tasksValid:
+            elif signerVid in signersTrain and taskVid in tasksTrain:
                 idxTrain.append(idxVid)
 
     return np.array(idxTrain).astype(int), np.array(idxValid).astype(int), np.array(idxTest).astype(int)
