@@ -87,8 +87,8 @@ parser.add_argument('--redLrFactor',      type=float,  default=0.5,       help='
 parser.add_argument('--saveModel',         type=str,    default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
 parser.add_argument('--saveBestMonitor',   type=str,    default='val_f1K', help='What metric to decide best model')
 parser.add_argument('--saveBestMonMode',   type=str,    default='max',     help='Mode to define best',                              choices=['min', 'max'])
-parser.add_argument('--saveGlobalresults', type=str,    default='../reports/corpora/DictaSign/recognitionUnique/global/globalUnique.dat', help='Where to save global results')
-parser.add_argument('--savePredictions',   type=str,    default='../reports/corpora/DictaSign/recognitionUnique/predictions/', help='Where to save predictions')
+parser.add_argument('--saveGlobalresults', type=str,    default='reports/corpora/DictaSign/recognitionUnique/global/globalUnique.dat', help='Where to save global results')
+parser.add_argument('--savePredictions',   type=str,    default='reports/corpora/DictaSign/recognitionUnique/predictions/', help='Where to save predictions')
 
 
 # Metrics
@@ -390,4 +390,4 @@ for config in ['valid', 'test']:
         dataGlobal[outputName][timeString]['results'][config]['marginUnitF1'][margin] = marginUnitF1
 
 pickle.dump(dataGlobal, open(saveGlobalresults,'wb'), protocol=pickle.HIGHEST_PROTOCOL)
-np.savez(savePredictions+saveBestName+'_'+timeString, true=annot_test[0,:,:], pred=predict_test, idxTest=idxTest, separation=separation)
+np.savez(savePredictions+saveBestName, true=annot_test[0,:timestepsRound_test,:], pred=predict_test, idxTest=idxTest, separation=separation)
