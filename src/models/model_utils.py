@@ -29,10 +29,10 @@ def recallKtest(y_true, y_pred):
     y_true_class = K.argmax(y_true, axis=-1)
     y_pred_class = K.argmax(y_pred, axis=-1)
 
-    TP = K.equal(y_true_class, y_pred_class) #this is also something I use a lot for gathering elements
+    TP = K.cast(K.equal(y_true_class, y_pred_class), dtype='int32') #this is also something I use a lot for gathering elements
     #FP = (1-y_true_class) * y_pred_class
     #FN = y_true_class * (1-y_pred_class)
-    nonzero_true = K.any(K.not_equal(y_true_class, 0), axis=-1)
+    nonzero_true = K.cast(K.any(K.not_equal(y_true_class, 0), axis=-1), dtype='int32')
     #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
     #possible_positives = K.sum(K.round(K.clip(y_true_class, 0, 1)))
     #recall = true_positives / (possible_positives + K.epsilon())
@@ -42,10 +42,10 @@ def precisionKtest(y_true, y_pred):
     y_true_class = K.argmax(y_true, axis=-1)
     y_pred_class = K.argmax(y_pred, axis=-1)
 
-    TP = K.equal(y_true_class, y_pred_class) #this is also something I use a lot for gathering elements
+    TP = K.cast(K.equal(y_true_class, y_pred_class), dtype='int32' #this is also something I use a lot for gathering elements
     #FP = (1-y_true_class) * y_pred_class
     #FN = y_true_class * (1-y_pred_class)
-    nonzero_pred = K.any(K.not_equal(y_pred_class, 0), axis=-1)
+    nonzero_pred = K.cast(K.any(K.not_equal(y_pred_class, 0), axis=-1), dtype='int32'
     #true_positives = K.sum(K.round(K.clip(y_true_class * y_pred_class, 0, 1)))
     #possible_positives = K.sum(K.round(K.clip(y_true_class, 0, 1)))
     #recall = true_positives / (possible_positives + K.epsilon())
