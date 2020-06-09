@@ -41,9 +41,9 @@ do
   echo Output: $output#
   #output=${OUTPUTS[$iOutput]}
 
-  for (( iOutput=0; iOutput<${lenOut}; iOutput++ ));
+  for (( iB=0; iB<${lenBatch}; iB++ ));
   do
-    output=${OUTPUTS[$iOutput]}
+    batchSize=${BATCH_SIZE[$iB]}
     python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation batch" --batchSize $batchSize --epochs 150 --videoSplitMode $manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
