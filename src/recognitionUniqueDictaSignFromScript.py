@@ -291,7 +291,7 @@ model = get_model([outputName],[nClasses],[1],
                     optimizer=optimizer,
                     metrics=metrics)
 
-train_model(model,
+history = train_model(model,
             features_train,
             annot_train,
             features_valid,
@@ -331,6 +331,7 @@ for config in ['valid', 'test']:
         acc = framewiseAccuracy(annot_valid[0,:nRound_valid *seq_length,:],predict_valid[:nRound_valid *seq_length,:],True,True)
         frameP, frameR, frameF1 = framewisePRF1(annot_valid[0,:nRound_valid *seq_length,:], predict_valid[:nRound_valid *seq_length,:], True, True)
         pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0,:nRound_valid*seq_length,:], predict_valid[:nRound_valid *seq_length,:], True, True, step=stepWolf)
+        nameHistoryAppend = 'val_'
     else:
         print('Test set')
         nRound_test=annot_test.shape[1]//seq_length
@@ -340,10 +341,13 @@ for config in ['valid', 'test']:
         acc = framewiseAccuracy(annot_test[0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True)
         frameP, frameR, frameF1 = framewisePRF1(annot_test[0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True)
         pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True, step=stepWolf)
+        nameHistoryAppend = ''
 
+    for metricName in metricsNames:
+            dataGlobal[outputName][timeString]['results'][config]['metrics'] = history[nameHistoryAppend+metricName]
     print('Framewise accuracy: ' + str(acc))
     print('Framewise P, R, F1: ' + str(frameP) + ', ' + str(frameR) + ', ' + str(frameF1))
-    print('P*(0,0), R*(0,0), F1*(0,0):' + str(pStarZeroZero) + ', ' + str(rStarZeroZero) + ', ' + str(ffStarZeroZero))
+    print('P*(0,0), R*(0,0), F1*(0,0):' + str(pStarTp[0]) + ', ' + str(rStarTp[0]) + ', ' + str(fStarTp[0]))
     dataGlobal[outputName][timeString]['results'][config]['frameAcc'] = acc
     dataGlobal[outputName][timeString]['results'][config]['frameP']  = frameP
     dataGlobal[outputName][timeString]['results'][config]['frameR']  = frameR

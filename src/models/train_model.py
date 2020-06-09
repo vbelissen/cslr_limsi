@@ -203,6 +203,7 @@ def train_model(model,
                                validation_steps=1,
                                callbacks=callbacksPerso)
 
-    print(hist)
-    print(hist.history)
-    print(hist.history['f1K'])
+    return hist.history
+    #print(hist)
+    #print(hist.history)
+    #print(hist.history['f1K'])
