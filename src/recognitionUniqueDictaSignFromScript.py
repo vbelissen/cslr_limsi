@@ -379,28 +379,3 @@ print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(ma
 
 
 np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_annot_predict_test.npz',annot=annot_test,predict=predict_test)
-
-
-t = np.arange(0,1+stepWolf,stepWolf)
-fig = plt.figure()
-ax = fig.add_axes([0,0,1,1])
-ax.plot(t,pStarTp,label='pStar')
-ax.plot(t,rStarTp,label='rStar')
-ax.plot(t,fStarTp,label='f1Star')
-ax.set_title('tr=0')
-ax.set_xlabel('tp')
-ax.set_xlim(0,1)
-ax.set_ylim(0,1)
-ax.legend()
-plt.savefig('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1_tp_tr0')
-fig = plt.figure()
-ax = fig.add_axes([0,0,1,1])
-ax.plot(t,pStarTr,label='pStar')
-ax.plot(t,rStarTr,label='rStar')
-ax.plot(t,fStarTr,label='f1Star')
-ax.set_title('tp=0')
-ax.set_xlabel('tr')
-ax.set_xlim(0,1)
-ax.set_ylim(0,1)
-ax.legend()
-plt.savefig('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1_tr_tp0')

@@ -92,4 +92,4 @@ target/
 /models/
 
 # exclude reports for now
-#/reports/
+/reports/corpora/DictaSign/recognitionUnique/predictions/
