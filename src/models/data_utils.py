@@ -663,19 +663,18 @@ def signerRefToSignerIdxDictaSign(signerRef):
 def signerIdxToSignerRefDictaSign(signerIdx):
     return signerRefsDictaSign[signerIdx]
 
-def getVideoIndicesSplitDictaSign(sessionsTrain, sessionsValid, sessionsTest, tasksTrain, tasksValid, tasksTest, signersTrain, signersValid, signersTest, signerIndependent, taskIndependent, videoSplitMode, fractionValid, fractionTest, checkSplits=False, checkSets=False):
+def getVideoIndicesSplitDictaSign(tasksTrain, tasksValid, tasksTest, signersTrain, signersValid, signersTest, signerIndependent, taskIndependent, excludeTask9, videoSplitMode, fractionValid, fractionTest, checkSplits=False, checkSets=False):
     if videoSplitMode == 'manual':
-        idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSignManual([sessionsTrain,sessionsValid,sessionsTest],
-                                                                          [tasksTrain,tasksValid,tasksTest],
-                                                                          [signersTrain,signersValid,signersTest])
+        idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSignManual([tasksTrain,tasksValid,tasksTest],
+                                                                          [signersTrain,signersValid,signersTest],
+                                                                          excludeTask9)
     elif videoSplitMode == 'auto':
-        idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fractionValid, fractionTest)
+        idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, excludeTask9, fractionValid, fractionTest)
     else:
         sys.exit('videoSplitMode should be either manual or auto')
 
     if checkSplits:
         verifSplitSettingDictaSign(videoSplitMode,
-                                   sessionsTrain, sessionsValid, sessionsTest,
                                    tasksTrain,    tasksValid,    tasksTest,
                                    signersTrain,  signersValid,  signersTest)
     if checkSets:
@@ -683,13 +682,13 @@ def getVideoIndicesSplitDictaSign(sessionsTrain, sessionsValid, sessionsTest, ta
 
     return idxTrain, idxValid, idxTest
 
-def getVideoIndicesSplitDictaSignManual(sessionsSplit, tasksSplit, signersSplit, from_notebook=False):
+def getVideoIndicesSplitDictaSignManual(tasksSplit, signersSplit, excludeTask9, from_notebook=False):#sessionsSplit,
     """
         Train/valid/test split for DictaSign
-        Returns intersection of sessions, tasks and signers
+        Returns intersection of tasks and signers
 
         Inputs:
-            sessionsSplit: list of 3 lists of session indices (2 to 9) for train, valid, test
+            ###sessionsSplit: list of 3 lists of session indices (2 to 9) for train, valid, test
             tasksSplit: list of 3 lists of task indices (1 to 9) for train, valid, test
             signersSplit: list of 3 lists of signer indices (0 to 15) for train, valid, test
             from_notebook: if notebook script, data is in parent folder
@@ -704,69 +703,72 @@ def getVideoIndicesSplitDictaSignManual(sessionsSplit, tasksSplit, signersSplit,
 
     l = np.load(parent+'data/processed/DictaSign/list_videos.npy')
     nVideos = len(l)
-    sess = []
+    #sess = []
     task = []
     signer = []
     for iV in range(nVideos):
         tmp = l[iV].replace('S','').replace('T','').split('_')
-        sess.append(int(tmp[0]))
+        #sess.append(int(tmp[0]))
         task.append(int(tmp[1]))
         signer.append(signerRefToSignerIdxDictaSign(tmp[2]))
 
-    sess = np.array(sess)
+    #sess = np.array(sess)
     task = np.array(task)
     signer = np.array(signer)
 
-    idxTrainSession = np.ones(nVideos)
+    #idxTrainSession = np.ones(nVideos)
     idxTrainTask = np.ones(nVideos)
     idxTrainSigner = np.ones(nVideos)
-    idxValidSession = np.ones(nVideos)
+    #idxValidSession = np.ones(nVideos)
     idxValidTask = np.ones(nVideos)
     idxValidSigner = np.ones(nVideos)
-    idxTestSession = np.ones(nVideos)
+    #idxTestSession = np.ones(nVideos)
     idxTestTask = np.ones(nVideos)
     idxTestSigner = np.ones(nVideos)
 
     for i in range(3):
-        if len(sessionsSplit[i])==0:
-            sessionsSplit[i] = [j for j in range(2,10)]
+        #if len(sessionsSplit[i])==0:
+        #    sessionsSplit[i] = [j for j in range(2,10)]
         if len(tasksSplit[i])==0:
-            tasksSplit[i] = [j for j in range(1,10)]
+            if excludeTask9:
+                tasksSplit[i] = [j for j in range(1,9)]
+            else:
+                tasksSplit[i] = [j for j in range(1,10)]
         if len(signersSplit[i])==0:
             signersSplit[i] = [j for j in range(0,16)]
 
-    for sessionTrain in sessionsSplit[0]:
-        idxTrainSession[sess == sessionTrain] = 0
+    # for sessionTrain in sessionsSplit[0]:
+    #     idxTrainSession[sess == sessionTrain] = 0
     for taskTrain in tasksSplit[0]:
         idxTrainTask[task == taskTrain] = 0
     for signerTrain in signersSplit[0]:
         idxTrainSigner[signer == signerTrain] = 0
-    idxTrainSession = 1-idxTrainSession
+    #idxTrainSession = 1-idxTrainSession
     idxTrainTask = 1-idxTrainTask
     idxTrainSigner = 1-idxTrainSigner
-    idxTrain = idxTrainSession*idxTrainTask*idxTrainSigner
+    idxTrain = idxTrainTask*idxTrainSigner
 
-    for sessionValid in sessionsSplit[1]:
-        idxValidSession[sess == sessionValid] = 0
+    #for sessionValid in sessionsSplit[1]:
+    #    idxValidSession[sess == sessionValid] = 0
     for taskValid in tasksSplit[1]:
         idxValidTask[task == taskValid] = 0
     for signerValid in signersSplit[1]:
         idxValidSigner[signer == signerValid] = 0
-    idxValidSession = 1-idxValidSession
+    #idxValidSession = 1-idxValidSession
     idxValidTask = 1-idxValidTask
     idxValidSigner = 1-idxValidSigner
-    idxValid = idxValidSession*idxValidTask*idxValidSigner
+    idxValid = idxValidTask*idxValidSigner
 
-    for sessionTest in sessionsSplit[2]:
-        idxTestSession[sess == sessionTest] = 0
+    #for sessionTest in sessionsSplit[2]:
+    #    idxTestSession[sess == sessionTest] = 0
     for taskTest in tasksSplit[2]:
         idxTestTask[task == taskTest] = 0
     for signerTest in signersSplit[2]:
         idxTestSigner[signer == signerTest] = 0
-    idxTestSession = 1-idxTestSession
+    #idxTestSession = 1-idxTestSession
     idxTestTask = 1-idxTestTask
     idxTestSigner = 1-idxTestSigner
-    idxTest = idxTestSession*idxTestTask*idxTestSigner
+    idxTest = idxTestTask*idxTestSigner
 
     idxTrain = np.where(idxTrain)[0]
     idxValid = np.where(idxValid)[0]
@@ -777,13 +779,18 @@ def getVideoIndicesSplitDictaSignManual(sessionsSplit, tasksSplit, signersSplit,
 
     return idxTrain.astype(int), idxValid.astype(int), idxTest.astype(int)
 
-def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fractionValid, fractionTest, from_notebook=False):
+def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, excludeTask9, fractionValid, fractionTest, from_notebook=False):
 
     if signerIndependent and taskIndependent:
         print('Attention, not all videos can be used if SI and TI setting are simultaneous')
 
+    if excludeTask9:
+        effectiveNbTasks = 8
+    else:
+        effectiveNbTasks = 9
+
     signersIdx = np.arange(16)
-    tasksIdx = np.arange(1,10)
+    tasksIdx = np.arange(1,effectiveNbTasks+1)
     np.random.shuffle(signersIdx)
     np.random.shuffle(tasksIdx)
 
@@ -857,8 +864,8 @@ def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fracti
             else:
                 idxTrain.append(idxVid)
     elif taskIndependent and not signerIndependent:
-        tasksTestNumber  = int(np.max([1, round(fractionTest*9)])) # 9 tasks in DictaSign
-        tasksValidNumber = int(np.max([1, round(fractionValid*9)])) # 9 tasks in DictaSign
+        tasksTestNumber  = int(np.max([1, round(fractionTest*effectiveNbTasks)])) # 9 tasks in DictaSign
+        tasksValidNumber = int(np.max([1, round(fractionValid*effectiveNbTasks)])) # 9 tasks in DictaSign
         tasksTest  = tasksIdx[:tasksTestNumber]
         tasksValid = tasksIdx[tasksTestNumber:tasksTestNumber+tasksValidNumber]
         for iV in range(nVideos):
@@ -878,8 +885,8 @@ def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fracti
         signersTest  = signersIdx[:signersTestNumber]
         signersValid = signersIdx[signersTestNumber:signersTestNumber+signersValidNumber]
         signersTrain = signersIdx[signersTestNumber+signersValidNumber:]
-        tasksTestNumber  = int(np.max([1, round(apparentFractionTest*9)])) # 9 tasks in DictaSign
-        tasksValidNumber = int(np.max([1, round(apparentFractionValid*9)])) # 9 tasks in DictaSign
+        tasksTestNumber  = int(np.max([1, round(apparentFractionTest*effectiveNbTasks)])) # 9 tasks in DictaSign
+        tasksValidNumber = int(np.max([1, round(apparentFractionValid*effectiveNbTasks)])) # 9 tasks in DictaSign
         tasksTest  = tasksIdx[:tasksTestNumber]
         tasksValid = tasksIdx[tasksTestNumber:tasksTestNumber+tasksValidNumber]
         tasksTrain = tasksIdx[tasksTestNumber+tasksValidNumber:]
@@ -934,12 +941,12 @@ def verifSets(idxTrain, idxValid, idxTest):
     print('Test: '  + str(idxTest.size))
     print('Total: ' + str(idxTrain.size + idxValid.size + idxTest.size))
 
-def verifSplitSettingDictaSign(videoSplitMode, sessionsTrain, sessionsValid, sessionsTest, tasksTrain, tasksValid, tasksTest, signersTrain, signersValid,  signersTest):
-    totalSize = len(sessionsTrain) + len(sessionsValid) + len(sessionsTest) + len(tasksTrain) + len(tasksValid) + len(tasksTest) + len(signersTrain) + len(signersValid) + len(signersTest)
+def verifSplitSettingDictaSign(videoSplitMode, tasksTrain, tasksValid, tasksTest, signersTrain, signersValid,  signersTest):
+    totalSize = len(tasksTrain) + len(tasksValid) + len(tasksTest) + len(signersTrain) + len(signersValid) + len(signersTest)
     if videoSplitMode == 'auto' and totalSize > 0:
         sys.exit('Video indices can not be both automatically determined and manually specified')
     if videoSplitMode == 'manual':
         if totalSize == 0:
             sys.exit('Video indices are supposed to be manually specified')
-        if len(sessionsTrain) == 0 or len(sessionsValid) == 0 or len(sessionsTest) == 0 or len(tasksTrain) == 0 or len(tasksValid) == 0 or len(tasksTest) == 0 or len(signersTrain) == 0 or len(signersValid) == 0 or len(signersTest) == 0:
+        if len(tasksTrain) == 0 or len(tasksValid) == 0 or len(tasksTest) == 0 or len(signersTrain) == 0 or len(signersValid) == 0 or len(signersTest) == 0:
             sys.exit('Empty set')

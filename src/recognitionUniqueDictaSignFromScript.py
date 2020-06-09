@@ -39,27 +39,26 @@ parser = argparse.ArgumentParser(description='Trains a Keras-TF model for the re
 parser.add_argument('--outputName', type=str,    default='PT', help='The output type that the model is trained to recognize')
 parser.add_argument('--flsBinary',  type=int,    default=1,    help='If the output is FLS, if seen as binary',              choices=[0, 1])
 parser.add_argument('--flsKeep',    type=int,    default=[],   help='If the output is FLS, list of FLS indices to consider', nargs='*')
+parser.add_argument('--comment',    type=str,    default='',   help='A comment to describe this run')
 
 # Training global setting
-parser.add_argument('--videoSplitMode',    type=str,    default='manual', choices=['manual', 'auto'], help='Split mode for videos (auto or manually specified)')
-parser.add_argument('--fractionValid',     type=float,  default=0.10,                                 help='Fraction of valid data wrt total (if auto split mode)')
-parser.add_argument('--fractionTest',      type=float,  default=0.05,                                 help='Fraction of test data wrt total (if auto split mode)')
-parser.add_argument('--signerIndependent', type=int,    default=0,        choices=[0, 1],             help='Signer independent train/valid/test random shuffle')
-parser.add_argument('--taskIndependent',   type=int,    default=0,        choices=[0, 1],             help='Task independent train/valid/test random shuffle')
-parser.add_argument('--sessionsTrain',     type=int,    default=[],       choices=range(2,10),        help='Training session indices',   nargs='*')
-parser.add_argument('--sessionsValid',     type=int,    default=[],       choices=range(2,10),        help='Validation session indices', nargs='*')
-parser.add_argument('--sessionsTest',      type=int,    default=[],       choices=range(2,10),        help='Test session indices',       nargs='*')
-parser.add_argument('--tasksTrain',        type=int,    default=[],       choices=range(1,10),        help='Training task indices',      nargs='*')
-parser.add_argument('--tasksValid',        type=int,    default=[],       choices=range(1,10),        help='Validation task indices',    nargs='*')
-parser.add_argument('--tasksTest',         type=int,    default=[],       choices=range(1,10),        help='Test task indices',          nargs='*')
-parser.add_argument('--signersTrain',      type=int,    default=[],       choices=range(0,16),        help='Training signer indices',    nargs='*')
-parser.add_argument('--signersValid',      type=int,    default=[],       choices=range(0,16),        help='Validation signer indices',  nargs='*')
-parser.add_argument('--signersTest',       type=int,    default=[],       choices=range(0,16),        help='Test signer indices',        nargs='*')
-parser.add_argument('--idxTrainBypass',    type=int,    default=[],       choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
-parser.add_argument('--idxValidBypass',    type=int,    default=[],       choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
-parser.add_argument('--idxTestBypass',     type=int,    default=[],       choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
-parser.add_argument('--randSeed',          type=int,    default=17,                                   help='Random seed (numpy)')
-parser.add_argument('--weightCorrection',  type=float,  default=0,                                    help='Correction for data imbalance (from 0 (no correction) to 1)')
+parser.add_argument('--videoSplitMode',    type=str,    default='auto', choices=['manual', 'auto'], help='Split mode for videos (auto or manually specified)')
+parser.add_argument('--fractionValid',     type=float,  default=0.10,                                help='Fraction of valid data wrt total (if auto split mode)')
+parser.add_argument('--fractionTest',      type=float,  default=0.10,                                help='Fraction of test data wrt total (if auto split mode)')
+parser.add_argument('--signerIndependent', type=int,    default=0,       choices=[0, 1],             help='Signer independent train/valid/test random shuffle')
+parser.add_argument('--taskIndependent',   type=int,    default=0,       choices=[0, 1],             help='Task independent train/valid/test random shuffle')
+parser.add_argument('--excludeTask9',      type=int,    default=0,       choices=[0, 1],             help='Whether to exclude task 9')
+parser.add_argument('--tasksTrain',        type=int,    default=[],      choices=range(1,10),        help='Training task indices',      nargs='*')
+parser.add_argument('--tasksValid',        type=int,    default=[],      choices=range(1,10),        help='Validation task indices',    nargs='*')
+parser.add_argument('--tasksTest',         type=int,    default=[],      choices=range(1,10),        help='Test task indices',          nargs='*')
+parser.add_argument('--signersTrain',      type=int,    default=[],      choices=range(0,16),        help='Training signer indices',    nargs='*')
+parser.add_argument('--signersValid',      type=int,    default=[],      choices=range(0,16),        help='Validation signer indices',  nargs='*')
+parser.add_argument('--signersTest',       type=int,    default=[],      choices=range(0,16),        help='Test signer indices',        nargs='*')
+parser.add_argument('--idxTrainBypass',    type=int,    default=[],      choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
+parser.add_argument('--idxValidBypass',    type=int,    default=[],      choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
+parser.add_argument('--idxTestBypass',     type=int,    default=[],      choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
+parser.add_argument('--randSeed',          type=int,    default=17,                                  help='Random seed (numpy)')
+parser.add_argument('--weightCorrection',  type=float,  default=0,                                   help='Correction for data imbalance (from 0 (no correction) to 1)')
 
 
 # Fine parameters
@@ -106,6 +105,7 @@ corpus = 'DictaSign'
 outputName = args.outputName#'PT'
 flsBinary  = bool(args.flsBinary)#True
 flsKeep    = args.flsKeep#[]
+comment    = args.comment#[]
 
 # Training global setting
 videoSplitMode    = args.videoSplitMode
@@ -113,9 +113,7 @@ fractionValid     = args.fractionValid
 fractionTest      = args.fractionTest
 signerIndependent = bool(args.signerIndependent)#False
 taskIndependent   = bool(args.taskIndependent)
-sessionsTrain     = args.sessionsTrain#[2,3,4,5,6,7,8]
-sessionsValid     = args.sessionsValid#[9]
-sessionsTest      = args.sessionsTest#[7] # session 7
+excludeTask9      = bool(args.excludeTask9)
 tasksTrain        = args.tasksTrain#[2,3,4,5,6,7,8]
 tasksValid        = args.tasksValid#[9]
 tasksTest         = args.tasksTest#[7] # session 7
@@ -172,6 +170,9 @@ if outputName not in dataGlobal:
     dataGlobal[outputName] = {}
 
 dataGlobal[outputName][timeString] = {}
+
+dataGlobal[outputName][timeString]['comment'] = comment
+
 dataGlobal[outputName][timeString]['params'] = {}
 dataGlobal[outputName][timeString]['params']['flsBinary']           = flsBinary
 dataGlobal[outputName][timeString]['params']['flsKeep']             = flsKeep
@@ -180,9 +181,7 @@ dataGlobal[outputName][timeString]['params']['fractionValid']       = fractionVa
 dataGlobal[outputName][timeString]['params']['fractionTest']        = fractionTest
 dataGlobal[outputName][timeString]['params']['signerIndependent']   = signerIndependent
 dataGlobal[outputName][timeString]['params']['taskIndependent']     = taskIndependent
-dataGlobal[outputName][timeString]['params']['sessionsTrain']       = sessionsTrain
-dataGlobal[outputName][timeString]['params']['sessionsValid']       = sessionsValid
-dataGlobal[outputName][timeString]['params']['sessionsTest']        = sessionsTest
+dataGlobal[outputName][timeString]['params']['excludeTask9']        = excludeTask9
 dataGlobal[outputName][timeString]['params']['tasksTrain']          = tasksTrain
 dataGlobal[outputName][timeString]['params']['tasksValid']          = tasksValid
 dataGlobal[outputName][timeString]['params']['tasksTest']           = tasksTest
@@ -227,10 +226,7 @@ if len(idxTrainBypass) + len(idxValidBypass) + len(idxTestBypass) > 0:
     idxValid = np.array(idxValidBypass)
     idxTest  = np.array(idxTestBypass)
 else:
-    idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSign(sessionsTrain,
-                                                                sessionsValid,
-                                                                sessionsTest,
-                                                                tasksTrain,
+    idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSign(tasksTrain,
                                                                 tasksValid,
                                                                 tasksTest,
                                                                 signersTrain,
@@ -238,6 +234,7 @@ else:
                                                                 signersTest,
                                                                 signerIndependent,
                                                                 taskIndependent,
+                                                                excludeTask9,
                                                                 videoSplitMode,
                                                                 fractionValid,
                                                                 fractionTest,
