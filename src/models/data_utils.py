@@ -948,5 +948,5 @@ def verifSplitSettingDictaSign(videoSplitMode, tasksTrain, tasksValid, tasksTest
     if videoSplitMode == 'manual':
         if totalSize == 0:
             sys.exit('Video indices are supposed to be manually specified')
-        if len(tasksTrain) == 0 or len(tasksValid) == 0 or len(tasksTest) == 0 or len(signersTrain) == 0 or len(signersValid) == 0 or len(signersTest) == 0:
-            sys.exit('Empty set')
+        #if len(tasksTrain) == 0 or len(tasksValid) == 0 or len(tasksTest) == 0 or len(signersTrain) == 0 or len(signersValid) == 0 or len(signersTest) == 0:
+        #    sys.exit('Empty set')
