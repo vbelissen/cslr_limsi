@@ -840,8 +840,8 @@ def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fracti
             if currentFill == 'valid' and framesCumulated > minFramesValid:
                 currentFill = 'train'
     elif signerIndependent and not taskIndependent:
-        signersTestNumber  = np.max([1, round(fractionTest*16)]) # 16 signers in DictaSign
-        signersValidNumber = np.max([1, round(fractionValid*16)]) # 16 signers in DictaSign
+        signersTestNumber  = int(np.max([1, round(fractionTest*16)])) # 16 signers in DictaSign
+        signersValidNumber = int(np.max([1, round(fractionValid*16)])) # 16 signers in DictaSign
         signersTest  = signersIdx[:signersTestNumber]
         signersValid = signersIdx[signersTestNumber:signersTestNumber+signersValidNumber]
         for iV in range(nVideos):
@@ -854,8 +854,8 @@ def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fracti
             else:
                 idxTrain.append(idxVid)
     elif taskIndependent and not signerIndependent:
-        tasksTestNumber  = np.max([1, round(fractionTest*9)]) # 9 tasks in DictaSign
-        tasksValidNumber = np.max([1, round(fractionValid*9)]) # 9 tasks in DictaSign
+        tasksTestNumber  = int(np.max([1, round(fractionTest*9)])) # 9 tasks in DictaSign
+        tasksValidNumber = int(np.max([1, round(fractionValid*9)])) # 9 tasks in DictaSign
         tasksTest  = tasksIdx[:tasksTestNumber]
         tasksValid = tasksIdx[tasksTestNumber:tasksTestNumber+tasksValidNumber]
         for iV in range(nVideos):
@@ -870,12 +870,12 @@ def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, fracti
     else: # signerIndependent and taskIndependent
         apparentFractionTest  = np.sqrt(fractionTest)
         apparentFractionValid = np.sqrt(fractionValid)
-        signersTestNumber  = np.max([1, round(apparentFractionTest*16)]) # 16 signers in DictaSign
-        signersValidNumber = np.max([1, round(apparentFractionValid*16)]) # 16 signers in DictaSign
+        signersTestNumber  = int(np.max([1, round(apparentFractionTest*16)])) # 16 signers in DictaSign
+        signersValidNumber = int(np.max([1, round(apparentFractionValid*16)])) # 16 signers in DictaSign
         signersTest  = signersIdx[:signersTestNumber]
         signersValid = signersIdx[signersTestNumber:signersTestNumber+signersValidNumber]
-        tasksTestNumber  = np.max([1, round(apparentFractionTest*9)]) # 9 tasks in DictaSign
-        tasksValidNumber = np.max([1, round(apparentFractionValid*9)]) # 9 tasks in DictaSign
+        tasksTestNumber  = int(np.max([1, round(apparentFractionTest*9)])) # 9 tasks in DictaSign
+        tasksValidNumber = int(np.max([1, round(apparentFractionValid*9)])) # 9 tasks in DictaSign
         tasksTest  = tasksIdx[:tasksTestNumber]
         tasksValid = tasksIdx[tasksTestNumber:tasksTestNumber+tasksValidNumber]
         for iV in range(nVideos):
