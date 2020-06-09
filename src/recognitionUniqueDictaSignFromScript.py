@@ -14,6 +14,10 @@ import numpy as np
 #plt.switch_backend('agg')
 import pickle
 import argparse
+import time
+
+import os.path
+from os import path
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -80,9 +84,12 @@ parser.add_argument('--redLrPatience',    type=int,    default=10,        help='
 parser.add_argument('--redLrFactor',      type=float,  default=0.5,       help='Factor for each l_rate reduc')
 
 # save data and monitor best
-parser.add_argument('--saveModel',       type=str,    default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
-parser.add_argument('--saveBestMonitor', type=str,    default='val_f1K', help='What metric to decide best model')
-parser.add_argument('--saveBestMonMode', type=str,    default='max',     help='Mode to define best',                              choices=['min', 'max'])
+parser.add_argument('--saveModel',         type=str,    default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
+parser.add_argument('--saveBestMonitor',   type=str,    default='val_f1K', help='What metric to decide best model')
+parser.add_argument('--saveBestMonMode',   type=str,    default='max',     help='Mode to define best',                              choices=['min', 'max'])
+parser.add_argument('--saveGlobalresults', type=str,    default='../reports/corpora/DictaSign/recognitionUnique/global/globalUnique.dat', help='Where to save global results')
+parser.add_argument('--savePredictions',   type=str,    default='../reports/corpora/DictaSign/recognitionUnique/predictions/', help='Where to save predictions')
+
 
 # Metrics
 parser.add_argument('--stepWolf',        type=float,  default=0.1,       help='Step between Wolf metric eval points',             choices=['rms', 'ada', 'sgd'])
@@ -142,18 +149,76 @@ reduceLrPatience    = args.redLrPatience
 reduceLrFactor      = args.redLrFactor
 
 # save data and monitor best
-save            = args.saveModel
-saveMonitor     = args.saveBestMonitor
-saveMonitorMode = args.saveBestMonMode
+save              = args.saveModel
+saveMonitor       = args.saveBestMonitor
+saveMonitorMode   = args.saveBestMonMode
+saveGlobalresults = args.saveGlobalresults
+savePredictions   = args.savePredictions
 
 # Metrics
 stepWolf     = args.stepWolf#0.1
 metrics      = ['acc',  f1K,   precisionK,   recallK]
 metricsNames = ['acc', 'f1K', 'precisionK', 'recallK']
 
+timeString = str(round(time.time()/10))
+saveBestName='recognitionUniqueDictaSign_'+outputName+'_'+timeString
 
+if path.exists(saveGlobalresults):
+    dataGlobal = pickle.load(open(saveGlobalresults, 'rb'))
+else:
+    dataGlobal = {}
 
-saveBestName='recognitionUniqueDictaSign'+outputName
+if outputName not in dataGlobal:
+    dataGlobal[outputName] = {}
+
+dataGlobal[outputName][timeString] = {}
+dataGlobal[outputName][timeString]['params'] = {}
+dataGlobal[outputName][timeString]['params']['flsBinary']           = flsBinary
+dataGlobal[outputName][timeString]['params']['flsKeep']             = flsKeep
+dataGlobal[outputName][timeString]['params']['videoSplitMode']      = videoSplitMode
+dataGlobal[outputName][timeString]['params']['fractionValid']       = fractionValid
+dataGlobal[outputName][timeString]['params']['fractionTest']        = fractionTest
+dataGlobal[outputName][timeString]['params']['signerIndependent']   = signerIndependent
+dataGlobal[outputName][timeString]['params']['taskIndependent']     = taskIndependent
+dataGlobal[outputName][timeString]['params']['sessionsTrain']       = sessionsTrain
+dataGlobal[outputName][timeString]['params']['sessionsValid']       = sessionsValid
+dataGlobal[outputName][timeString]['params']['sessionsTest']        = sessionsTest
+dataGlobal[outputName][timeString]['params']['tasksTrain']          = tasksTrain
+dataGlobal[outputName][timeString]['params']['tasksValid']          = tasksValid
+dataGlobal[outputName][timeString]['params']['tasksTest']           = tasksTest
+dataGlobal[outputName][timeString]['params']['signersTrain']        = signersTrain
+dataGlobal[outputName][timeString]['params']['signersValid']        = signersValid
+dataGlobal[outputName][timeString]['params']['signersTest']         = signersTest
+dataGlobal[outputName][timeString]['params']['idxTrainBypass']      = idxTrainBypass
+dataGlobal[outputName][timeString]['params']['idxValidBypass']      = idxValidBypass
+dataGlobal[outputName][timeString]['params']['idxTestBypass']       = idxTestBypass
+dataGlobal[outputName][timeString]['params']['weightCorrection']    = weightCorrection
+dataGlobal[outputName][timeString]['params']['seq_length']          = seq_length
+dataGlobal[outputName][timeString]['params']['batch_size']          = batch_size
+dataGlobal[outputName][timeString]['params']['epochs']              = epochs
+dataGlobal[outputName][timeString]['params']['separation']          = separation
+dataGlobal[outputName][timeString]['params']['dropout']             = dropout
+dataGlobal[outputName][timeString]['params']['rnn_number']          = rnnNumber
+dataGlobal[outputName][timeString]['params']['rnn_hidden_units']    = rnn_hidden_units
+dataGlobal[outputName][timeString]['params']['mlp_layers_number']   = mlp_layers_number
+dataGlobal[outputName][timeString]['params']['convolution']         = convolution
+dataGlobal[outputName][timeString]['params']['convFilt']            = convFilt
+dataGlobal[outputName][timeString]['params']['convFiltSize']        = convFiltSize
+dataGlobal[outputName][timeString]['params']['learning_rate']       = learning_rate
+dataGlobal[outputName][timeString]['params']['optimizer']           = optimizer
+dataGlobal[outputName][timeString]['params']['earlyStopping']       = earlyStopping
+dataGlobal[outputName][timeString]['params']['reduceLrOnPlateau']   = reduceLrOnPlateau
+dataGlobal[outputName][timeString]['params']['reduceLrMonitor']     = reduceLrMonitor
+dataGlobal[outputName][timeString]['params']['reduceLrMonitorMode'] = reduceLrMonitorMode
+dataGlobal[outputName][timeString]['params']['reduceLrPatience']    = reduceLrPatience
+dataGlobal[outputName][timeString]['params']['reduceLrFactor']      = reduceLrFactor
+dataGlobal[outputName][timeString]['params']['save']                = save
+dataGlobal[outputName][timeString]['params']['saveMonitor']         = saveMonitor
+dataGlobal[outputName][timeString]['params']['saveMonitorMode']     = saveMonitorMode
+dataGlobal[outputName][timeString]['params']['saveGlobalresults']   = saveGlobalresults
+dataGlobal[outputName][timeString]['params']['savePredictions']     = savePredictions
+dataGlobal[outputName][timeString]['params']['stepWolf']            = stepWolf
+
 
 
 ## GET VIDEO INDICES
@@ -245,137 +310,80 @@ train_model(model,
             reduceLrPatience=reduceLrPatience,
             reduceLrFactor=reduceLrFactor)
 
-# Test
+
+
+
+
+# Results
+print('Results')
 model.load_weights(saveBestName+'-best.hdf5')
+dataGlobal[outputName][timeString]['results'] = {}
 
-print('On valid: ')
-nRound=annot_valid.shape[1]//seq_length
-timestepsRound = nRound*seq_length
-predict_valid = model.predict(features_valid[:,:timestepsRound,:].reshape(-1, seq_length, features_valid.shape[2])).reshape(1, timestepsRound, nClasses)
-predict_valid = predict_valid[0]
-#    predict_valid[i*seq_length:(i+1)*seq_length,:]=model.predict(features_valid[:,i*seq_length:(i+1)*seq_length,:])[0]
+# Valid results
+for config in ['valid', 'test']:
+    dataGlobal[outputName][timeString]['results'][config] = {}
+    if config == 'valid':
+        print('Validation set')
+        nRound_valid=annot_valid.shape[1]//seq_length
+        timestepsRound_valid = nRound_valid *seq_length
+        predict_valid = model.predict(features_valid[:,:timestepsRound_valid,:].reshape(-1, seq_length, features_valid.shape[2])).reshape(1, timestepsRound_valid, nClasses)
+        predict_valid = predict_valid[0]
+        acc = framewiseAccuracy(annot_valid[0,:nRound_valid *seq_length,:],predict_valid[:nRound_valid *seq_length,:],True,True)
+        frameP, frameR, frameF1 = framewisePRF1(annot_valid[0,:nRound_valid *seq_length,:], predict_valid[:nRound_valid *seq_length,:], True, True)
+        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0,:nRound_valid*seq_length,:], predict_valid[:nRound_valid *seq_length,:], True, True, step=stepWolf)
+    else:
+        print('Test set')
+        nRound_test=annot_test.shape[1]//seq_length
+        timestepsRound_test = nRound_test*seq_length
+        predict_test = model.predict(features_test[:,:timestepsRound_test,:].reshape(-1, seq_length, features_test.shape[2])).reshape(1, timestepsRound_test, nClasses)
+        predict_test = predict_test[0]
+        acc = framewiseAccuracy(annot_test[0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True)
+        frameP, frameR, frameF1 = framewisePRF1(annot_test[0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True)
+        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True, step=stepWolf)
 
-acc = framewiseAccuracy(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True)
-#accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True)
-pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,step=stepWolf)
-Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=stepWolf)
+    print('Framewise accuracy: ' + str(acc))
+    print('Framewise P, R, F1: ' + str(frameP) + ', ' + str(frameR) + ', ' + str(frameF1))
+    print('P*(0,0), R*(0,0), F1*(0,0):' + str(pStarZeroZero) + ', ' + str(rStarZeroZero) + ', ' + str(ffStarZeroZero))
+    dataGlobal[outputName][timeString]['results'][config]['frameAcc'] = acc
+    dataGlobal[outputName][timeString]['results'][config]['frameP']  = frameP
+    dataGlobal[outputName][timeString]['results'][config]['frameR']  = frameR
+    dataGlobal[outputName][timeString]['results'][config]['frameF1'] = frameF1
+    dataGlobal[outputName][timeString]['results'][config]['pStarTp'] = pStarTp
+    dataGlobal[outputName][timeString]['results'][config]['pStarTr'] = pStarTr
+    dataGlobal[outputName][timeString]['results'][config]['rStarTp'] = rStarTp
+    dataGlobal[outputName][timeString]['results'][config]['rStarTr'] = rStarTr
+    dataGlobal[outputName][timeString]['results'][config]['fStarTp'] = fStarTp
+    dataGlobal[outputName][timeString]['results'][config]['fStarTr'] = fStarTr
+    dataGlobal[outputName][timeString]['results'][config]['pStarZeroZero'] = pStarTp[0]
+    dataGlobal[outputName][timeString]['results'][config]['rStarZeroZero'] = rStarTp[0]
+    dataGlobal[outputName][timeString]['results'][config]['fStarZeroZero'] = fStarTp[0]
+    Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=stepWolf)
+    dataGlobal[outputName][timeString]['results'][config]['Ip']  = Ip
+    dataGlobal[outputName][timeString]['results'][config]['Ir']  = Ir
+    dataGlobal[outputName][timeString]['results'][config]['Ipr'] = Ipr
+    print('Ip, Ir, Ipr (star): ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
+    dataGlobal[outputName][timeString]['results'][config]['middleUnitP']  = {}
+    dataGlobal[outputName][timeString]['results'][config]['middleUnitR']  = {}
+    dataGlobal[outputName][timeString]['results'][config]['middleUnitF1'] = {}
+    dataGlobal[outputName][timeString]['results'][config]['marginUnitP']  = {}
+    dataGlobal[outputName][timeString]['results'][config]['marginUnitR']  = {}
+    dataGlobal[outputName][timeString]['results'][config]['marginUnitF1'] = {}
+    for margin in [0, 12, 25, 50]:
+        print('margin = ' + str(margin))
+        if config == 'valid':
+            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_valid[0,:nRound_valid*seq_length,:],predict_valid[:nRound_valid*seq_length,:],True,True,margin)
+            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound_valid*seq_length,:],predict_valid[:nRound_valid*seq_length,:],True,True,margin)
+        else:
+            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_test[0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True,margin)
+            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True,margin)
+        print('P, R, F1 (middleUnit): ' + str(middleUnitP) + ', ' + str(middleUnitR) + ', ' + str(middleUnitF1))
+        print('P, R, F1 (marginUnit): ' + str(marginUnitP) + ', ' + str(marginUnitR) + ', ' + str(marginUnitF1))
+        dataGlobal[outputName][timeString]['results'][config]['middleUnitP'][margin]  = middleUnitP
+        dataGlobal[outputName][timeString]['results'][config]['middleUnitR'][margin]  = middleUnitR
+        dataGlobal[outputName][timeString]['results'][config]['middleUnitF1'][margin] = middleUnitF1
+        dataGlobal[outputName][timeString]['results'][config]['marginUnitP'][margin]  = marginUnitP
+        dataGlobal[outputName][timeString]['results'][config]['marginUnitR'][margin]  = marginUnitR
+        dataGlobal[outputName][timeString]['results'][config]['marginUnitF1'][margin] = marginUnitF1
 
-print('Accuracy : ' + str(acc))
-#print('Accuracy Yanovich : ' + str(accYanovich))
-#print('Accuracy Yanovich per class :')
-#print(accYanovichPerClass)
-print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
-np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
-
-print('P*(0,0) = ' + str(pStarTp[0]))
-print('R*(0,0) = ' + str(rStarTp[0]))
-print('F1*(0,0) = ' + str(fStarTp[0]))
-
-margin = 0
-print('margin = ' + str(margin))
-oldP, oldR, oldF1 = oldPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-print('P R F1')
-print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
-print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
-print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
-
-margin = 10
-print('margin = ' + str(margin))
-oldP, oldR, oldF1 = oldPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-print('P R F1')
-print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
-print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
-print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
-
-margin = 30
-print('margin = ' + str(margin))
-oldP, oldR, oldF1 = oldPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-print('P R F1')
-print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
-print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
-print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
-
-margin = 50
-print('margin = ' + str(margin))
-oldP, oldR, oldF1 = oldPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound*seq_length,:],predict_valid[:nRound*seq_length,:],True,True,margin)
-print('P R F1')
-print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
-print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
-print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
-
-
-
-print('On test:')
-#predict_test = np.zeros((annot_test.shape[1],annot_test.shape[2]))
-nRound=annot_test.shape[1]//seq_length
-timestepsRound = nRound*seq_length
-predict_test = model.predict(features_test[:,:timestepsRound,:].reshape(-1, seq_length, features_test.shape[2])).reshape(1, timestepsRound, 2)
-predict_test = predict_test[0]
-#    predict_test[i*seq_length:(i+1)*seq_length,:]=model.predict(features_test[:,i*seq_length:(i+1)*seq_length,:])[0]
-
-acc = framewiseAccuracy(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True)
-#accYanovich, accYanovichPerClass = framewiseAccuracyYanovich(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True)
-pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,step=stepWolf)
-Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=stepWolf)
-
-print('Accuracy : ' + str(acc))
-#print('Accuracy Yanovich : ' + str(accYanovich))
-#print('Accuracy Yanovich per class :')
-#print(accYanovichPerClass)
-print('Ip, Ir, Ipr (star) = ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
-np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_prf1.npz',pStarTp=pStarTp, pStarTr=pStarTr, rStarTp=rStarTp, rStarTr=rStarTr, fStarTp=fStarTp, fStarTr=fStarTr)
-
-print('P*(0,0) = ' + str(pStarTp[0]))
-print('R*(0,0) = ' + str(rStarTp[0]))
-print('F1*(0,0) = ' + str(fStarTp[0]))
-
-margin = 0
-print('margin = ' + str(margin))
-oldP, oldR, oldF1 = oldPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-print('P R F1')
-print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
-print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
-print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
-
-margin = 10
-print('margin = ' + str(margin))
-oldP, oldR, oldF1 = oldPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-print('P R F1')
-print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
-print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
-print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
-
-margin = 30
-print('margin = ' + str(margin))
-oldP, oldR, oldF1 = oldPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-print('P R F1')
-print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
-print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
-print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
-
-margin = 50
-print('margin = ' + str(margin))
-oldP, oldR, oldF1 = oldPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-oldPadapted, oldRadapted, oldF1adapted = oldPRF1adapted(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound*seq_length,:],predict_test[:nRound*seq_length,:],True,True,margin)
-print('P R F1')
-print('Old: ' + str(oldP) + ' ' + str(oldR) + ' ' + str(oldF1))
-print('Old-adapted: ' + str(oldPadapted) + ' ' + str(oldRadapted) + ' ' + str(oldF1adapted))
-print('margin unit: ' + str(marginUnitP) + ' ' + str(marginUnitR) + ' ' + str(marginUnitF1))
-
-
-np.savez('reports/corpora/'+corpus+'/recognitionUnique/'+outputName+'_annot_predict_test.npz',annot=annot_test,predict=predict_test)
+pickle.dump(dataGlobal, open(saveGlobalresults,'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+np.savez(savePredictions+saveBestName+'_'+timeString, true=annot_test[0,:,:], pred=predict_test, idxTest=idxTest, separation=separation)

@@ -284,7 +284,7 @@ def oldPRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, threshold):
 
     return P, R, F1
 
-def oldPRF1adapted(dataTrue, dataPred, trueIsCat, predIsCatOrProb, margin=0):
+def middleUnitPRF1(dataTrue, dataPred, trueIsCat, predIsCatOrProb, margin=0):
     """
         Computes precision, recall and f1-score of predictions wrt annotations.
         Positives/negatives are counted with a margin allowing for a difference
