@@ -37,7 +37,9 @@ source activate py36_tf1
 #for (( iOutput=0; iOutput<${tLen}; iOutput++ ));
 for (( iOutput=0; iOutput<${lenOut}; iOutput++ ));
 do
-  convFilt=${CONV_FILTERS[$iCOnvF]}
+  output=${OUTPUTS[$iOutput]}
+  echo Output: $output#
+  #output=${OUTPUTS[$iOutput]}
   python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation conv filters" --convolution 0 --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   mv *.hdf5 models/
 done
