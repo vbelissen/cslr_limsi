@@ -47,7 +47,7 @@ do
     for (( iRand=0; iRand<${lenRandS}; iRand++ ));
     do
       randSeed=${RANDOM_SEEDS[$iRand]}
-      python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation config SI TI v2" --randSeed $randSeed --epochs 150 --videoSplitMode auto --signerIndependent $config_SI --taskIndependent $config_TI --excludeTask9 1
+      python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation config SI TI v2" --randSeed $randSeed --epochs 150 --videoSplitMode auto --signerIndependent $config_SI --taskIndependent $config_TI --excludeTask9 1 --fractionTest 0.2 --fractionValid 0.2
     done
   done
 
