@@ -5,7 +5,7 @@ OUTPUTS=("fls" "DS" "PT" "FBUOY")
 CONFIG_SI=(0 1 0 1)
 CONFIG_TI=(0 0 1 1)
 
-COMMENT=("variation config SD TD" "variation config SI TD" "variation config SD TI" "variation config SI TI")
+COMMENT=("variation_config_SD_TD" "variation_config_SI_TD" "variation_config_SD_TI" "variation_config_SI_TI")
 
 FIXED_SIGNERS_TRAIN_SI="0 7 8 9 10 11 12 13 14 15"
 FIXED_SIGNERS_VALID_SI="1 2 3"
