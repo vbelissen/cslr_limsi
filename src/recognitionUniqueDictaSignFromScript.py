@@ -340,7 +340,7 @@ for config in ['valid', 'test']:
         acc = framewiseAccuracy(annot_test[0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True)
         frameP, frameR, frameF1 = framewisePRF1(annot_test[0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True)
         pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True, step=stepWolf)
-        nameHistoryAppend = ''
+        nameHistoryAppend =  ''
 
     print('Framewise accuracy: ' + str(acc))
     print('Framewise P, R, F1: ' + str(frameP) + ', ' + str(frameR) + ', ' + str(frameF1))
