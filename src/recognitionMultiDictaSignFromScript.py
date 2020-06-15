@@ -456,4 +456,4 @@ for config in ['valid', 'test']:
             dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['marginUnitF1'][margin] = marginUnitF1
 
 pickle.dump(dataGlobal, open(saveGlobalresults,'wb'), protocol=pickle.HIGHEST_PROTOCOL)
-np.savez(savePredictions+saveBestName, true=annot_test[0,:timestepsRound_test,:], pred=predict_test, idxTest=idxTest, separation=separation)
+#np.savez(savePredictions+saveBestName, true=annot_test[0,:timestepsRound_test,:], pred=predict_test, idxTest=idxTest, separation=separation)
