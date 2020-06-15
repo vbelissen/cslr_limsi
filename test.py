@@ -17,7 +17,8 @@ features_1_valid, annot_1_valid = get_data_concatenated('DictaSign',
                                                         ['PT', 'DS', 'fls'],
                                                         [[1], [1], [41891,43413,43422,42992]],
                                                         video_indices=np.arange(70,94))
-train_model(model_1, features_1_train, annot_1_train, features_1_valid, annot_1_valid, 2000, 5, 100)
+t = train_model(model_1, features_1_train, annot_1_train, features_1_valid, annot_1_valid, 2000, 5, 100)
+print(t.keys())
 
 # A model with 1 output matrix:
 # [other, Pointing, Depicting, Lexical]
