@@ -88,13 +88,23 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
 
         # Fill in batch weights
         if output_class_weights != []:
-            batch_labels_weight = batch_labels_weight.reshape(1, batch_size_time)
-            if end <= total_length_round:
-                batch_labels_weight = annot_labels_weight[0, random_ini:end].reshape(-1, seq_length)
-            else:
-                batch_labels_weight[0, :(total_length_round - random_ini)] = annot_labels_weight[0, random_ini:total_length_round]
-                batch_labels_weight[0, (total_length_round - random_ini):] = annot_labels_weight[0, 0:end_modulo]
-                batch_labels_weight = batch_labels_weight.reshape(-1, seq_length)
+            if output_form == 'mixed':
+                for i_label_cat in range(labels_number):
+                    batch_labels_weight[i_label_cat] = batch_labels_weight[i_label_cat].reshape(1, batch_size_time)
+                    if end <= total_length_round:
+                        batch_labels_weight[i_label_cat] = annot_labels_weight[i_label_cat][0, random_ini:end, :].reshape(-1, seq_length)
+                    else:
+                        batch_labels_weight[i_label_cat][0, :(total_length_round - random_ini)] = annot_labels_weight[i_label_cat][0, random_ini:total_length_round]
+                        batch_labels_weight[i_label_cat][0, (total_length_round - random_ini):] = annot_labels_weight[i_label_cat][0, 0:end_modulo]
+                        batch_labels_weight[i_label_cat] = batch_labels_weight[i_label_cat].reshape(-1, seq_length)
+            elif output_form == 'sign_types':
+                batch_labels_weight = batch_labels_weight.reshape(1, batch_size_time)
+                if end <= total_length_round:
+                    batch_labels_weight = annot_labels_weight[0, random_ini:end].reshape(-1, seq_length)
+                else:
+                    batch_labels_weight[0, :(total_length_round - random_ini)] = annot_labels_weight[0, random_ini:total_length_round]
+                    batch_labels_weight[0, (total_length_round - random_ini):] = annot_labels_weight[0, 0:end_modulo]
+                    batch_labels_weight = batch_labels_weight.reshape(-1, seq_length)
 
 
         # Fill in batch annotations
