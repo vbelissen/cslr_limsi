@@ -37,7 +37,7 @@ source activate py36_tf1
 for (( iB=0; iB<${lenBatch}; iB++ ));
 do
   batchSize=${BATCH_SIZE[$iB]}
-  python src/recognitionMultiDictaSignFromScript.py --comment "variation batch" --batchSize $batchSize --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+  python src/recognitionMultiDictaSignFromScript.py --comment "variation batch" --batchSize $batchSize --epochs 2 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
 done
 
 for (( iD=0; iD<${lenDrop}; iD++ ));
