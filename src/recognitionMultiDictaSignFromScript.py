@@ -369,7 +369,9 @@ for config in ['valid', 'test']:
         print('Validation set')
         nRound_valid=annot_valid[0].shape[1]//seq_length
         timestepsRound_valid = nRound_valid *seq_length
-        predict_valid = model.predict(features_valid[:,:timestepsRound_valid,:].reshape(-1, seq_length, features_valid.shape[2])).reshape(1, timestepsRound_valid, nClasses)
+        predict_valid = model.predict(features_valid[:,:timestepsRound_valid,:].reshape(-1, seq_length, features_valid.shape[2]))
+        for iOut in range(nOutputs):
+            predict_valid[iOut] = predict_valid[iOut].reshape(1, timestepsRound_valid, nClasses)
         #predict_valid = predict_valid[0]
         for iOut in range(nOutputs):
             acc.append(framewiseAccuracy(annot_valid[iOut][0,:nRound_valid *seq_length,:],predict_valid[iOut][:nRound_valid *seq_length,:],True,True))
@@ -389,7 +391,9 @@ for config in ['valid', 'test']:
         print('Test set')
         nRound_test=annot_test[0].shape[1]//seq_length
         timestepsRound_test = nRound_test *seq_length
-        predict_test = model.predict(features_test[:,:timestepsRound_test,:].reshape(-1, seq_length, features_test.shape[2])).reshape(1, timestepsRound_test, nClasses)
+        predict_test = model.predict(features_test[:,:timestepsRound_test,:].reshape(-1, seq_length, features_test.shape[2]))
+        for iOut in range(nOutputs):
+            predict_test[iOut] = predict_test[iOut].reshape(1, timestepsRound_test, nClasses)
         #predict_test = predict_test[0]
         for iOut in range(nOutputs):
             acc.append(framewiseAccuracy(annot_test[iOut][0,:nRound_test *seq_length,:],predict_test[iOut][:nRound_test *seq_length,:],True,True))
