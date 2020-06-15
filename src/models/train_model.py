@@ -40,11 +40,12 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
     feature_number = features.shape[2]
 
     batch_features = np.zeros((1, batch_size_time, feature_number))
-    batch_labels_weight = np.zeros((1, batch_size_time))
+    #batch_labels_weight = np.zeros((1, batch_size_time))
 
     if output_class_weights != []:
         if output_form == 'mixed':
             annot_labels_weight = []#np.ones((1, annot[0].shape[1]))
+            batch_labels_weight = []#np.zeros((1, batch_size_time))
             labels_number = len(annot)
             for i_label_cat in range(labels_number):
                 annot_labels_weight_tmp = np.zeros((1, annot[i_label_cat].shape[1]))
@@ -52,9 +53,11 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
                 for iClass in range(nClasses):
                     annot_labels_weight_tmp[0, np.argmax(annot[i_label_cat][0,:,:],axis=1)==iClass] = output_class_weights[i_label_cat][iClass]
                 annot_labels_weight.append(annot_labels_weight_tmp)# = annot_labels_weight*annot_labels_weight_tmp
+                batch_labels_weight.append(np.zeros((1, batch_size_time)))
         elif output_form == 'sign_types':
             nClasses = annot.shape[2]
             annot_labels_weight=np.zeros((1, annot.shape[1]))
+            batch_labels_weight = np.zeros((1, batch_size_time))
             for iClass in range(nClasses):
                 annot_labels_weight[0, np.argmax(annot[0,:,:],axis=1)==iClass] = output_class_weights[0][iClass]
 
