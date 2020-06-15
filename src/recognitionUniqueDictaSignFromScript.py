@@ -317,6 +317,8 @@ model.load_weights(saveBestName+'-best.hdf5')
 dataGlobal[outputName][timeString]['results'] = {}
 
 # Valid results
+for metricName in history.keys():
+    dataGlobal[outputName][timeString]['results']['metrics'][metricName] = history[metricName]
 for config in ['valid', 'test']:
     dataGlobal[outputName][timeString]['results'][config] = {}
     if config == 'valid':
@@ -340,8 +342,6 @@ for config in ['valid', 'test']:
         pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True, step=stepWolf)
         nameHistoryAppend = ''
 
-    for metricName in metricsNames:
-            dataGlobal[outputName][timeString]['results'][config]['metrics'] = history[nameHistoryAppend+metricName]
     print('Framewise accuracy: ' + str(acc))
     print('Framewise P, R, F1: ' + str(frameP) + ', ' + str(frameR) + ', ' + str(frameF1))
     print('P*(0,0), R*(0,0), F1*(0,0):' + str(pStarTp[0]) + ', ' + str(rStarTp[0]) + ', ' + str(fStarTp[0]))
