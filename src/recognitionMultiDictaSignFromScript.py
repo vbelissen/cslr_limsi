@@ -108,6 +108,7 @@ corpus = 'DictaSign'
 #flsBinary  = bool(args.flsBinary)#True
 #flsKeep    = args.flsKeep#[]
 outputsList= args.outputsList
+outputsWeightList= args.outputsWeightList
 comment    = args.comment#[]
 
 # Training global setting
