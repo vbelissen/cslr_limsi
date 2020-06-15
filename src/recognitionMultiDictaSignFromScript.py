@@ -107,9 +107,9 @@ corpus = 'DictaSign'
 #outputName = args.outputName#'PT'
 #flsBinary  = bool(args.flsBinary)#True
 #flsKeep    = args.flsKeep#[]
-outputsList= args.outputsList
-outputsWeightList= args.outputsWeightList
-comment    = args.comment#[]
+outputsList       = args.outputsList
+outputsWeightList = args.outputsWeightList
+comment           = args.comment#[]
 
 # Training global setting
 videoSplitMode    = args.videoSplitMode
