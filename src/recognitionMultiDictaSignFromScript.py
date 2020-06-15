@@ -88,8 +88,8 @@ parser.add_argument('--redLrFactor',      type=float,  default=0.5,       help='
 parser.add_argument('--saveModel',         type=str,    default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
 parser.add_argument('--saveBestMonitor',   type=str,    default='val_f1K', help='What metric to decide best model')
 parser.add_argument('--saveBestMonMode',   type=str,    default='max',     help='Mode to define best',                              choices=['min', 'max'])
-parser.add_argument('--saveGlobalresults', type=str,    default='reports/corpora/DictaSign/recognitionUnique/global/globalMulti.dat', help='Where to save global results')
-parser.add_argument('--savePredictions',   type=str,    default='reports/corpora/DictaSign/recognitionUnique/predictions/', help='Where to save predictions')
+parser.add_argument('--saveGlobalresults', type=str,    default='reports/corpora/DictaSign/recognitionMulti/global/globalMulti.dat', help='Where to save global results')
+parser.add_argument('--savePredictions',   type=str,    default='reports/corpora/DictaSign/recognitionMulti/predictions/', help='Where to save predictions')
 
 
 # Metrics
@@ -167,12 +167,12 @@ outputNbList = []
 outputCategories = []
 outputAssembleList = []
 for i in range(nOutputs-1):
-    outputName.append(outputsList[i])
-    outputName.append('_')
+    outputName += outputsList[i]
+    outputName += '_'
     outputCategories.append([1])
     outputAssembleList.append([outputsList[i]])
     outputNbList.append(2)
-outputName.append(outputsList[nOutputs-1])
+outputName += outputsList[nOutputs-1]
 outputCategories.append([1])
 outputAssembleList.append([outputsList[nOutputs-1]])
 outputNbList.append(2)
