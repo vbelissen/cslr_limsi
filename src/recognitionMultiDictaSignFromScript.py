@@ -85,7 +85,7 @@ parser.add_argument('--redLrPatience',    type=int,    default=10,        help='
 parser.add_argument('--redLrFactor',      type=float,  default=0.5,       help='Factor for each l_rate reduc')
 
 # save data and monitor best
-parser.add_argument('--saveModel',         type=str,    default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
+parser.add_argument('--saveModel',         type=str,    default='all',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
 parser.add_argument('--saveBestMonitor',   type=str,    default='val_f1K', help='What metric to decide best model')
 parser.add_argument('--saveBestMonMode',   type=str,    default='max',     help='Mode to define best',                              choices=['min', 'max'])
 parser.add_argument('--saveGlobalresults', type=str,    default='reports/corpora/DictaSign/recognitionMulti/global/globalMulti.dat', help='Where to save global results')
@@ -328,8 +328,15 @@ history = train_model(model,
             reduceLrFactor=reduceLrFactor)
 
 
+time_distributed_1_f1K = np.array(history['time_distributed_1_f1K'])
+time_distributed_2_f1K = np.array(history['time_distributed_2_f1K'])
+time_distributed_3_f1K = np.array(history['time_distributed_3_f1K'])
+time_distributed_4_f1K = np.array(history['time_distributed_4_f1K'])
 
+print
 
+time_distributed_sum_f1K = np.sum(np.hstack([time_distributed_1_f1K,time_distributed_1_f1K,time_distributed_1_f1K,time_distributed_1_f1K]),axis=0)
+print(time_distributed_sum_f1K.shape)
 
 # Results
 print('Results')
