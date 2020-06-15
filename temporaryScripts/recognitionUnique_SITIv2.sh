@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUTPUTS=("fls" "FS" "DS" "PT" "FBUOY")
+OUTPUTS=("fls" "DS" "PT" "FBUOY")
 BATCH_SIZE=("50" "100" "200" "400")
 DROPOUT=("0" "0.25" "0.5" "0.75")
 RNN_NUMBER=("1" "2" "3")
