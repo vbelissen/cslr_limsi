@@ -333,14 +333,19 @@ time_distributed_2_f1K = np.array(history['time_distributed_2_f1K'])
 time_distributed_3_f1K = np.array(history['time_distributed_3_f1K'])
 time_distributed_4_f1K = np.array(history['time_distributed_4_f1K'])
 
-print
+print(history)
+print(history.keys())
+print(history['time_distributed_4_f1K'])
 
 time_distributed_sum_f1K = np.sum(np.hstack([time_distributed_1_f1K,time_distributed_1_f1K,time_distributed_1_f1K,time_distributed_1_f1K]),axis=0)
 print(time_distributed_sum_f1K.shape)
 
+bestf1K_idx = np.argmax(time_distributed_sum_f1K)
+bestf1K_str = str(bestf1K_idx+1).zfill(3)
+
 # Results
 print('Results')
-model.load_weights(saveBestName+'-best.hdf5')
+model.load_weights(saveBestName+'.'+bestf1K_str+'.hdf5')
 dataGlobal[outputName][timeString]['results'] = {}
 
 # Valid results
