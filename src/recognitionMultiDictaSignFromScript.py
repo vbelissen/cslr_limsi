@@ -374,12 +374,12 @@ for config in ['valid', 'test']:
             predict_valid[iOut] = predict_valid[iOut].reshape(1, timestepsRound_valid, nClasses)
         #predict_valid = predict_valid[0]
         for iOut in range(nOutputs):
-            acc.append(framewiseAccuracy(annot_valid[iOut][0,:nRound_valid *seq_length,:],predict_valid[iOut][:nRound_valid *seq_length,:],True,True))
-            a, b, c = framewisePRF1(annot_valid[iOut][0,:nRound_valid *seq_length,:], predict_valid[iOut][:nRound_valid *seq_length,:], True, True)
+            acc.append(framewiseAccuracy(annot_valid[iOut][0,:nRound_valid *seq_length,:],predict_valid[iOut][0, :nRound_valid *seq_length,:],True,True))
+            a, b, c = framewisePRF1(annot_valid[iOut][0,:nRound_valid *seq_length,:], predict_valid[iOut][0, :nRound_valid *seq_length,:], True, True)
             frameP.append(a)
             frameR.append(b)
             frameF1.append(c)
-            a, b, c, d, e, f = prfStar(annot_valid[iOut][0,:nRound_valid*seq_length,:], predict_valid[iOut][:nRound_valid *seq_length,:], True, True, step=stepWolf)
+            a, b, c, d, e, f = prfStar(annot_valid[iOut][0,:nRound_valid*seq_length,:], predict_valid[iOut][0, :nRound_valid *seq_length,:], True, True, step=stepWolf)
             pStarTp.append(a)
             pStarTr.append(b)
             rStarTp.append(c)
@@ -396,12 +396,12 @@ for config in ['valid', 'test']:
             predict_test[iOut] = predict_test[iOut].reshape(1, timestepsRound_test, nClasses)
         #predict_test = predict_test[0]
         for iOut in range(nOutputs):
-            acc.append(framewiseAccuracy(annot_test[iOut][0,:nRound_test *seq_length,:],predict_test[iOut][:nRound_test *seq_length,:],True,True))
-            a, b, c = framewisePRF1(annot_test[iOut][0,:nRound_test *seq_length,:], predict_test[iOut][:nRound_test *seq_length,:], True, True)
+            acc.append(framewiseAccuracy(annot_test[iOut][0,:nRound_test *seq_length,:],predict_test[iOut][0, :nRound_test *seq_length,:],True,True))
+            a, b, c = framewisePRF1(annot_test[iOut][0,:nRound_test *seq_length,:], predict_test[iOut][0, :nRound_test *seq_length,:], True, True)
             frameP.append(a)
             frameR.append(b)
             frameF1.append(c)
-            a, b, c, d, e, f = prfStar(annot_test[iOut][0,:nRound_test*seq_length,:], predict_test[iOut][:nRound_test *seq_length,:], True, True, step=stepWolf)
+            a, b, c, d, e, f = prfStar(annot_test[iOut][0,:nRound_test*seq_length,:], predict_test[iOut][0, :nRound_test *seq_length,:], True, True, step=stepWolf)
             pStarTp.append(a)
             pStarTr.append(b)
             rStarTp.append(c)
