@@ -315,6 +315,7 @@ history = train_model(model,
 print('Results')
 model.load_weights(saveBestName+'-best.hdf5')
 dataGlobal[outputName][timeString]['results'] = {}
+dataGlobal[outputName][timeString]['results']['metrics'] = {}
 
 # Valid results
 for metricName in history.keys():
