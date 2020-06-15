@@ -37,7 +37,7 @@ source activate py36_tf1
 for (( iB=0; iB<${lenBatch}; iB++ ));
 do
   batchSize=${BATCH_SIZE[$iB]}
-  python src/recognitionMultiDictaSignFromScript.py --comment "variation batch" --batchSize $batchSize --epochs 2 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+  python src/recognitionMultiDictaSignFromScript.py --comment "variation batch" --batchSize $batchSize --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   rm *.hdf5
 done
 
@@ -87,7 +87,7 @@ for (( iExcl=0; iExcl<${lenExcl}; iExcl++ ));
 do
   excludeTask9=${EXCLUDE_TASK_9[$iExcl]}
   python src/recognitionMultiDictaSignFromScript.py --comment "exclude or include task 9" --excludeTask9 $excludeTask9 --epochs 150 --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
-  rm *.hdf5 
+  rm *.hdf5
 done
 
 
