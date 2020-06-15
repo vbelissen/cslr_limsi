@@ -346,75 +346,110 @@ model.load_weights(saveBestName+'.'+bestf1K_str+'.hdf5')
 dataGlobal[outputName][timeString]['results'] = {}
 dataGlobal[outputName][timeString]['results']['metrics'] = {}
 
+nOutputs
+
 # Valid results
 for metricName in history.keys():
     dataGlobal[outputName][timeString]['results']['metrics'][metricName] = history[metricName]
 for config in ['valid', 'test']:
     dataGlobal[outputName][timeString]['results'][config] = {}
+    for iOut in range(nOutputs):
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]] = {}
+    acc = []
+    frameP = []
+    frameR = []
+    frameF1 = []
+    pStarTp = []
+    pStarTr = []
+    rStarTp = []
+    rStarTr = []
+    fStarTp = []
+    fStarTr = []
     if config == 'valid':
         print('Validation set')
-        nRound_valid=annot_valid.shape[1]//seq_length
+        nRound_valid=annot_valid[0].shape[1]//seq_length
         timestepsRound_valid = nRound_valid *seq_length
         predict_valid = model.predict(features_valid[:,:timestepsRound_valid,:].reshape(-1, seq_length, features_valid.shape[2])).reshape(1, timestepsRound_valid, nClasses)
-        predict_valid = predict_valid[0]
-        acc = framewiseAccuracy(annot_valid[0,:nRound_valid *seq_length,:],predict_valid[:nRound_valid *seq_length,:],True,True)
-        frameP, frameR, frameF1 = framewisePRF1(annot_valid[0,:nRound_valid *seq_length,:], predict_valid[:nRound_valid *seq_length,:], True, True)
-        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0,:nRound_valid*seq_length,:], predict_valid[:nRound_valid *seq_length,:], True, True, step=stepWolf)
+        #predict_valid = predict_valid[0]
+        for iOut in range(nOutputs):
+            acc.append(framewiseAccuracy(annot_valid[iOut][0,:nRound_valid *seq_length,:],predict_valid[iOut][:nRound_valid *seq_length,:],True,True))
+            a, b, c = framewisePRF1(annot_valid[iOut][0,:nRound_valid *seq_length,:], predict_valid[iOut][:nRound_valid *seq_length,:], True, True)
+            frameP.append(a)
+            frameR.append(b)
+            frameF1.append(c)
+            a, b, c, d, e, f = prfStar(annot_valid[iOut][0,:nRound_valid*seq_length,:], predict_valid[iOut][:nRound_valid *seq_length,:], True, True, step=stepWolf)
+            pStarTp.append(a)
+            pStarTr.append(b)
+            rStarTp.append(c)
+            rStarTr.append(d)
+            fStarTp.append(e)
+            fStarTr.append(f)
         nameHistoryAppend = 'val_'
     else:
         print('Test set')
-        nRound_test=annot_test.shape[1]//seq_length
-        timestepsRound_test = nRound_test*seq_length
+        nRound_test=annot_test[0].shape[1]//seq_length
+        timestepsRound_test = nRound_test *seq_length
         predict_test = model.predict(features_test[:,:timestepsRound_test,:].reshape(-1, seq_length, features_test.shape[2])).reshape(1, timestepsRound_test, nClasses)
-        predict_test = predict_test[0]
-        acc = framewiseAccuracy(annot_test[0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True)
-        frameP, frameR, frameF1 = framewisePRF1(annot_test[0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True)
-        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True, step=stepWolf)
+        #predict_test = predict_test[0]
+        for iOut in range(nOutputs):
+            acc.append(framewiseAccuracy(annot_test[iOut][0,:nRound_test *seq_length,:],predict_test[iOut][:nRound_test *seq_length,:],True,True))
+            a, b, c = framewisePRF1(annot_test[iOut][0,:nRound_test *seq_length,:], predict_test[iOut][:nRound_test *seq_length,:], True, True)
+            frameP.append(a)
+            frameR.append(b)
+            frameF1.append(c)
+            a, b, c, d, e, f = prfStar(annot_test[iOut][0,:nRound_test*seq_length,:], predict_test[iOut][:nRound_test *seq_length,:], True, True, step=stepWolf)
+            pStarTp.append(a)
+            pStarTr.append(b)
+            rStarTp.append(c)
+            rStarTr.append(d)
+            fStarTp.append(e)
+            fStarTr.append(f)
         nameHistoryAppend = ''
-
-    print('Framewise accuracy: ' + str(acc))
-    print('Framewise P, R, F1: ' + str(frameP) + ', ' + str(frameR) + ', ' + str(frameF1))
-    print('P*(0,0), R*(0,0), F1*(0,0):' + str(pStarTp[0]) + ', ' + str(rStarTp[0]) + ', ' + str(fStarTp[0]))
-    dataGlobal[outputName][timeString]['results'][config]['frameAcc'] = acc
-    dataGlobal[outputName][timeString]['results'][config]['frameP']  = frameP
-    dataGlobal[outputName][timeString]['results'][config]['frameR']  = frameR
-    dataGlobal[outputName][timeString]['results'][config]['frameF1'] = frameF1
-    dataGlobal[outputName][timeString]['results'][config]['pStarTp'] = pStarTp
-    dataGlobal[outputName][timeString]['results'][config]['pStarTr'] = pStarTr
-    dataGlobal[outputName][timeString]['results'][config]['rStarTp'] = rStarTp
-    dataGlobal[outputName][timeString]['results'][config]['rStarTr'] = rStarTr
-    dataGlobal[outputName][timeString]['results'][config]['fStarTp'] = fStarTp
-    dataGlobal[outputName][timeString]['results'][config]['fStarTr'] = fStarTr
-    dataGlobal[outputName][timeString]['results'][config]['pStarZeroZero'] = pStarTp[0]
-    dataGlobal[outputName][timeString]['results'][config]['rStarZeroZero'] = rStarTp[0]
-    dataGlobal[outputName][timeString]['results'][config]['fStarZeroZero'] = fStarTp[0]
-    Ip, Ir, Ipr = integralValues(fStarTp, fStarTr,step=stepWolf)
-    dataGlobal[outputName][timeString]['results'][config]['Ip']  = Ip
-    dataGlobal[outputName][timeString]['results'][config]['Ir']  = Ir
-    dataGlobal[outputName][timeString]['results'][config]['Ipr'] = Ipr
-    print('Ip, Ir, Ipr (star): ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
-    dataGlobal[outputName][timeString]['results'][config]['middleUnitP']  = {}
-    dataGlobal[outputName][timeString]['results'][config]['middleUnitR']  = {}
-    dataGlobal[outputName][timeString]['results'][config]['middleUnitF1'] = {}
-    dataGlobal[outputName][timeString]['results'][config]['marginUnitP']  = {}
-    dataGlobal[outputName][timeString]['results'][config]['marginUnitR']  = {}
-    dataGlobal[outputName][timeString]['results'][config]['marginUnitF1'] = {}
-    for margin in [0, 12, 25, 50]:
-        print('margin = ' + str(margin))
-        if config == 'valid':
-            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_valid[0,:nRound_valid*seq_length,:],predict_valid[:nRound_valid*seq_length,:],True,True,margin)
-            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound_valid*seq_length,:],predict_valid[:nRound_valid*seq_length,:],True,True,margin)
-        else:
-            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_test[0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True,margin)
-            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True,margin)
-        print('P, R, F1 (middleUnit): ' + str(middleUnitP) + ', ' + str(middleUnitR) + ', ' + str(middleUnitF1))
-        print('P, R, F1 (marginUnit): ' + str(marginUnitP) + ', ' + str(marginUnitR) + ', ' + str(marginUnitF1))
-        dataGlobal[outputName][timeString]['results'][config]['middleUnitP'][margin]  = middleUnitP
-        dataGlobal[outputName][timeString]['results'][config]['middleUnitR'][margin]  = middleUnitR
-        dataGlobal[outputName][timeString]['results'][config]['middleUnitF1'][margin] = middleUnitF1
-        dataGlobal[outputName][timeString]['results'][config]['marginUnitP'][margin]  = marginUnitP
-        dataGlobal[outputName][timeString]['results'][config]['marginUnitR'][margin]  = marginUnitR
-        dataGlobal[outputName][timeString]['results'][config]['marginUnitF1'][margin] = marginUnitF1
+    for iOut in range(nOutputs):
+        print(outputsList[iOut])
+        print('Framewise accuracy: ' + str(acc[iOut]))
+        print('Framewise P, R, F1: ' + str(frameP[iOut]) + ', ' + str(frameR[iOut]) + ', ' + str(frameF1[iOut]))
+        print('P*(0,0), R*(0,0), F1*(0,0):' + str(pStarTp[iOut][0]) + ', ' + str(rStarTp[iOut][0]) + ', ' + str(fStarTp[iOut][0]))
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['frameAcc'] = acc[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['frameP']  = frameP[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['frameR']  = frameR[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['frameF1'] = frameF1[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['pStarTp'] = pStarTp[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['pStarTr'] = pStarTr[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['rStarTp'] = rStarTp[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['rStarTr'] = rStarTr[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['fStarTp'] = fStarTp[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['fStarTr'] = fStarTr[iOut]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['pStarZeroZero'] = pStarTp[iOut][0]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['rStarZeroZero'] = rStarTp[iOut][0]
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['fStarZeroZero'] = fStarTp[iOut][0]
+        Ip, Ir, Ipr = integralValues(fStarTp[iOut], fStarTr[iOut], step=stepWolf)
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['Ip']  = Ip
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['Ir']  = Ir
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['Ipr'] = Ipr
+        print('Ip, Ir, Ipr (star): ' + str(Ip) + ', ' + str(Ir) + ', ' + str(Ipr))
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['middleUnitP']  = {}
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['middleUnitR']  = {}
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['middleUnitF1'] = {}
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['marginUnitP']  = {}
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['marginUnitR']  = {}
+        dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['marginUnitF1'] = {}
+        for margin in [0, 12, 25, 50]:
+            print('margin = ' + str(margin))
+            if config == 'valid':
+                middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_valid[iOut][0,:nRound_valid*seq_length,:],predict_valid[iOut][:nRound_valid*seq_length,:],True,True,margin)
+                marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[iOut][0,:nRound_valid*seq_length,:],predict_valid[iOut][:nRound_valid*seq_length,:],True,True,margin)
+            else:
+                middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_test[iOut][0,:nRound_test*seq_length,:],predict_test[iOut][:nRound_test*seq_length,:],True,True,margin)
+                marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[iOut][0,:nRound_test*seq_length,:],predict_test[iOut][:nRound_test*seq_length,:],True,True,margin)
+            print('P, R, F1 (middleUnit): ' + str(middleUnitP) + ', ' + str(middleUnitR) + ', ' + str(middleUnitF1))
+            print('P, R, F1 (marginUnit): ' + str(marginUnitP) + ', ' + str(marginUnitR) + ', ' + str(marginUnitF1))
+            dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['middleUnitP'][margin]  = middleUnitP
+            dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['middleUnitR'][margin]  = middleUnitR
+            dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['middleUnitF1'][margin] = middleUnitF1
+            dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['marginUnitP'][margin]  = marginUnitP
+            dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['marginUnitR'][margin]  = marginUnitR
+            dataGlobal[outputName][timeString]['results'][config][outputsList[iOut]]['marginUnitF1'][margin] = marginUnitF1
 
 pickle.dump(dataGlobal, open(saveGlobalresults,'wb'), protocol=pickle.HIGHEST_PROTOCOL)
 np.savez(savePredictions+saveBestName, true=annot_test[0,:timestepsRound_test,:], pred=predict_test, idxTest=idxTest, separation=separation)
