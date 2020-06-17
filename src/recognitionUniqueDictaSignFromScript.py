@@ -1,7 +1,4 @@
-'''
-This script is intended to compare results with Yanovich's paper
-It is ran on the NCSLGR corpus, with FLS, FS and DS
-'''
+
 
 from models.data_utils import *
 from models.model_utils import *
@@ -59,6 +56,17 @@ parser.add_argument('--idxValidBypass',    type=int,    default=[],      choices
 parser.add_argument('--idxTestBypass',     type=int,    default=[],      choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
 parser.add_argument('--randSeed',          type=int,    default=17,                                  help='Random seed (numpy)')
 parser.add_argument('--weightCorrection',  type=float,  default=0,                                   help='Correction for data imbalance (from 0 (no correction) to 1)')
+parser.add_argument('--inputType',         type=str,    default='3Dfeatures_HS', choices=['2Draw',
+                                                                                          '2Draw_HS',
+                                                                                          '2Dfeatures',
+                                                                                          '2Dfeatures_HS',
+                                                                                          '3Draw',
+                                                                                          '3Draw_HS',
+                                                                                          '3Dfeatures',
+                                                                                          '3Dfeatures_HS'],
+                                                                                                    help='Type of features')
+parser.add_argument('--inputNormed', type=int,    default=1,       choices=[0, 1],                  help='If features are normed')
+
 
 
 # Fine parameters
@@ -124,6 +132,8 @@ idxTrainBypass    = args.idxTrainBypass
 idxValidBypass    = args.idxValidBypass
 idxTestBypass     = args.idxTestBypass
 weightCorrection  = args.weightCorrection
+inputType         = args.inputType
+inputNormed      = bool(args.inputNormed)
 
 # Fine parameters
 seq_length          = args.seqLength
@@ -161,6 +171,41 @@ metricsNames = ['acc', 'f1K', 'precisionK', 'recallK']
 timeString = str(round(time.time()/10))
 saveBestName='recognitionUniqueDictaSign_'+outputName+'_'+timeString
 
+features_dict={'features_HS':np.array([]),
+               'features_HS_norm':np.array([]),
+               'raw':np.array([]),
+               'raw_norm':np.array([]),
+               '2Dfeatures':np.array([]),
+               '2Dfeatures_norm':np.array([])},
+
+if inputNormed:
+    suffix='_norm'
+else:
+    suffix=''
+if inputType=='2Draw':
+    features_dict['raw'+suffix]         = np.sort(np.hstack([np.arange(0,14),np.arange(28,42),np.arange(42,42+68),np.arange(42+2*68,42+3*68)]))
+    features_dict['features_HS'+suffix] = np.arange(122, 244)
+elif inputType=='2Draw_HS':
+    features_dict['raw'+suffix]         = np.sort(np.hstack([np.arange(0,14),np.arange(28,42),np.arange(42,42+68),np.arange(42+2*68,42+3*68)]))
+    features_dict['features_HS'+suffix] = np.arange(0, 244)
+elif inputType=='2Dfeatures':
+    features_dict['2Dfeatures'+suffix]  = np.arange(0, 96)
+    features_dict['features_HS'+suffix] = np.arange(122, 244)
+elif inputType=='2Dfeatures_HS':
+    features_dict['2Dfeatures'+suffix]  = np.arange(0, 96)
+    features_dict['features_HS'+suffix] = np.arange(0, 244)
+elif inputType=='3Draw':
+    features_dict['raw'+suffix]         = np.arange(0, 246)
+    features_dict['features_HS'+suffix] = np.arange(122, 244)
+elif inputType=='3Draw_HS':
+    features_dict['raw'+suffix]         = np.arange(0, 246)
+    features_dict['features_HS'+suffix] = np.arange(0, 244)
+elif inputType=='3Dfeatures':
+    features_dict['features_HS'+suffix] = np.arange(122, 420)
+elif inputType=='3Dfeatures_HS':
+    features_dict['features_HS'+suffix] = np.arange(0, 420)
+
+
 if path.exists(saveGlobalresults):
     dataGlobal = pickle.load(open(saveGlobalresults, 'rb'))
 else:
@@ -192,6 +237,8 @@ dataGlobal[outputName][timeString]['params']['idxTrainBypass']      = idxTrainBy
 dataGlobal[outputName][timeString]['params']['idxValidBypass']      = idxValidBypass
 dataGlobal[outputName][timeString]['params']['idxTestBypass']       = idxTestBypass
 dataGlobal[outputName][timeString]['params']['weightCorrection']    = weightCorrection
+dataGlobal[outputName][timeString]['params']['inputType']           = inputType
+dataGlobal[outputName][timeString]['params']['inputNormed']         = inputNormed
 dataGlobal[outputName][timeString]['params']['seq_length']          = seq_length
 dataGlobal[outputName][timeString]['params']['batch_size']          = batch_size
 dataGlobal[outputName][timeString]['params']['epochs']              = epochs

@@ -288,11 +288,11 @@ features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     separation=separation)
 
 classWeightFinal = []
-for i in range(nOutputs):
-    nClasses = outputNbList[i]#annot_train.shape[2]
-    classWeightsCorrected, _ = weightVectorImbalancedDataOneHot(annot_train[i][0, :, :])
-    classWeightsNotCorrected = np.ones(nClasses)
-    classWeightFinal.append(weightCorrection*classWeightsCorrected + (1-weightCorrection)*classWeightsNotCorrected)
+#for i in range(nOutputs):
+#    nClasses = outputNbList[i]#annot_train.shape[2]
+#    classWeightsCorrected, _ = weightVectorImbalancedDataOneHot(annot_train[i][0, :, :])
+#    classWeightsNotCorrected = np.ones(nClasses)
+#    classWeightFinal.append(weightCorrection*classWeightsCorrected + (1-weightCorrection)*classWeightsNotCorrected)
 
 
 model = get_model(outputsList,outputNbList,outputsWeightList,
