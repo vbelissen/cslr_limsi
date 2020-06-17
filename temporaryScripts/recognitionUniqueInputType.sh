@@ -25,7 +25,7 @@ do
   for (( iI=0; iI<${lenIn}; iI++ ));
   do
     inputType=${INPUT_TYPE[$iI]}
-    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation input" --epochs 150 --inputType $inputType--videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
+    python src/recognitionUniqueDictaSignFromScript.py --outputName $output --comment "variation input" --epochs 150 --inputType $inputType --videoSplitMode manual --signersTrain $FIXED_SIGNERS_TRAIN --signersValid $FIXED_SIGNERS_VALID --signersTest $FIXED_SIGNERS_TEST
   done
 
   mv *.hdf5 models/
