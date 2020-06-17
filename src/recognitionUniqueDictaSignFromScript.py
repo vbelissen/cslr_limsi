@@ -176,7 +176,7 @@ features_dict={'features_HS':np.array([]),
                'raw':np.array([]),
                'raw_norm':np.array([]),
                '2Dfeatures':np.array([]),
-               '2Dfeatures_norm':np.array([])},
+               '2Dfeatures_norm':np.array([])}
 
 if inputNormed:
     suffix='_norm'
