@@ -205,6 +205,7 @@ elif inputType=='3Dfeatures':
 elif inputType=='3Dfeatures_HS':
     features_dict['features_HS'+suffix] = np.arange(0, 420)
 
+features_number = features_dict['features_HS'].size + features_dict['features_HS_norm'].size + features_dict['raw'].size + features_dict['raw_norm'].size + features_dict['2Dfeatures'].size + features_dict['2Dfeatures_norm'].size
 
 if path.exists(saveGlobalresults):
     dataGlobal = pickle.load(open(saveGlobalresults, 'rb'))
@@ -336,7 +337,8 @@ model = get_model([outputName],[nClasses],[1],
                     time_steps=seq_length,
                     learning_rate=learning_rate,
                     optimizer=optimizer,
-                    metrics=metrics)
+                    metrics=metrics,
+                    features_number=features_number)
 
 history = train_model(model,
             features_train,
