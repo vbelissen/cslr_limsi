@@ -58,12 +58,16 @@ parser.add_argument('--randSeed',          type=int,    default=17,             
 parser.add_argument('--weightCorrection',  type=float,  default=0,                                   help='Correction for data imbalance (from 0 (no correction) to 1)')
 parser.add_argument('--inputType',         type=str,    default='3Dfeatures_HS', choices=['2Draw',
                                                                                           '2Draw_HS',
+                                                                                          '2Draw_HS_noOP',
                                                                                           '2Dfeatures',
                                                                                           '2Dfeatures_HS',
+                                                                                          '2Dfeatures_HS_noOP',
                                                                                           '3Draw',
                                                                                           '3Draw_HS',
+                                                                                          '3Draw_HS_noOP',
                                                                                           '3Dfeatures',
-                                                                                          '3Dfeatures_HS'],
+                                                                                          '3Dfeatures_HS',
+                                                                                          '3Dfeatures_HS_noOP'],
                                                                                                     help='Type of features')
 parser.add_argument('--inputNormed', type=int,    default=1,       choices=[0, 1],                  help='If features are normed')
 
@@ -188,22 +192,33 @@ if inputType=='2Draw':
 elif inputType=='2Draw_HS':
     features_dict['raw'+suffix]         = np.sort(np.hstack([np.arange(0,14),np.arange(28,42),np.arange(42,42+68),np.arange(42+2*68,42+3*68)]))
     features_dict['features_HS'+suffix] = np.arange(0, 244)
+elif inputType=='2Draw_HS_noOP':
+    features_dict['raw'+suffix]         = np.sort(np.hstack([np.arange(0,14),np.arange(28,42),np.arange(42,42+68),np.arange(42+2*68,42+3*68)]))
+    features_dict['features_HS'+suffix] = np.arange(0, 122)
 elif inputType=='2Dfeatures':
     features_dict['2Dfeatures'+suffix]  = np.arange(0, 96)
     features_dict['features_HS'+suffix] = np.arange(122, 244)
 elif inputType=='2Dfeatures_HS':
     features_dict['2Dfeatures'+suffix]  = np.arange(0, 96)
     features_dict['features_HS'+suffix] = np.arange(0, 244)
+elif inputType=='2Dfeatures_HS_noOP':
+    features_dict['2Dfeatures'+suffix]  = np.arange(0, 96)
+    features_dict['features_HS'+suffix] = np.arange(0, 122)
 elif inputType=='3Draw':
     features_dict['raw'+suffix]         = np.arange(0, 246)
     features_dict['features_HS'+suffix] = np.arange(122, 244)
 elif inputType=='3Draw_HS':
     features_dict['raw'+suffix]         = np.arange(0, 246)
     features_dict['features_HS'+suffix] = np.arange(0, 244)
+elif inputType=='3Draw_HS_noOP':
+    features_dict['raw'+suffix]         = np.arange(0, 246)
+    features_dict['features_HS'+suffix] = np.arange(0, 122)
 elif inputType=='3Dfeatures':
     features_dict['features_HS'+suffix] = np.arange(122, 420)
 elif inputType=='3Dfeatures_HS':
     features_dict['features_HS'+suffix] = np.arange(0, 420)
+elif inputType=='3Dfeatures_HS_noOP':
+    features_dict['features_HS'+suffix] = np.sort(np.hstack([np.arange(0,122),np.arange(244,420)]))
 
 features_number = features_dict['features_HS'].size + features_dict['features_HS_norm'].size + features_dict['raw'].size + features_dict['raw_norm'].size + features_dict['2Dfeatures'].size + features_dict['2Dfeatures_norm'].size
 
