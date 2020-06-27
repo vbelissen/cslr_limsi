@@ -1,5 +1,5 @@
 
-from src.models.data_utils import *
+#from src.models.data_utils import *
 from src.models.model_utils import *
 from src.models.train_model import *
 from src.models.perf_utils import *
@@ -78,9 +78,9 @@ for iOut in range(nOuts):
                 idxTest=predict['idxTest']
 
                 T = true.shape[0]
-                
+
                 idxDebFin = {'debut': np.zeros(nbVid), 'fin':np.zeros(nbVid)}
-                
+
                 idxDebTmp = 0
                 for i in range(nbVid):
                     nbFramesVid = annotation_raw[idxTest[i]].shape[0]
@@ -88,14 +88,14 @@ for iOut in range(nOuts):
                     results_videos[namesAll[idxTest[i]]][out]['true'][0:finTmp-idxDebTmp] = true[idxDebTmp:finTmp,1]
                     results_videos[namesAll[idxTest[i]]][out]['pred'][0:finTmp-idxDebTmp] = pred[idxDebTmp:finTmp,1]
                     idxDebTmp += nbFramesVid
-                    
+
 
                 #plt.figure()
                 #plt.plot(np.arange(T), true[:,1])
                 #plt.plot(np.arange(T), pred[:,1])
                 #plt.show()
 
-plotList = range(nbVid)#[8]
+plotList = [5]#range(nbVid)#[8]
 for j in plotList:
     plt.figure()
     plt.title(namesAll[idxTestClasse[j]])
@@ -105,4 +105,3 @@ for j in plotList:
 #model=get_model(['fls'],[2],[1],dropout=0.5,rnn_number=1,rnn_hidden_units=50,mlp_layers_number=0,conv=True,conv_filt=200,conv_ker=3,time_steps=100,learning_rate=0.001,metrics=['acc',  f1K,   precisionK,   recallK],features_number=298)
 
 #smodel.load_weights('models/'+saveBestName+'-best.hdf5')
-
