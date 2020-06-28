@@ -25,6 +25,7 @@ import pickle
 plt.switch_backend('TKAgg')
 
 listeOutputs = ['fls','DS','PT','FBUOY']
+outputsLatex = {'fls':'\\acrshort{fls}', 'DS':'\\acrshort{ds}', 'PT':'\\acrshort{pts}', 'FBUOY':'\\acrshort{fbuoy}'}
 listeFeatures = ['3Dfeatures_HS_noOP','2Dfeatures','2Dfeatures','3Dfeatures']
 nOuts = 4
 
@@ -95,13 +96,38 @@ for iOut in range(nOuts):
                 #plt.plot(np.arange(T), pred[:,1])
                 #plt.show()
 
-plotList = [5]#range(nbVid)#[8]
+plotList = range(nbVid)#[8]
 for j in plotList:
     plt.figure()
     plt.title(namesAll[idxTestClasse[j]])
-    plt.plot(results_videos[namesAll[idxTestClasse[j]]]['PT']['true'])
-    plt.plot(results_videos[namesAll[idxTestClasse[j]]]['PT']['pred'])
+    plt.plot(results_videos[namesAll[idxTestClasse[j]]]['DS']['true'])
+    plt.plot(results_videos[namesAll[idxTestClasse[j]]]['DS']['pred'])
     plt.show()
+
+import tikzplotlib
+from os.path import expanduser
+home = expanduser("~")
+
+outType='PT'
+idxClasse = 0
+plt.figure()
+t = np.arange(7340, 7375)
+plt.plot(t, results_videos[namesAll[idxTestClasse[idxClasse]]][outType]['true'][t], label='Annotation')
+plt.plot(t, results_videos[namesAll[idxTestClasse[idxClasse]]][outType]['pred'][t], '--', label='Prediction')
+plt.xlim((t[0],t[-1]+1))
+plt.ylim((0,1))
+plt.yticks([0,0.5,1])
+plt.xlabel("$t$")
+plt.legend()
+#plt.title(outputsLatex[outType]+' '+namesTest[idxClasse]+' '+str(t[0])+'-'+str(t[-1]+1))
+
+#
+tikzplotlib.save(home+'/thesis/testSequences/'+outType+'_'+namesTest[idxClasse]+'_'+str(t[0])+'_'+str(t[-1]+1)+'.tex')
+#a = tikzplotlib.get_tikz_code()
+#print(a)
+plt.show()
+
+
 #model=get_model(['fls'],[2],[1],dropout=0.5,rnn_number=1,rnn_hidden_units=50,mlp_layers_number=0,conv=True,conv_filt=200,conv_ker=3,time_steps=100,learning_rate=0.001,metrics=['acc',  f1K,   precisionK,   recallK],features_number=298)
 
 #smodel.load_weights('models/'+saveBestName+'-best.hdf5')
