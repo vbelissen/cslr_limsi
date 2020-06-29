@@ -944,17 +944,17 @@ def verifSets(idxTrain, idxValid, idxTest):
         print('Train and valid sets have common videos:')
         for i in interTrainValid:
             print('Video ' + str(i))
-        sys.exit()
+        #sys.exit()
     if np.size(interTrainTest) > 0:
         print('Train and test sets have common videos:')
         for i in interTrainTest:
             print('Video ' + str(i))
-        sys.exit()
+        #sys.exit()
     if np.size(interValidTest) > 0:
         print('Valid and test sets have common videos:')
         for i in interValidTest:
             print('Video ' + str(i))
-        sys.exit()
+        #sys.exit()
     print('Number of videos:')
     print('Train: ' + str(idxTrain.size))
     print('Valid: ' + str(idxValid.size))
