@@ -98,7 +98,32 @@ for iOut in range(nOuts):
                 #plt.plot(np.arange(T), pred[:,1])
                 #plt.show()
 
+
+import tikzplotlib
+from os.path import expanduser
+home = expanduser("~")
 plotList = range(nbVid)#[8]
+for j in plotList:
+    for iOut in range(nOuts):
+        out = listeOutputs[iOut]
+        plt.figure()
+        plt.title(namesAll[idxTestClasse[j]])
+        plt.yticks([0,0.5,1])
+        plt.xlabel("$t$")
+        plt.plot(results_videos[namesAll[idxTestClasse[j]]][out]['true'], color=colors[iOut])
+        tikzplotlib.save(home+'/thesis/testSequences/'+namesAll[idxTestClasse[j]]+'_'+out+'_true.tex')
+        plt.close()
+        plt.figure()
+        plt.title(namesAll[idxTestClasse[j]])
+        plt.yticks([0,0.5,1])
+        plt.xlabel("$t$")
+        plt.plot(results_videos[namesAll[idxTestClasse[j]]][out]['pred'], color=colors[iOut], linestyle=linestyles[iOut])
+        tikzplotlib.save(home+'/thesis/testSequences/'+namesAll[idxTestClasse[j]]+'_'+out+'_pred_v2.tex')
+        plt.close()
+    
+    
+
+
 for j in plotList:
     plt.figure()
     plt.title(namesAll[idxTestClasse[j]])
@@ -106,11 +131,10 @@ for j in plotList:
         out = listeOutputs[iOut]
         plt.plot(results_videos[namesAll[idxTestClasse[j]]][out]['true'], color=colors[iOut])
         plt.plot(results_videos[namesAll[idxTestClasse[j]]][out]['pred'], color=colors[iOut], linestyle=linestyles[iOut])
+    plt.yticks([0,0.5,1])
+    plt.xlabel("$t$")
+    #tikzplotlib.save(home+'/thesis/testSequences/'+namesAll[idxTestClasse[j]]+'_v2.tex')
     plt.show()
-
-import tikzplotlib
-from os.path import expanduser
-home = expanduser("~")
 
 outType='PT'
 idxClasse = 0

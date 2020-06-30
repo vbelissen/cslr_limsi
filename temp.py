@@ -24,12 +24,12 @@ import pickle
 
 plt.switch_backend('TKAgg')
 
-listeOutputs = ['fls','DS','PT','FBUOY']
-colors = ['navy', 'darkred', 'black', 'darkgreen']
+listeOutputs = ['fls']
+colors = ['black']
 linestyles = ['-', '--', '-.', ':']
-outputsLatex = {'fls':'\\acrshort{fls}', 'DS':'\\acrshort{ds}', 'PT':'\\acrshort{pts}', 'FBUOY':'\\acrshort{fbuoy}'}
-listeFeatures = ['2Dfeatures_HS','2Dfeatures_HS','2Dfeatures_HS','2Dfeatures_HS']
-nOuts = 4
+outputsLatex = {'PT':'\\acrshort{pts}'}
+listeFeatures = ['2Dfeatures']
+nOuts = 1
 
 idxTest = np.load('reports/corpora/DictaSign/recognitionUnique/predictions/recognitionUniqueDictaSign_DS_159336941.npz')['idxTest']
 idxTestClasse = np.sort(idxTest)
@@ -68,7 +68,7 @@ for iOut in range(nOuts):
     print(out)
     dataGlobal[out].keys()
     for k in dataGlobal[out].keys():
-        if dataGlobal[out][k]['comment'] == 'plot thesis v3':
+        if dataGlobal[out][k]['comment'] == 'plot thesis v2':
             if dataGlobal[out][k]['params']['inputType'] == listeFeatures[iOut]:
                 print(k)
                 print(dataGlobal[out][k]['params']['inputType'])
@@ -110,32 +110,11 @@ for j in plotList:
         plt.title(namesAll[idxTestClasse[j]])
         plt.yticks([0,0.5,1])
         plt.xlabel("$t$")
-        plt.plot(results_videos[namesAll[idxTestClasse[j]]][out]['true'], color=colors[iOut])
-        tikzplotlib.save(home+'/thesis/testSequences/'+namesAll[idxTestClasse[j]]+'_'+out+'_true.tex')
-        plt.close()
-        plt.figure()
-        plt.title(namesAll[idxTestClasse[j]])
-        plt.yticks([0,0.5,1])
-        plt.xlabel("$t$")
         plt.plot(results_videos[namesAll[idxTestClasse[j]]][out]['pred'], color=colors[iOut], linestyle=linestyles[iOut])
-        tikzplotlib.save(home+'/thesis/testSequences/'+namesAll[idxTestClasse[j]]+'_'+out+'_pred_v3.tex')
+        tikzplotlib.save(home+'/thesis/testSequences/'+namesAll[idxTestClasse[j]]+'_'+out+'_pred_v1.csv')
         plt.close()
     
     
-
-
-for j in plotList:
-    plt.figure()
-    plt.title(namesAll[idxTestClasse[j]])
-    for iOut in range(nOuts):
-        out = listeOutputs[iOut]
-        plt.plot(results_videos[namesAll[idxTestClasse[j]]][out]['true'], color=colors[iOut])
-        plt.plot(results_videos[namesAll[idxTestClasse[j]]][out]['pred'], color=colors[iOut], linestyle=linestyles[iOut])
-    plt.yticks([0,0.5,1])
-    plt.xlabel("$t$")
-    tikzplotlib.save(home+'/thesis/testSequences/'+namesAll[idxTestClasse[j]]+'_v3.tex')
-    plt.show()
-
 
 
 
