@@ -36,14 +36,14 @@ catDetails = [
               ['fingerspelling', 'fingerspelled_loan_signs'],
               [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
              ]
-batch_size=200
-epochs=200
+batch_size=50
+epochs=80
 seq_length=100
 separation=50
-dropout=0
+dropout=0.3
 rnn_number=1
 mlp_layers_number=0
-rnn_hidden_units=50
+rnn_hidden_units=30
 learning_rate=0.001
 earlyStopping=True
 save='best'
@@ -67,7 +67,7 @@ lengthCriterion = 300
 includeLong=True
 includeShort=True
 
-inputType         = '2Dfeatures'#'2Dfeatures_HS_noOP'
+inputType         = '3Dfeatures_HS'#'2Dfeatures_HS_noOP'
 inputNormed       = True
 features_dict, features_number = getFeaturesDict(inputType=inputType, inputNormed=inputNormed)
 
