@@ -39,7 +39,7 @@ catDetails = [
 batch_size=200
 epochs=200
 seq_length=100
-separation=50
+separation=0
 dropout=0
 rnn_number=1
 mlp_layers_number=0
@@ -67,6 +67,10 @@ lengthCriterion = 300
 includeLong=True
 includeShort=True
 
+inputType         = '2Dfeatures_HS_noOP'
+inputNormed      = True
+features_dict, features_number = getFeaturesDict(inputType=inputType, inputNormed=inputNormed)
+
 # Wolf metrics
 stepWolf=0.01
 
@@ -83,17 +87,20 @@ features_train, annot_train = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
                                                         video_indices=idxTrain,
-                                                        separation=separation)
+                                                        separation=separation,
+                                                        features_dict=features_dict)
 features_valid, annot_valid = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
                                                         video_indices=idxValid,
-                                                        separation=separation)
+                                                        separation=separation,
+                                                        features_dict=features_dict)
 features_test, annot_test = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
                                                         video_indices=idxTest,
-                                                        separation=separation)
+                                                        separation=separation,
+                                                        features_dict=features_dict)
 
 classWeights, classWeights_dict = weightVectorImbalancedDataOneHot(annot_train[0, :, :])
 
@@ -112,7 +119,8 @@ model = get_model(outputNames,[4],[1],
                     time_steps=seq_length,
                     learning_rate=learning_rate,
                     optimizer=optimizer,
-                    metrics=metrics)
+                    metrics=metrics,
+                    features_number=features_number)
 
 train_model(model,
             features_train,
