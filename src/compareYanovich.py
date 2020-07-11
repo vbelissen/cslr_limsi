@@ -37,7 +37,7 @@ catDetails = [
               [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
              ]
 batch_size=200
-epochs=200
+epochs=80
 seq_length=100
 separation=50
 dropout=0
