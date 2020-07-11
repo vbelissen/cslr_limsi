@@ -50,7 +50,7 @@ save='best'
 saveMonitor='val_accYanovichK'
 saveMonitorMode='max'
 saveBestName='Yanovich'
-reduceLrOnPlateau=True
+reduceLrOnPlateau=False
 reduceLrMonitor='val_accYanovichK'
 reduceLrMonitorMode='max'
 reduceLrPatience=7
@@ -67,7 +67,7 @@ lengthCriterion = 300
 includeLong=True
 includeShort=True
 
-inputType         = '2Dfeatures_HS_noOP'
+inputType         = '3Dfeatures_HS'#'2Dfeatures_HS_noOP'
 inputNormed      = True
 features_dict, features_number = getFeaturesDict(inputType=inputType, inputNormed=inputNormed)
 
