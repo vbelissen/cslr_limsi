@@ -39,7 +39,7 @@ catDetails = [
 batch_size=200
 epochs=200
 seq_length=100
-separation=0
+separation=50
 dropout=0
 rnn_number=1
 mlp_layers_number=0
@@ -67,7 +67,7 @@ lengthCriterion = 300
 includeLong=True
 includeShort=True
 
-inputType         = '3Dfeatures_HS'#'2Dfeatures_HS_noOP'
+inputType         = '3Dfeatures_HS_noOP'#'2Dfeatures_HS_noOP'
 inputNormed      = True
 features_dict, features_number = getFeaturesDict(inputType=inputType, inputNormed=inputNormed)
 
@@ -92,13 +92,13 @@ features_train, annot_train = get_data_concatenated(corpus,
 features_valid, annot_valid = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
-                                                        video_indices=idxValid,
+                                                        video_indices=idxTest,
                                                         separation=separation,
                                                         features_dict=features_dict)
 features_test, annot_test = get_data_concatenated(corpus,
                                                         'sign_types',
                                                         catNames, catDetails,
-                                                        video_indices=idxTest,
+                                                        video_indices=idxValid,
                                                         separation=separation,
                                                         features_dict=features_dict)
 
