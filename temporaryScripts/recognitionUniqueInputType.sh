@@ -1,7 +1,7 @@
 #!/bin/bash
 
 OUTPUTS=("fls" "FS" "DS" "PT" "FBUOY")
-INPUT_TYPE=("2Draw_HS_noOP" "2Dfeatures_HS_noOP" "3Draw_HS_noOP" "3Dfeatures_HS_noOP")
+INPUT_TYPE=("2Draw_noHands" "2Dfeatures_noHands" "3Draw_noHands" "3Dfeatures_noHands")
 #INPUT_TYPE=("2Draw" "2Draw_HS" "2Draw_HS_noOP" "2Dfeatures" "2Dfeatures_HS" "2Dfeatures_HS_noOP" "3Draw" "3Draw_HS" "3Draw_HS_noOP" "3Dfeatures" "3Dfeatures_HS" "3Dfeatures_HS_noOP")
 
 FIXED_SIGNERS_TRAIN="0 5 6 7 8 9 10 11 12 13 14 15"
