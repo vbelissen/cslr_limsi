@@ -1,4 +1,4 @@
-# Test
+# A few sequences from Dicta-Sign-LSF-v2
 
 ### S3_T1_B0 frames 7340-7375
 [![S3_T1_B0 frames 7340-7375](https://img.youtube.com/vi/nrVO0d5Ehx8/0.jpg)](https://www.youtube.com/watch?v=nrVO0d5Ehx8)
@@ -20,5 +20,3 @@
 
 ### S7_T2_A10 frames 5285-5385
 [![S7_T2_A10 frames 5285-5385](https://img.youtube.com/vi/purfDE9ipiA/0.jpg)](https://www.youtube.com/watch?v=purfDE9ipiA)
-
-
