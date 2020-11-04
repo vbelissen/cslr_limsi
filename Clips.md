@@ -15,6 +15,9 @@
 ### S7_T2_A10 frames 1710-1820
 [![S7_T2_A10 frames 1710-1820](https://img.youtube.com/vi/dCWnwHQaVIM/0.jpg)](https://www.youtube.com/watch?v=dCWnwHQaVIM)
 
+### S7_T2_A10 frames 1955-2033
+[![S7_T2_A10 frames 1955-2033](https://img.youtube.com/vi/NEdSGjnkWhg/0.jpg)](https://www.youtube.com/watch?v=NEdSGjnkWhg)
+
 ### S7_T2_A10 frames 3398-3485
 [![S7_T2_A10 frames 3398-3485](https://img.youtube.com/vi/DYFzHmiqvkY/0.jpg)](https://www.youtube.com/watch?v=DYFzHmiqvkY)
 
