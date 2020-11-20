@@ -9,19 +9,22 @@ if v0 == '2':
     import tensorflow.keras.backend as K
     from tensorflow.keras import optimizers
     from tensorflow.keras.callbacks import TensorBoard
-    from tensorflow.keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Input, Dense, Conv1D, Dropout, GlobalAveragePooling1D, multiply
+    from tensorflow.keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Input, Dense, Conv1D, Dropout, GlobalAveragePooling1D, multiply, Flatten
     from tensorflow.python.keras.layers.core import *
     from tensorflow.keras.models import *
     from tensorflow.keras.utils import to_categorical, plot_model
+    from tensorflow.keras.applications.resnet50 import ResNet50
 elif v0 == '1':
     #For tensorflow 1.2.0
     import keras.backend as K
     from keras import optimizers
     from keras.callbacks import TensorBoard
-    from keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Input, Dense, Conv1D, Dropout, GlobalAveragePooling1D, merge
+    from keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Input, Dense, Conv1D, Dropout, GlobalAveragePooling1D, merge, Flatten
     from keras.layers.core import *
     from keras.models import *
     from keras.utils import to_categorical, plot_model
+    from keras.applications.resnet50 import ResNet50
+
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
 
@@ -160,6 +163,7 @@ def get_model(output_names,
               learning_rate=0.005,
               time_steps=100,
               features_number=420,
+              features_type='vector',
               print_summary=True):
     """
         Keras recurrent neural network model builder.
@@ -191,13 +195,25 @@ def get_model(output_names,
             learning_rate: learning rate (float)
             time_steps: length of sequences (int)
             features_number: number of features (int)
+            features_type: 'vector' (1D vector of features), 'frames' (for a CNN processing) or 'both'
             print_summary (bool)
 
         Output: A Keras model
     """
 
+    img_height = 720
+    img_width = 576
+
     # input
-    main_input = Input(shape=(time_steps, features_number))
+    if features_type == 'vector':
+        main_input = Input(shape=(time_steps, features_number))
+    elif features_type == 'frames':
+        main_input = Input(shape=(time_steps, img_height, img_width, 3))
+    elif features_type == 'both':
+        print('')
+    else:
+        sys.exit('Invalid features type')
+
     input_transfo = main_input
 
     # convolution input
@@ -212,6 +228,18 @@ def get_model(output_names,
             input_transfo = attention_featurewise(input_transfo, single=att_in_rnn_single, attention_layer_descriptor='before_rnn')
         else:
             sys.exit('Invalid attention type')
+
+    if features_type == 'frames':
+        resnet = ResNet50(include_top=False, weights="imagenet", pooling='max', input_shape=(img_height,img_width,3))
+        input_transfo = TimeDistributed(resnet)(input_transfo)
+        input_transfo = TimeDistributed(Flatten())(input_transfo)
+
+        for layer in resnet.layers[:165]:
+           layer.trainable = False
+        for layer in resnet.layers[165:]:
+           layer.trainable = True
+        for i, layer in enumerate(resnet.layers):
+            print(i, layer.name, layer.trainable)
 
     # recurrent layers
     if rnn_number == 1:

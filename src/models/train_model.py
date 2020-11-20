@@ -18,6 +18,7 @@ if v0 == '2':
     from tensorflow.python.keras.layers.core import *
     from tensorflow.keras.models import *
     from tensorflow.keras.utils import to_categorical, plot_model
+    from tensorflow.keras.preprocessing.image import load_img, img_to_array
 elif v0 == '1':
     #For tensorflow 1.2.0
     import keras.backend as K
@@ -27,20 +28,34 @@ elif v0 == '1':
     from keras.layers.core import *
     from keras.models import *
     from keras.utils import to_categorical, plot_model
+    from keras.preprocessing.image import load_img, img_to_array
+
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
 
 
-def generator(features, annot, batch_size, seq_length, output_form, output_class_weights):
+def generator(features, features_type, annot, batch_size, seq_length, output_form, output_class_weights):
     """
     Generator function for batch training models
+    features: [preprocessed features (numpy array (1, time_steps, nb_features)), images_path (list of strings)]
     """
-    total_length_round = (features.shape[1]//seq_length)*seq_length
-    batch_size_time = np.min([batch_size*seq_length, total_length_round])
-    feature_number = features.shape[2]
+    img_width = 720
+    img_height = 576
 
-    batch_features = np.zeros((1, batch_size_time, feature_number))
-    #batch_labels_weight = np.zeros((1, batch_size_time))
+    if features_type == 'frames':
+        total_length_round = (len(features[1])//seq_length)*seq_length
+    elif features_type == 'vector' or features_type == 'both':
+        total_length_round = (features[0].shape[1]//seq_length)*seq_length
+        feature_number = features[0].shape[2]
+    else:
+        sys.exit('Wrong features type')
+
+    batch_size_time = np.min([batch_size*seq_length, total_length_round])
+
+    if features_type == 'frames' or features_type == 'both'::
+        batch_images = np.zeros((1, batch_size_time, img_width, img_height, 3))
+    if features_type == 'vector' or features_type == 'both':
+        batch_features = np.zeros((1, batch_size_time, feature_number))
 
     if output_class_weights != []:
         if output_form == 'mixed':
@@ -81,13 +96,25 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
         end_modulo = np.mod(end, total_length_round)
 
         # Fill in batch features
-        batch_features = batch_features.reshape(1, batch_size_time, feature_number)
-        if end <= total_length_round:
-            batch_features = features[0, random_ini:end, :].reshape(-1, seq_length, feature_number)
-        else:
-            batch_features[0, :(total_length_round - random_ini), :] = features[0, random_ini:total_length_round, :]
-            batch_features[0, (total_length_round - random_ini):, :] = features[0, 0:end_modulo, :]
-            batch_features = batch_features.reshape(-1, seq_length, feature_number)
+        if features_type == 'vector' or features_type == 'both':
+            batch_features = batch_features.reshape(1, batch_size_time, feature_number)
+            if end <= total_length_round:
+                batch_features = features[0][0, random_ini:end, :].reshape(-1, seq_length, feature_number)
+            else:
+                batch_features[0, :(total_length_round - random_ini), :] = features[0][0, random_ini:total_length_round, :]
+                batch_features[0, (total_length_round - random_ini):, :] = features[0][0, 0:end_modulo, :]
+                batch_features = batch_features.reshape(-1, seq_length, feature_number)
+        if features_type == 'images' or features_type == 'both':
+            batch_images = batch_images.reshape(1, batch_size_time, img_width, img_height, 3)
+            if end <= total_length_round:
+                for iFrame in range(random_ini, end):
+                    batch_images[0, iFrame-random_ini, :, :, :] = load_img(features[1][iFrame], target_size=(img_width, img_height)).img_to_array(img)
+            else:
+                for iFrame in range(random_ini,total_length_round):
+                    batch_images[0, iFrame-random_ini, :, :, :] = load_img(features[1][iFrame], target_size=(img_width, img_height)).img_to_array(img)
+                for iFrame in range(0, end_modulo):
+                    batch_images[0, iFrame+total_length_round-random_ini, :, :, :] = load_img(features[1][iFrame], target_size=(img_width, img_height)).img_to_array(img)
+            batch_images = batch_images.reshape(-1, seq_length, img_width, img_height, 3)
 
         # Fill in batch weights
         if output_class_weights != []:
@@ -130,9 +157,19 @@ def generator(features, annot, batch_size, seq_length, output_form, output_class
                 batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
 
         if output_class_weights != []:
-            yield batch_features, batch_labels, batch_labels_weight
+            if features_type == 'vector':
+                yield batch_features, batch_labels, batch_labels_weight
+            elif features_type == 'frames':
+                yield batch_frames, batch_labels, batch_labels_weight
+            elif features_type == 'both':
+                yield [batch_features, batch_frames], batch_labels, batch_labels_weight
         else:
-            yield batch_features, batch_labels
+            if features_type == 'vector':
+                yield batch_features, batch_labels
+            elif features_type == 'frames':
+                yield batch_frames, batch_labels
+            elif features_type == 'both':
+                yield [batch_features, batch_frames], batch_labels
 
 
 def train_model(model,
@@ -143,6 +180,7 @@ def train_model(model,
                 batch_size,
                 epochs,
                 seq_length,
+                features_type='vector',
                 output_class_weights=[],
                 earlyStopping=False,
                 save='no',
@@ -159,10 +197,10 @@ def train_model(model,
 
         Inputs:
             model: keras model
-            features_train: numpy array of features [1, time_steps_train, features]
+            features_train: [numpy array of features [1, time_steps_train, features], list of images (if CNN is used)]
             annot_train: either list of annotation arrays (output_form: 'mixed')
                             or one binary array (output_form: 'sign_types')
-            features_valid: numpy array of features [1, time_steps_valid, features]
+            features_valid: [numpy array of features [1, time_steps_valid, features], list of images (if CNN is used)]
             annot_valid: either list of annotation arrays (output_form: 'mixed')
                              or one binary array (output_form: 'sign_types')
             batch_size
@@ -183,10 +221,17 @@ def train_model(model,
     if output_form == 'mixed':
         annot_categories_number = len(annot_train)
 
-    time_steps_train = features_train.shape[1]
-    time_steps_valid = features_valid.shape[1]
+    if features_type == 'frames':
+        time_steps_train = len(features_train[1])
+        time_steps_valid = len(features_valid[1])
+    elif features_type == 'vector' or features_type == 'both':
+        time_steps_train = features_train[0].shape[1]
+        time_steps_valid = features_valid[0].shape[1]
+    else:
+        sys.exit('Wrong features type')
 
-    total_length_train_round = (features_train.shape[1] // seq_length) * seq_length
+
+    total_length_train_round = (time_steps_train // seq_length) * seq_length
     batch_size_time = np.min([batch_size * seq_length, total_length_train_round])
 
     callbacksPerso = []
@@ -207,10 +252,10 @@ def train_model(model,
     if reduceLrOnPlateau:
         callbacksPerso.append(ReduceLROnPlateau(monitor=reduceLrMonitor, factor=reduceLrFactor, patience=reduceLrPatience, verbose=1, epsilon=1e-4, mode=reduceLrMonitorMode))
 
-    hist = model.fit_generator(generator(features_train, annot_train, batch_size, seq_length, output_form, output_class_weights),
+    hist = model.fit_generator(generator(features_train, features_type, annot_train, batch_size, seq_length, output_form, output_class_weights),
                                epochs=epochs,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
-                               validation_data=generator(features_valid, annot_valid, batch_size, seq_length, output_form, output_class_weights),
+                               validation_data=generator(features_valid, features_type, annot_valid, batch_size, seq_length, output_form, output_class_weights),
                                validation_steps=1,
                                callbacks=callbacksPerso)
 
