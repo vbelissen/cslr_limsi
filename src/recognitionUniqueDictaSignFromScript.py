@@ -297,8 +297,8 @@ features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     separation=separation,
                                                     features_dict=features_dict)
 
-print(len(features_train))
-print(features_train[0].shape)
+#print(len(features_train))
+#print(features_train[0].shape)
 
 nClasses = annot_train.shape[2]
 

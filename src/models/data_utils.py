@@ -572,7 +572,7 @@ def get_data_concatenated(corpus,
         else: sys.exit('Invalid output form')
 
 
-    if features_type == 'features' or features_type == 'both':
+    if features_type == 'vector' or features_type == 'both':
         features_number = preloaded_features[0].shape[2]
         X_features = np.zeros((1, total_length, features_number))
     else:
@@ -594,8 +594,8 @@ def get_data_concatenated(corpus,
     img_start_idx = 0
     for i_vid in range(video_number):
         vid_idx = video_indices[i_vid]
-        if features_type == 'features' or features_type == 'both':
-            X[0, img_start_idx:img_start_idx+video_lengths[i_vid], :] = preloaded_features[i_vid][0, :, :]
+        if features_type == 'vector' or features_type == 'both':
+            X_features[0, img_start_idx:img_start_idx+video_lengths[i_vid], :] = preloaded_features[i_vid][0, :, :]
         if features_type == 'frames' or features_type == 'both':
             tmp_vid    = np.repeat(list_videos[i_vid]+'/', video_lengths[i_vid])
             tmp_frames = np.char.zfill((np.arange(video_lengths[i_vid])+1).astype('<U5'),5)
