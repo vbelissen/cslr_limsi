@@ -275,21 +275,21 @@ if outputName=='fls' and not flsBinary:
 else:
     output_form='sign_types'
     output_categories_or_names_original=[[outputName]]
-[features_train, _ ] , annot_train = get_data_concatenated(corpus=corpus,
+features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
                                                     output_categories_or_names_original=output_categories_or_names_original,
                                                     video_indices=idxTrain,
                                                     separation=separation,
                                                     features_dict=features_dict)
-[features_valid, _ ], annot_valid = get_data_concatenated(corpus=corpus,
+features_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
                                                     output_categories_or_names_original=output_categories_or_names_original,
                                                     video_indices=idxValid,
                                                     separation=separation,
                                                     features_dict=features_dict)
-[features_test, _ ], annot_test   = get_data_concatenated(corpus=corpus,
+features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
                                                     output_categories_or_names_original=output_categories_or_names_original,
