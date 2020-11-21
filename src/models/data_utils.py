@@ -487,7 +487,8 @@ def get_data_concatenated(corpus,
                           video_indices=np.arange(10),
                           separation=100,
                           from_notebook=False,
-                          return_idx_trueData=False):
+                          return_idx_trueData=False,
+                          features_type='vector'):
     """
         For returning concatenated features and annotations for a set of videos (e.g. train set...).
             e.g. features_2_train, annot_2_train = get_data_concatenated('NCSLGR',
@@ -523,13 +524,26 @@ def get_data_concatenated(corpus,
             separation: in order to separate consecutive videos
             from_notebook: if notebook script, data is in parent folder
             return_idx_trueData: if True, returns a binary vector with 0 where separations are
+            features_type: 'vector', 'frames', 'both'
 
         Outputs:
-            X: a numpy array [1, total_time_steps, features_number] for features
+            X: [a numpy array [1, total_time_steps, features_number] for features,
+                a list of frame paths]
             Y: array or list, comprising annotations
     """
 
-    if preloaded_features is None:
+    if from_notebook:
+        parent = '../'
+    else:
+        parent = ''
+
+    list_videos = np.load(parent+'data/processed/DictaSign/list_videos.npy')
+
+    video_number = video_indices.size
+    video_lengths = np.zeros(video_number, dtype=int)
+    total_length = 0
+
+    if preloaded_features is None and features_type != 'frames':
         preloaded_features = get_features_videos(corpus, features_dict, video_indices, from_notebook)
     if preloaded_annotations is None:
         if output_form == 'mixed':
@@ -539,26 +553,33 @@ def get_data_concatenated(corpus,
                                                                       output_assemble,
                                                                       video_indices,
                                                                       from_notebook)
+            for i_vid in range(video_number):
+                vid_idx = video_indices[i_vid]
+                video_lengths[i_vid] = preloaded_annotations[0][i_vid].shape[1]
+                total_length += video_lengths[i_vid]
+                total_length += separation
         elif output_form == 'sign_types':
             preloaded_annotations = get_annotations_videos_sign_types_binary(corpus,
                                                                              output_names_final,
                                                                              output_categories_or_names_original,
                                                                              video_indices,
                                                                              from_notebook)
+            for i_vid in range(video_number):
+                vid_idx = video_indices[i_vid]
+                video_lengths[i_vid] = preloaded_annotations[i_vid].shape[1]
+                total_length += video_lengths[i_vid]
+                total_length += separation
         else: sys.exit('Invalid output form')
 
-    video_number = video_indices.size
-    video_lengths = np.zeros(video_number, dtype=int)
-    total_length = 0
-    for i_vid in range(video_number):
-        vid_idx = video_indices[i_vid]
-        video_lengths[i_vid] = preloaded_features[i_vid].shape[1]
-        total_length += video_lengths[i_vid]
-        total_length += separation
 
-    features_number = preloaded_features[0].shape[2]
+    if features_type == 'features' or features_type == 'both':
+        features_number = preloaded_features[0].shape[2]
+        X_features = np.zeros((1, total_length, features_number))
+    else:
+        X_features = np.array([])
 
-    X = np.zeros((1, total_length, features_number))
+    X_frames = np.repeat('',total_length).astype('<U15')
+
     idx_trueData = np.zeros(total_length)
 
     output_number = len(output_names_final)
@@ -573,7 +594,13 @@ def get_data_concatenated(corpus,
     img_start_idx = 0
     for i_vid in range(video_number):
         vid_idx = video_indices[i_vid]
-        X[0, img_start_idx:img_start_idx+video_lengths[i_vid], :] = preloaded_features[i_vid][0, :, :]
+        if features_type == 'features' or features_type == 'both':
+            X[0, img_start_idx:img_start_idx+video_lengths[i_vid], :] = preloaded_features[i_vid][0, :, :]
+        if features_type == 'frames' or features_type == 'both':
+            tmp_vid    = np.repeat(list_videos[i_vid]+'/', video_lengths[i_vid])
+            tmp_frames = np.char.zfill((np.arange(video_lengths[i_vid])+1).astype('<U5'),5)
+            X_frames[img_start_idx:img_start_idx + video_lengths[i_vid]] = np.core.defchararray.add(tmp_vid, tmp_frames)
+            X_frames[img_start_idx + video_lengths[i_vid]:img_start_idx + video_lengths[i_vid]+separation] = 'nothing'
         idx_trueData[img_start_idx:img_start_idx+video_lengths[i_vid]] = 1
         if output_form == 'mixed':
             for i_output in range(output_number):
@@ -586,9 +613,9 @@ def get_data_concatenated(corpus,
         img_start_idx += separation
 
     if return_idx_trueData:
-        return X, Y, idx_trueData
+        return [X_features, X_frames], Y, idx_trueData
     else:
-        return X, Y
+        return [X_features, X_frames], Y
 
 
 def getVideoIndicesSplitNCSLGR(fractionValid=0.10,
@@ -1025,7 +1052,7 @@ def getFeaturesDict(inputType, inputNormed):
         features_dict['features_HS'+suffix] = np.sort(np.hstack([np.arange(0,122),np.arange(244,420)]))
     elif inputType=='3Dfeatures_noHands':
         features_dict['features_HS'+suffix] = np.arange(244, 420)
-    
+
 
     features_number = features_dict['features_HS'].size + features_dict['features_HS_norm'].size + features_dict['raw'].size + features_dict['raw_norm'].size + features_dict['2Dfeatures'].size + features_dict['2Dfeatures_norm'].size
 

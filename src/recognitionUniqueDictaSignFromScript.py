@@ -71,9 +71,12 @@ parser.add_argument('--inputType',         type=str,    default='3Dfeatures_HS',
                                                                                           '3Dfeatures',
                                                                                           '3Dfeatures_HS',
                                                                                           '3Dfeatures_HS_noOP',
-                                                                                          '3Dfeatures_noHands'],
+                                                                                          '3Dfeatures_noHands',
+                                                                                          'none'],
                                                                                                     help='Type of features')
-parser.add_argument('--inputNormed', type=int,    default=1,       choices=[0, 1],                  help='If features are normed')
+parser.add_argument('--inputNormed',         type=int,    default=1,          choices=[0, 1],       help='If features are normed')
+parser.add_argument('--inputFeaturesFrames', type=str,    default='features', choices=['features', 'frames', 'both'],
+                                                                                                    help='Features type')
 
 
 
@@ -124,24 +127,25 @@ flsKeep    = args.flsKeep#[]
 comment    = args.comment#[]
 
 # Training global setting
-videoSplitMode    = args.videoSplitMode
-fractionValid     = args.fractionValid
-fractionTest      = args.fractionTest
-signerIndependent = bool(args.signerIndependent)#False
-taskIndependent   = bool(args.taskIndependent)
-excludeTask9      = bool(args.excludeTask9)
-tasksTrain        = args.tasksTrain#[2,3,4,5,6,7,8]
-tasksValid        = args.tasksValid#[9]
-tasksTest         = args.tasksTest#[7] # session 7
-signersTrain      = args.signersTrain#[2,3,4,5,6,7,8]
-signersValid      = args.signersValid#[9]
-signersTest       = args.signersTest#[7] # session 7
-idxTrainBypass    = args.idxTrainBypass
-idxValidBypass    = args.idxValidBypass
-idxTestBypass     = args.idxTestBypass
-weightCorrection  = args.weightCorrection
-inputType         = args.inputType
-inputNormed      = bool(args.inputNormed)
+videoSplitMode      = args.videoSplitMode
+fractionValid       = args.fractionValid
+fractionTest        = args.fractionTest
+signerIndependent   = bool(args.signerIndependent)#False
+taskIndependent     = bool(args.taskIndependent)
+excludeTask9        = bool(args.excludeTask9)
+tasksTrain          = args.tasksTrain#[2,3,4,5,6,7,8]
+tasksValid          = args.tasksValid#[9]
+tasksTest           = args.tasksTest#[7] # session 7
+signersTrain        = args.signersTrain#[2,3,4,5,6,7,8]
+signersValid        = args.signersValid#[9]
+signersTest         = args.signersTest#[7] # session 7
+idxTrainBypass      = args.idxTrainBypass
+idxValidBypass      = args.idxValidBypass
+idxTestBypass       = args.idxTestBypass
+weightCorrection    = args.weightCorrection
+inputType           = args.inputType
+inputNormed         = bool(args.inputNormed)
+inputFeaturesFrames = args.inputFeaturesFrames
 
 # Fine parameters
 seq_length          = args.seqLength
@@ -214,6 +218,7 @@ dataGlobal[outputName][timeString]['params']['idxTestBypass']       = idxTestByp
 dataGlobal[outputName][timeString]['params']['weightCorrection']    = weightCorrection
 dataGlobal[outputName][timeString]['params']['inputType']           = inputType
 dataGlobal[outputName][timeString]['params']['inputNormed']         = inputNormed
+dataGlobal[outputName][timeString]['params']['inputFeaturesFrames'] = inputFeaturesFrames
 dataGlobal[outputName][timeString]['params']['seq_length']          = seq_length
 dataGlobal[outputName][timeString]['params']['batch_size']          = batch_size
 dataGlobal[outputName][timeString]['params']['epochs']              = epochs
@@ -270,21 +275,21 @@ if outputName=='fls' and not flsBinary:
 else:
     output_form='sign_types'
     output_categories_or_names_original=[[outputName]]
-features_train, annot_train = get_data_concatenated(corpus=corpus,
+[features_train, _ ] , annot_train = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
                                                     output_categories_or_names_original=output_categories_or_names_original,
                                                     video_indices=idxTrain,
                                                     separation=separation,
                                                     features_dict=features_dict)
-features_valid, annot_valid = get_data_concatenated(corpus=corpus,
+[features_valid, _ ], annot_valid = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
                                                     output_categories_or_names_original=output_categories_or_names_original,
                                                     video_indices=idxValid,
                                                     separation=separation,
                                                     features_dict=features_dict)
-features_test, annot_test   = get_data_concatenated(corpus=corpus,
+[features_test, _ ], annot_test   = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
                                                     output_categories_or_names_original=output_categories_or_names_original,
