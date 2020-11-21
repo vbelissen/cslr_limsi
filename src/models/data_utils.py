@@ -613,9 +613,9 @@ def get_data_concatenated(corpus,
         img_start_idx += separation
 
     if return_idx_trueData:
-        return X_features, X_frames, Y, idx_trueData
+        return [X_features, X_frames], Y, idx_trueData
     else:
-        return X_features, X_frames, Y
+        return [X_features, X_frames], Y
 
 
 def getVideoIndicesSplitNCSLGR(fractionValid=0.10,
