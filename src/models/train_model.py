@@ -52,7 +52,7 @@ def generator(features, features_type, annot, batch_size, seq_length, output_for
 
     batch_size_time = np.min([batch_size*seq_length, total_length_round])
 
-    if features_type == 'frames' or features_type == 'both'::
+    if features_type == 'frames' or features_type == 'both':
         batch_images = np.zeros((1, batch_size_time, img_width, img_height, 3))
     if features_type == 'vector' or features_type == 'both':
         batch_features = np.zeros((1, batch_size_time, feature_number))
