@@ -211,9 +211,6 @@ def train_model(model,
         Outputs:
             ?
     """
-    print(len(features_train))
-    print(features_train[0].shape)
-
     if type(annot_train) == list:
         output_form = 'mixed'
     elif type(annot_train) == np.ndarray:
