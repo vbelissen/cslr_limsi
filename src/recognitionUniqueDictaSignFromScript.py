@@ -282,7 +282,7 @@ features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     video_indices=idxTrain,
                                                     separation=separation,
                                                     features_dict=features_dict,
-                                                    features_type=features_type)
+                                                    features_type=inputFeaturesFrames)
 features_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
@@ -290,7 +290,7 @@ features_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     video_indices=idxValid,
                                                     separation=separation,
                                                     features_dict=features_dict,
-                                                    features_type=features_type)
+                                                    features_type=inputFeaturesFrames)
 features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
@@ -298,7 +298,7 @@ features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     video_indices=idxTest,
                                                     separation=separation,
                                                     features_dict=features_dict,
-                                                    features_type=features_type)
+                                                    features_type=inputFeaturesFrames)
 
 #print(len(features_train))
 #print(features_train[0].shape)
