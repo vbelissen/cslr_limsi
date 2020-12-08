@@ -44,7 +44,7 @@ def generator(features, features_type, annot, batch_size, seq_length, output_for
 
     if features_type == 'frames':
         total_length_round = (len(features[1])//seq_length)*seq_length
-    elif features_type == 'vector' or features_type == 'both':
+    elif features_type == 'features' or features_type == 'both':
         total_length_round = (features[0].shape[1]//seq_length)*seq_length
         feature_number = features[0].shape[2]
     else:
@@ -54,7 +54,7 @@ def generator(features, features_type, annot, batch_size, seq_length, output_for
 
     if features_type == 'frames' or features_type == 'both':
         batch_images = np.zeros((1, batch_size_time, img_width, img_height, 3))
-    if features_type == 'vector' or features_type == 'both':
+    if features_type == 'features' or features_type == 'both':
         batch_features = np.zeros((1, batch_size_time, feature_number))
 
     if output_class_weights != []:
@@ -96,7 +96,7 @@ def generator(features, features_type, annot, batch_size, seq_length, output_for
         end_modulo = np.mod(end, total_length_round)
 
         # Fill in batch features
-        if features_type == 'vector' or features_type == 'both':
+        if features_type == 'features' or features_type == 'both':
             batch_features = batch_features.reshape(1, batch_size_time, feature_number)
             if end <= total_length_round:
                 batch_features = features[0][0, random_ini:end, :].reshape(-1, seq_length, feature_number)
@@ -157,14 +157,14 @@ def generator(features, features_type, annot, batch_size, seq_length, output_for
                 batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
 
         if output_class_weights != []:
-            if features_type == 'vector':
+            if features_type == 'features':
                 yield batch_features, batch_labels, batch_labels_weight
             elif features_type == 'frames':
                 yield batch_frames, batch_labels, batch_labels_weight
             elif features_type == 'both':
                 yield [batch_features, batch_frames], batch_labels, batch_labels_weight
         else:
-            if features_type == 'vector':
+            if features_type == 'features':
                 yield batch_features, batch_labels
             elif features_type == 'frames':
                 yield batch_frames, batch_labels
@@ -180,7 +180,7 @@ def train_model(model,
                 batch_size,
                 epochs,
                 seq_length,
-                features_type='vector',
+                features_type='features',
                 output_class_weights=[],
                 earlyStopping=False,
                 save='no',
@@ -224,7 +224,7 @@ def train_model(model,
     if features_type == 'frames':
         time_steps_train = len(features_train[1])
         time_steps_valid = len(features_valid[1])
-    elif features_type == 'vector' or features_type == 'both':
+    elif features_type == 'features' or features_type == 'both':
         time_steps_train = features_train[0].shape[1]
         time_steps_valid = features_valid[0].shape[1]
     else:
