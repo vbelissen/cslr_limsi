@@ -527,8 +527,8 @@ def get_data_concatenated(corpus,
             features_type: 'vector', 'frames', 'both'
 
         Outputs:
-            X: [a numpy array [1, total_time_steps, features_number] for features,
-                a list of frame paths]
+            X1: a numpy array [1, total_time_steps, features_number] for features
+            X2: a list of frame paths
             Y: array or list, comprising annotations
     """
 
@@ -613,9 +613,9 @@ def get_data_concatenated(corpus,
         img_start_idx += separation
 
     if return_idx_trueData:
-        return [X_features, X_frames], Y, idx_trueData
+        return X_features, X_frames, Y, idx_trueData
     else:
-        return [X_features, X_frames], Y
+        return X_features, X_frames, Y
 
 
 def getVideoIndicesSplitNCSLGR(fractionValid=0.10,

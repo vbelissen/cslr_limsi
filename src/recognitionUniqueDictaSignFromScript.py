@@ -275,7 +275,7 @@ if outputName=='fls' and not flsBinary:
 else:
     output_form='sign_types'
     output_categories_or_names_original=[[outputName]]
-features_train, annot_train = get_data_concatenated(corpus=corpus,
+features_train, frames_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
                                                     output_categories_or_names_original=output_categories_or_names_original,
@@ -283,7 +283,7 @@ features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     separation=separation,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames)
-features_valid, annot_valid = get_data_concatenated(corpus=corpus,
+features_valid, frames_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
                                                     output_categories_or_names_original=output_categories_or_names_original,
@@ -291,7 +291,7 @@ features_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     separation=separation,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames)
-features_test, annot_test   = get_data_concatenated(corpus=corpus,
+features_test, frames_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     output_names_final=[outputName],
                                                     output_categories_or_names_original=output_categories_or_names_original,
@@ -326,9 +326,9 @@ model = get_model([outputName],[nClasses],[1],
                     features_number=features_number)
 
 history = train_model(model,
-            features_train,
+            [features_train, frames_train],
             annot_train,
-            features_valid,
+            [features_valid, frames_valid],
             annot_valid,
             output_class_weights=[classWeightFinal],
             batch_size=batch_size,
