@@ -488,7 +488,8 @@ def get_data_concatenated(corpus,
                           separation=100,
                           from_notebook=False,
                           return_idx_trueData=False,
-                          features_type='features'):
+                          features_type='features',
+                          frames_path_before_video='/localHD/DictaSign/convert/img/DictaSign_lsf_'):
     """
         For returning concatenated features and annotations for a set of videos (e.g. train set...).
             e.g. features_2_train, annot_2_train = get_data_concatenated('NCSLGR',
@@ -578,7 +579,7 @@ def get_data_concatenated(corpus,
     else:
         X_features = np.array([])
 
-    X_frames = np.repeat('',total_length).astype('<U15')
+    X_frames = np.repeat('',total_length).astype('<U100')
 
     idx_trueData = np.zeros(total_length)
 
@@ -597,9 +598,10 @@ def get_data_concatenated(corpus,
         if features_type == 'features' or features_type == 'both':
             X_features[0, img_start_idx:img_start_idx+video_lengths[i_vid], :] = preloaded_features[i_vid][0, :, :]
         if features_type == 'frames' or features_type == 'both':
-            tmp_vid    = np.repeat(list_videos[i_vid]+'/', video_lengths[i_vid])
-            tmp_frames = np.char.zfill((np.arange(video_lengths[i_vid])+1).astype('<U5'),5)
-            X_frames[img_start_idx:img_start_idx + video_lengths[i_vid]] = np.core.defchararray.add(tmp_vid, tmp_frames)
+            tmp_vid       = np.repeat(frames_path_before_video + list_videos[vid_idx] + '_front/', video_lengths[i_vid])
+            tmp_frames    = np.char.zfill((np.arange(video_lengths[i_vid])+1).astype('<U5'),5)
+            tmp_extension = np.repeat('.jpg', video_lengths[i_vid])
+            X_frames[img_start_idx:img_start_idx + video_lengths[i_vid]] = np.core.defchararray.add(np.core.defchararray.add(tmp_vid, tmp_frames), tmp_extension)
             X_frames[img_start_idx + video_lengths[i_vid]:img_start_idx + video_lengths[i_vid]+separation] = 'nothing'
         idx_trueData[img_start_idx:img_start_idx+video_lengths[i_vid]] = 1
         if output_form == 'mixed':

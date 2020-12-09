@@ -39,8 +39,8 @@ def generator(features, features_type, annot, batch_size, seq_length, output_for
     Generator function for batch training models
     features: [preprocessed features (numpy array (1, time_steps, nb_features)), images_path (list of strings)]
     """
-    img_width = 720
-    img_height = 576
+    img_width = 224
+    img_height = 224
 
     if features_type == 'frames':
         total_length_round = (len(features[1])//seq_length)*seq_length
@@ -53,7 +53,7 @@ def generator(features, features_type, annot, batch_size, seq_length, output_for
     batch_size_time = np.min([batch_size*seq_length, total_length_round])
 
     if features_type == 'frames' or features_type == 'both':
-        batch_images = np.zeros((1, batch_size_time, img_width, img_height, 3))
+        batch_frames = np.zeros((1, batch_size_time, img_width, img_height, 3))
     if features_type == 'features' or features_type == 'both':
         batch_features = np.zeros((1, batch_size_time, feature_number))
 
@@ -104,17 +104,17 @@ def generator(features, features_type, annot, batch_size, seq_length, output_for
                 batch_features[0, :(total_length_round - random_ini), :] = features[0][0, random_ini:total_length_round, :]
                 batch_features[0, (total_length_round - random_ini):, :] = features[0][0, 0:end_modulo, :]
                 batch_features = batch_features.reshape(-1, seq_length, feature_number)
-        if features_type == 'images' or features_type == 'both':
-            batch_images = batch_images.reshape(1, batch_size_time, img_width, img_height, 3)
+        if features_type == 'frames' or features_type == 'both':
+            batch_frames = batch_frames.reshape(1, batch_size_time, img_width, img_height, 3)
             if end <= total_length_round:
                 for iFrame in range(random_ini, end):
-                    batch_images[0, iFrame-random_ini, :, :, :] = load_img(features[1][iFrame], target_size=(img_width, img_height)).img_to_array(img)
+                    batch_frames[0, iFrame-random_ini, :, :, :] = img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height)))
             else:
                 for iFrame in range(random_ini,total_length_round):
-                    batch_images[0, iFrame-random_ini, :, :, :] = load_img(features[1][iFrame], target_size=(img_width, img_height)).img_to_array(img)
+                    batch_frames[0, iFrame-random_ini, :, :, :] = img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height)))
                 for iFrame in range(0, end_modulo):
-                    batch_images[0, iFrame+total_length_round-random_ini, :, :, :] = load_img(features[1][iFrame], target_size=(img_width, img_height)).img_to_array(img)
-            batch_images = batch_images.reshape(-1, seq_length, img_width, img_height, 3)
+                    batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height)))
+            batch_frames = batch_frames.reshape(-1, seq_length, img_width, img_height, 3)
 
         # Fill in batch weights
         if output_class_weights != []:
@@ -250,12 +250,29 @@ def train_model(model,
                                               mode=saveMonitorMode,
                                               verbose=1))
     if reduceLrOnPlateau:
-        callbacksPerso.append(ReduceLROnPlateau(monitor=reduceLrMonitor, factor=reduceLrFactor, patience=reduceLrPatience, verbose=1, epsilon=1e-4, mode=reduceLrMonitorMode))
+        callbacksPerso.append(ReduceLROnPlateau(monitor=reduceLrMonitor,
+                                                factor=reduceLrFactor,
+                                                patience=reduceLrPatience,
+                                                verbose=1,
+                                                epsilon=1e-4,
+                                                mode=reduceLrMonitorMode))
 
-    hist = model.fit_generator(generator(features_train, features_type, annot_train, batch_size, seq_length, output_form, output_class_weights),
+    hist = model.fit_generator(generator(features_train,
+                                         features_type,
+                                         annot_train,
+                                         batch_size,
+                                         seq_length,
+                                         output_form,
+                                         output_class_weights),
                                epochs=epochs,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
-                               validation_data=generator(features_valid, features_type, annot_valid, batch_size, seq_length, output_form, output_class_weights),
+                               validation_data=generator(features_valid,
+                                                         features_type,
+                                                         annot_valid,
+                                                         batch_size,
+                                                         seq_length,
+                                                         output_form,
+                                                         output_class_weights),
                                validation_steps=1,
                                callbacks=callbacksPerso)
 

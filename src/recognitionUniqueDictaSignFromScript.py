@@ -301,8 +301,8 @@ features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     features_type=inputFeaturesFrames)
 
 #print(len(features_train))
-print(features_train[0].shape)
-print(len(features_train[1]))
+#print(features_train[0].shape)
+#print(len(features_train[1]))
 
 nClasses = annot_train.shape[2]
 
@@ -324,7 +324,8 @@ model = get_model([outputName],[nClasses],[1],
                     learning_rate=learning_rate,
                     optimizer=optimizer,
                     metrics=metrics,
-                    features_number=features_number)
+                    features_number=features_number,
+                    features_type=inputFeaturesFrames)
 
 history = train_model(model,
             features_train,
@@ -343,7 +344,8 @@ history = train_model(model,
             reduceLrMonitor=reduceLrMonitor,
             reduceLrMonitorMode=reduceLrMonitorMode,
             reduceLrPatience=reduceLrPatience,
-            reduceLrFactor=reduceLrFactor)
+            reduceLrFactor=reduceLrFactor,
+            features_type=inputFeaturesFrames)
 
 
 

@@ -163,7 +163,7 @@ def get_model(output_names,
               learning_rate=0.005,
               time_steps=100,
               features_number=420,
-              features_type='vector',
+              features_type='features',
               print_summary=True):
     """
         Keras recurrent neural network model builder.
@@ -195,17 +195,18 @@ def get_model(output_names,
             learning_rate: learning rate (float)
             time_steps: length of sequences (int)
             features_number: number of features (int)
-            features_type: 'vector' (1D vector of features), 'frames' (for a CNN processing) or 'both'
+            features_type: 'features' (1D vector of features), 'frames' (for a CNN processing) or 'both'
             print_summary (bool)
 
         Output: A Keras model
     """
 
-    img_height = 720
-    img_width = 576
+
+    img_height = 224
+    img_width = 224
 
     # input
-    if features_type == 'vector':
+    if features_type == 'features':
         main_input = Input(shape=(time_steps, features_number))
     elif features_type == 'frames':
         main_input = Input(shape=(time_steps, img_height, img_width, 3))
@@ -216,22 +217,26 @@ def get_model(output_names,
 
     input_transfo = main_input
 
-    # convolution input
-    if conv:
-        input_transfo = Conv1D(filters=conv_filt, kernel_size=conv_ker, strides=conv_strides, padding='same', activation='relu')(input_transfo)
+    if features_type != 'frames':
+        # convolution input
+        if conv:
+            input_transfo = Conv1D(filters=conv_filt, kernel_size=conv_ker, strides=conv_strides, padding='same', activation='relu')(input_transfo)
 
-    # attention before RNNs
-    if att_in_rnn:
-        if att_in_rnn_type == 'timewise':
-            input_transfo = attention_timewise(input_transfo, time_steps=time_steps, single=att_in_rnn_single, attention_layer_descriptor='before_rnn')
-        elif att_in_rnn_type == 'featurewise':
-            input_transfo = attention_featurewise(input_transfo, single=att_in_rnn_single, attention_layer_descriptor='before_rnn')
-        else:
-            sys.exit('Invalid attention type')
+        # attention before RNNs
+        if att_in_rnn:
+            if att_in_rnn_type == 'timewise':
+                input_transfo = attention_timewise(input_transfo, time_steps=time_steps, single=att_in_rnn_single, attention_layer_descriptor='before_rnn')
+            elif att_in_rnn_type == 'featurewise':
+                input_transfo = attention_featurewise(input_transfo, single=att_in_rnn_single, attention_layer_descriptor='before_rnn')
+            else:
+                sys.exit('Invalid attention type')
+
 
     if features_type == 'frames':
         resnet = ResNet50(include_top=False, weights="imagenet", pooling='max', input_shape=(img_height,img_width,3))
         input_transfo = TimeDistributed(resnet)(input_transfo)
+        #intermediate_model = Model(inputs=resnet.input, outputs=resnet.output)
+        #input_transfo = TimeDistributed(intermediate_model)(input_transfo)
         input_transfo = TimeDistributed(Flatten())(input_transfo)
 
         for layer in resnet.layers[:165]:
