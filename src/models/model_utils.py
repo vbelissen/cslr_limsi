@@ -235,9 +235,12 @@ def get_model(output_names,
     if features_type == 'frames':
         resnet = ResNet50(include_top=False, weights="imagenet", pooling='max', input_shape=(img_height,img_width,3))
         input_transfo = TimeDistributed(resnet)(input_transfo)
+        denseResnet = [200]
+        for i in range(len(denseResnet)):
+            input_transfo = TimeDistributed(Dense(denseResnet[i], activation='relu'))(input_transfo)
         #intermediate_model = Model(inputs=resnet.input, outputs=resnet.output)
         #input_transfo = TimeDistributed(intermediate_model)(input_transfo)
-        input_transfo = TimeDistributed(Flatten())(input_transfo)
+        #input_transfo = TimeDistributed(Flatten())(input_transfo)
 
         for layer in resnet.layers[:165]:
            layer.trainable = False

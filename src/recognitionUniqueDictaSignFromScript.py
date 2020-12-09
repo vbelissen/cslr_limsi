@@ -106,7 +106,7 @@ parser.add_argument('--saveModel',         type=str,    default='best',    help=
 parser.add_argument('--saveBestMonitor',   type=str,    default='val_f1K', help='What metric to decide best model')
 parser.add_argument('--saveBestMonMode',   type=str,    default='max',     help='Mode to define best',                              choices=['min', 'max'])
 parser.add_argument('--saveGlobalresults', type=str,    default='reports/corpora/DictaSign/recognitionUnique/global/globalUnique.dat', help='Where to save global results')
-parser.add_argument('--savePredictions',   type=str,    default='reports/corpora/DictaSign/recognitionUnique/predictions/', help='Where to save predictions')
+parser.add_argument('--savePredictions',   type=str,    default='reports/corpora/DictaSign/recognitionUnique/predictions/',            help='Where to save predictions')
 
 
 # Metrics
