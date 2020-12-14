@@ -263,6 +263,9 @@ def get_model(output_names,
             for layer in cnnBackbone.layers[cnnFirstTrainedLayer:]:
                layer.trainable = True
 
+        for i, layer in enumerate(cnnBackbone.layers):
+            print(i, layer.name, layer.trainable)
+
     if features_type == 'features':
         input_transfo = input_transfo_features
     elif features_type == 'frames':
