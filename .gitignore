@@ -93,3 +93,6 @@ target/
 
 # exclude reports for now
 /reports/
+
+# hdf5 files
+*.hdf5

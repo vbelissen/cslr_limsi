@@ -201,45 +201,41 @@ def get_model(output_names,
         Output: A Keras model
     """
 
-
     img_height = 224
-    img_width = 224
+    img_width  = 224
 
     # input
-    if features_type == 'features':
-        main_input = Input(shape=(time_steps, features_number))
-    elif features_type == 'frames':
-        main_input = Input(shape=(time_steps, img_height, img_width, 3))
-    elif features_type == 'both':
-        print('')
-    else:
+    if features_type == 'features' or features_type == 'both':
+        main_input_features    = Input(shape=(time_steps, features_number))
+        input_transfo_features = main_input_features
+    if features_type == 'frames' or features_type == 'both':
+        main_input_frames    = Input(shape=(time_steps, img_height, img_width, 3))
+        input_transfo_frames = main_input_frames
+    if features_type != 'features' and features_type != 'frames' and features_type != 'both':
         sys.exit('Invalid features type')
-
-    input_transfo = main_input
 
     if features_type != 'frames':
         # convolution input
         if conv:
-            input_transfo = Conv1D(filters=conv_filt, kernel_size=conv_ker, strides=conv_strides, padding='same', activation='relu')(input_transfo)
+            input_transfo_features = Conv1D(filters=conv_filt, kernel_size=conv_ker, strides=conv_strides, padding='same', activation='relu')(input_transfo_features)
 
         # attention before RNNs
         if att_in_rnn:
             if att_in_rnn_type == 'timewise':
-                input_transfo = attention_timewise(input_transfo, time_steps=time_steps, single=att_in_rnn_single, attention_layer_descriptor='before_rnn')
+                input_transfo_features = attention_timewise(input_transfo_features, time_steps=time_steps, single=att_in_rnn_single, attention_layer_descriptor='before_rnn')
             elif att_in_rnn_type == 'featurewise':
-                input_transfo = attention_featurewise(input_transfo, single=att_in_rnn_single, attention_layer_descriptor='before_rnn')
+                input_transfo_features = attention_featurewise(input_transfo_features, single=att_in_rnn_single, attention_layer_descriptor='before_rnn')
             else:
                 sys.exit('Invalid attention type')
 
 
-    if features_type == 'frames':
+    if features_type != 'features':
         resnet = ResNet50(include_top=False, weights="imagenet", pooling='max', input_shape=(img_height,img_width,3))
-        input_transfo = TimeDistributed(resnet)(input_transfo)
-        denseResnet = [200]
-        for i in range(len(denseResnet)):
-            input_transfo = TimeDistributed(Dense(denseResnet[i], activation='relu'))(input_transfo)
-        #intermediate_model = Model(inputs=resnet.input, outputs=resnet.output)
-        #input_transfo = TimeDistributed(intermediate_model)(input_transfo)
+        input_transfo_frames = TimeDistributed(resnet)(input_transfo_frames)
+        #denseResnet = [200]
+        #for i in range(len(denseResnet)):
+        #    input_transfo = TimeDistributed(Dense(denseResnet[i], activation='relu'))(input_transfo)
+
         #input_transfo = TimeDistributed(Flatten())(input_transfo)
 
         for layer in resnet.layers[:165]:
@@ -248,6 +244,18 @@ def get_model(output_names,
            layer.trainable = True
         for i, layer in enumerate(resnet.layers):
             print(i, layer.name, layer.trainable)
+
+    if features_type == 'features':
+        input_transfo = input_transfo_features
+    elif features_type == 'frames':
+        input_transfo = input_transfo_frames
+    elif features_type == 'both':
+        input_transfo = merge([input_transfo_features, input_transfo_frames],
+                        name='merge_features_frames',
+                        mode='concat')
+    else:
+        sys.exit('Invalid features type')
+
 
     # recurrent layers
     if rnn_number == 1:
