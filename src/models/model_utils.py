@@ -15,7 +15,7 @@ if v0 == '2':
     from tensorflow.keras.utils import to_categorical, plot_model
     from tensorflow.keras.applications.resnet50 import ResNet50
     from tensorflow.keras.applications.vgg16 import VGG16
-    from tensorflow.keras.applications.mobilenet import MobileNet
+    from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
 elif v0 == '1':
     #For tensorflow 1.2.0
     import keras.backend as K
@@ -27,7 +27,7 @@ elif v0 == '1':
     from keras.utils import to_categorical, plot_model
     from keras.applications.resnet50 import ResNet50
     from keras.applications.vgg16 import VGG16
-    from keras.applications.mobilenet import MobileNet
+    from keras.applications.mobilenet_v2 import MobileNetV2
 
 
 else:
@@ -243,7 +243,7 @@ def get_model(output_names,
         elif cnnType=='vgg':
             cnnBackbone = VGG16(include_top=False, weights="imagenet", pooling='max', input_shape=(img_height,img_width,3))
         elif cnnType=='mobilenet':
-            cnnBackbone = MobileNet(include_top=False, weights="imagenet", pooling='max', input_shape=(img_height,img_width,3))
+            cnnBackbone = MobileNetV2(include_top=False, weights="imagenet", pooling='max', input_shape=(img_height,img_width,3))
         else:
             sys.exit('Invalid CNN network model')
 

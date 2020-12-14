@@ -564,7 +564,8 @@ history = train_model(model,
             reduceLrFactor=reduceLrFactor,
             features_type=inputFeaturesFrames,
             img_width=imgWidth,
-            img_height=imgHeight)
+            img_height=imgHeight,
+            cnnType=cnnType)
 
 
 

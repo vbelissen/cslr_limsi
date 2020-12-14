@@ -19,6 +19,9 @@ if v0 == '2':
     from tensorflow.keras.models import *
     from tensorflow.keras.utils import to_categorical, plot_model
     from tensorflow.keras.preprocessing.image import load_img, img_to_array
+    from tensorflow.keras.applications.resnet50 import preprocess_input as preprocess_input_ResNet50
+    from tensorflow.keras.applications.vgg16 import preprocess_input as preprocess_input_VGG16
+    from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as preprocess_input_MobileNetV2
 elif v0 == '1':
     #For tensorflow 1.2.0
     import keras.backend as K
@@ -29,6 +32,9 @@ elif v0 == '1':
     from keras.models import *
     from keras.utils import to_categorical, plot_model
     from keras.preprocessing.image import load_img, img_to_array
+    from keras.applications.resnet50 import preprocess_input as preprocess_input_ResNet50
+    from keras.applications.vgg16 import preprocess_input as preprocess_input_VGG16
+    from keras.applications.mobilenet_v2 import preprocess_input as preprocess_input_MobileNetV2
 
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
@@ -41,7 +47,8 @@ def generator(features,
               output_form,
               output_class_weights,
               img_width,
-              img_height):
+              img_height
+              cnnType):
     """
     Generator function for batch training models
     features: [preprocessed features (numpy array (1, time_steps, nb_features)), images_path (list of strings)]
@@ -113,12 +120,33 @@ def generator(features,
             batch_frames = batch_frames.reshape(1, batch_size_time, img_width, img_height, 3)
             if end <= total_length_round:
                 for iFrame in range(random_ini, end):
-                    batch_frames[0, iFrame-random_ini, :, :, :] = img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height)))
+                    if cnnType=='resnet':
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    elif cnnType=='vgg':
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    elif cnnType=='mobilenet':
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNetV2(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    else:
+                        sys.exit('Invalid CNN network model')
             else:
                 for iFrame in range(random_ini,total_length_round):
-                    batch_frames[0, iFrame-random_ini, :, :, :] = img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height)))
+                    if cnnType=='resnet':
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    elif cnnType=='vgg':
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    elif cnnType=='mobilenet':
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNetV2(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    else:
+                        sys.exit('Invalid CNN network model')
                 for iFrame in range(0, end_modulo):
-                    batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height)))
+                    if cnnType=='resnet':
+                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    elif cnnType=='vgg':
+                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    elif cnnType=='mobilenet':
+                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_MobileNetV2(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    else:
+                        sys.exit('Invalid CNN network model')
             batch_frames = batch_frames.reshape(-1, seq_length, img_width, img_height, 3)
 
         # Fill in batch weights
@@ -198,7 +226,8 @@ def train_model(model,
                 reduceLrPatience=7,
                 reduceLrFactor=0.8,
                 img_width=224,
-                img_height=224):
+                img_height=224,
+                cnnType='resnet'):
     """
         Trains a keras model.
 
