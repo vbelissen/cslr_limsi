@@ -21,7 +21,7 @@ if v0 == '2':
     from tensorflow.keras.preprocessing.image import load_img, img_to_array
     from tensorflow.keras.applications.resnet50 import preprocess_input as preprocess_input_ResNet50
     from tensorflow.keras.applications.vgg16 import preprocess_input as preprocess_input_VGG16
-    from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as preprocess_input_MobileNetV2
+    from tensorflow.keras.applications.mobilenet import preprocess_input as preprocess_input_MobileNet
 elif v0 == '1':
     #For tensorflow 1.2.0
     import keras.backend as K
@@ -34,7 +34,7 @@ elif v0 == '1':
     from keras.preprocessing.image import load_img, img_to_array
     from keras.applications.resnet50 import preprocess_input as preprocess_input_ResNet50
     from keras.applications.vgg16 import preprocess_input as preprocess_input_VGG16
-    from keras.applications.mobilenet_v2 import preprocess_input as preprocess_input_MobileNetV2
+    from keras.applications.mobilenet import preprocess_input as preprocess_input_MobileNet
 
 else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
@@ -125,7 +125,7 @@ def generator(features,
                     elif cnnType=='vgg':
                         batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
                     elif cnnType=='mobilenet':
-                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNetV2(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
                     else:
                         sys.exit('Invalid CNN network model')
             else:
@@ -135,7 +135,7 @@ def generator(features,
                     elif cnnType=='vgg':
                         batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
                     elif cnnType=='mobilenet':
-                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNetV2(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
                     else:
                         sys.exit('Invalid CNN network model')
                 for iFrame in range(0, end_modulo):
@@ -144,7 +144,7 @@ def generator(features,
                     elif cnnType=='vgg':
                         batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
                     elif cnnType=='mobilenet':
-                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_MobileNetV2(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
                     else:
                         sys.exit('Invalid CNN network model')
             batch_frames = batch_frames.reshape(-1, seq_length, img_width, img_height, 3)
