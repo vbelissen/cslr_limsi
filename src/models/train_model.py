@@ -47,7 +47,7 @@ def generator(features,
               output_form,
               output_class_weights,
               img_width,
-              img_height
+              img_height,
               cnnType):
     """
     Generator function for batch training models
