@@ -333,7 +333,15 @@ def get_model(output_names,
             output_list.append(Dense(output_classes[i_output], activation='softmax', name='output_' + output_names[i_output])(output_intermed_list[i_output]))
 
     # Create model
-    model = Model(inputs=main_input, outputs=output_list)
+    if features_type == 'features':
+        model = Model(inputs=main_input_features, outputs=output_list)
+    elif features_type == 'frames':
+        model = Model(inputs=main_input_frames, outputs=output_list)
+    elif features_type == 'both':
+        model = Model(inputs=[main_input_features, main_input_frames], outputs=output_list)
+    else:
+        sys.exit('Invalid features type')
+        
     # framewise weights:
     if classif_local:
         weight_mode_sequence = 'temporal'
