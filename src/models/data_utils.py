@@ -489,7 +489,8 @@ def get_data_concatenated(corpus,
                           from_notebook=False,
                           return_idx_trueData=False,
                           features_type='features',
-                          frames_path_before_video='/localHD/DictaSign/convert/img/DictaSign_lsf_'):
+                          frames_path_before_video='/localHD/DictaSign/convert/img/DictaSign_lsf_',
+                          empty_image_path='/localHD/DictaSign/convert/img/white.jpg'):
     """
         For returning concatenated features and annotations for a set of videos (e.g. train set...).
             e.g. features_2_train, annot_2_train = get_data_concatenated('NCSLGR',
@@ -602,7 +603,7 @@ def get_data_concatenated(corpus,
             tmp_frames    = np.char.zfill((np.arange(video_lengths[i_vid])+1).astype('<U5'),5)
             tmp_extension = np.repeat('.jpg', video_lengths[i_vid])
             X_frames[img_start_idx:img_start_idx + video_lengths[i_vid]] = np.core.defchararray.add(np.core.defchararray.add(tmp_vid, tmp_frames), tmp_extension)
-            X_frames[img_start_idx + video_lengths[i_vid]:img_start_idx + video_lengths[i_vid]+separation] = 'nothing'
+            X_frames[img_start_idx + video_lengths[i_vid]:img_start_idx + video_lengths[i_vid]+separation] = empty_image_path
         idx_trueData[img_start_idx:img_start_idx+video_lengths[i_vid]] = 1
         if output_form == 'mixed':
             for i_output in range(output_number):

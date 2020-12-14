@@ -33,84 +33,285 @@ parser = argparse.ArgumentParser(description='Trains a Keras-TF model for the re
 #group.add_argument("-q", "--quiet", action="store_true")
 
 # Output type
-parser.add_argument('--outputName', type=str,    default='PT', help='The output type that the model is trained to recognize')
-parser.add_argument('--flsBinary',  type=int,    default=1,    help='If the output is FLS, if seen as binary',              choices=[0, 1])
-parser.add_argument('--flsKeep',    type=int,    default=[],   help='If the output is FLS, list of FLS indices to consider', nargs='*')
-parser.add_argument('--comment',    type=str,    default='',   help='A comment to describe this run')
+parser.add_argument('--outputName',
+                    type=str,
+                    default='PT',
+                    help='The output type that the model is trained to recognize')
+parser.add_argument('--flsBinary',
+                    type=int,
+                    default=1,
+                    help='If the output is FLS, if seen as binary',
+                    choices=[0, 1])
+parser.add_argument('--flsKeep',
+                    type=int,
+                    default=[],
+                    help='If the output is FLS, list of FLS indices to consider',
+                    nargs='*')
+parser.add_argument('--comment',
+                    type=str,
+                    default='',
+                    help='A comment to describe this run')
 
 # Training global setting
-parser.add_argument('--videoSplitMode',    type=str,    default='auto', choices=['manual', 'auto'], help='Split mode for videos (auto or manually specified)')
-parser.add_argument('--fractionValid',     type=float,  default=0.10,                                help='Fraction of valid data wrt total (if auto split mode)')
-parser.add_argument('--fractionTest',      type=float,  default=0.10,                                help='Fraction of test data wrt total (if auto split mode)')
-parser.add_argument('--signerIndependent', type=int,    default=0,       choices=[0, 1],             help='Signer independent train/valid/test random shuffle')
-parser.add_argument('--taskIndependent',   type=int,    default=0,       choices=[0, 1],             help='Task independent train/valid/test random shuffle')
-parser.add_argument('--excludeTask9',      type=int,    default=0,       choices=[0, 1],             help='Whether to exclude task 9')
-parser.add_argument('--tasksTrain',        type=int,    default=[],      choices=range(1,10),        help='Training task indices',      nargs='*')
-parser.add_argument('--tasksValid',        type=int,    default=[],      choices=range(1,10),        help='Validation task indices',    nargs='*')
-parser.add_argument('--tasksTest',         type=int,    default=[],      choices=range(1,10),        help='Test task indices',          nargs='*')
-parser.add_argument('--signersTrain',      type=int,    default=[],      choices=range(0,16),        help='Training signer indices',    nargs='*')
-parser.add_argument('--signersValid',      type=int,    default=[],      choices=range(0,16),        help='Validation signer indices',  nargs='*')
-parser.add_argument('--signersTest',       type=int,    default=[],      choices=range(0,16),        help='Test signer indices',        nargs='*')
-parser.add_argument('--idxTrainBypass',    type=int,    default=[],      choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
-parser.add_argument('--idxValidBypass',    type=int,    default=[],      choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
-parser.add_argument('--idxTestBypass',     type=int,    default=[],      choices=range(0,94),        help='If you really want to set video indices directly', nargs='*')
-parser.add_argument('--randSeed',          type=int,    default=17,                                  help='Random seed (numpy)')
-parser.add_argument('--weightCorrection',  type=float,  default=0,                                   help='Correction for data imbalance (from 0 (no correction) to 1)')
-parser.add_argument('--inputType',         type=str,    default='3Dfeatures_HS', choices=['2Draw',
-                                                                                          '2Draw_HS',
-                                                                                          '2Draw_HS_noOP',
-                                                                                          '2Draw_noHands',
-                                                                                          '2Dfeatures',
-                                                                                          '2Dfeatures_HS',
-                                                                                          '2Dfeatures_HS_noOP',
-                                                                                          '2Dfeatures_noHands',
-                                                                                          '3Draw',
-                                                                                          '3Draw_HS',
-                                                                                          '3Draw_HS_noOP',
-                                                                                          '3Draw_noHands',
-                                                                                          '3Dfeatures',
-                                                                                          '3Dfeatures_HS',
-                                                                                          '3Dfeatures_HS_noOP',
-                                                                                          '3Dfeatures_noHands',
-                                                                                          'none'],
-                                                                                                    help='Type of features')
-parser.add_argument('--inputNormed',         type=int,    default=1,          choices=[0, 1],       help='If features are normed')
-parser.add_argument('--inputFeaturesFrames', type=str,    default='features', choices=['features', 'frames', 'both'],
-                                                                                                    help='Features type')
-
-
+parser.add_argument('--videoSplitMode',
+                    type=str,
+                    default='auto',
+                    choices=['manual', 'auto'],
+                    help='Split mode for videos (auto or manually specified)')
+parser.add_argument('--fractionValid',
+                    type=float,
+                    default=0.10,
+                    help='Fraction of valid data wrt total (if auto split mode)')
+parser.add_argument('--fractionTest',
+                    type=float,
+                    default=0.10,
+                    help='Fraction of test data wrt total (if auto split mode)')
+parser.add_argument('--signerIndependent',
+                    type=int,
+                    default=0,
+                    choices=[0, 1],
+                    help='Signer independent train/valid/test random shuffle')
+parser.add_argument('--taskIndependent',
+                    type=int,
+                    default=0,
+                    choices=[0, 1],
+                    help='Task independent train/valid/test random shuffle')
+parser.add_argument('--excludeTask9',
+                    type=int,
+                    default=0,
+                    choices=[0, 1],
+                    help='Whether to exclude task 9')
+parser.add_argument('--tasksTrain',
+                    type=int,
+                    default=[],
+                    choices=range(1,10),
+                    help='Training task indices',
+                    nargs='*')
+parser.add_argument('--tasksValid',
+                    type=int,
+                    default=[],
+                    choices=range(1,10),
+                    help='Validation task indices',
+                    nargs='*')
+parser.add_argument('--tasksTest',
+                    type=int,
+                    default=[],
+                    choices=range(1,10),
+                    help='Test task indices',
+                    nargs='*')
+parser.add_argument('--signersTrain',
+                    type=int,
+                    default=[],
+                    choices=range(0,16),
+                    help='Training signer indices',
+                    nargs='*')
+parser.add_argument('--signersValid',
+                    type=int,
+                    default=[],
+                    choices=range(0,16),
+                    help='Validation signer indices',
+                    nargs='*')
+parser.add_argument('--signersTest',
+                    type=int,
+                    default=[],
+                    choices=range(0,16),
+                    help='Test signer indices',
+                    nargs='*')
+parser.add_argument('--idxTrainBypass',
+                    type=int,
+                    default=[],
+                    choices=range(0,94),
+                    help='If you really want to set video indices directly',
+                    nargs='*')
+parser.add_argument('--idxValidBypass',
+                    type=int,
+                    default=[],
+                    choices=range(0,94),
+                    help='If you really want to set video indices directly',
+                    nargs='*')
+parser.add_argument('--idxTestBypass',
+                    type=int,
+                    default=[],
+                    choices=range(0,94),
+                    help='If you really want to set video indices directly',
+                    nargs='*')
+parser.add_argument('--randSeed',
+                    type=int,
+                    default=17,
+                    help='Random seed (numpy)')
+parser.add_argument('--weightCorrection',
+                    type=float,
+                    default=0,
+                    help='Correction for data imbalance (from 0 (no correction) to 1)')
+parser.add_argument('--inputType',
+                    type=str,
+                    default='3Dfeatures_HS',
+                    choices=['2Draw',
+                              '2Draw_HS',
+                              '2Draw_HS_noOP',
+                              '2Draw_noHands',
+                              '2Dfeatures',
+                              '2Dfeatures_HS',
+                              '2Dfeatures_HS_noOP',
+                              '2Dfeatures_noHands',
+                              '3Draw',
+                              '3Draw_HS',
+                              '3Draw_HS_noOP',
+                              '3Draw_noHands',
+                              '3Dfeatures',
+                              '3Dfeatures_HS',
+                              '3Dfeatures_HS_noOP',
+                              '3Dfeatures_noHands',
+                              'none'],
+                    help='Type of features')
+parser.add_argument('--inputNormed',
+                    type=int,
+                    default=1,
+                    choices=[0, 1],
+                    help='If features are normed')
+parser.add_argument('--inputFeaturesFrames',
+                    type=str,
+                    default='features',
+                    choices=['features', 'frames', 'both'],
+                    help='Features type')
+parser.add_argument('--imgWidth',
+                    type=int,
+                    default=224,
+                    choices=range(0,1000),
+                    help='CNN width')
+parser.add_argument('--imgHeight',
+                    type=int,
+                    default=224,
+                    choices=range(0,1000),
+                    help='CNN height')
+parser.add_argument('--cnnType',
+                    type=str,
+                    default='resnet',
+                    choices=['resnet', 'vgg', 'mobilenet'],
+                    help='CNN type')
+parser.add_argument('--cnnFirstTrainedLayer',
+                    type=int,
+                    default=165,
+                    help='Index of first trained layer in CNN')
+parser.add_argument('--cnnReduceDim',
+                    type=int,
+                    default=0,
+                    help='If greater than 0, the reduced dimension of CNN output vector')
 
 # Fine parameters
-parser.add_argument('--seqLength',        type=int,    default=100,       help='Length of sequences')
-parser.add_argument('--batchSize',        type=int,    default=200,       help='Batch size')
-parser.add_argument('--epochs',           type=int,    default=100,       help='Number of epochs')
-parser.add_argument('--separation',       type=int,    default=0,         help='Separation between videos')
-parser.add_argument('--dropout',          type=float,  default=0.5,       help='Dropout (0 to 1)')
-parser.add_argument('--rnnNumber',        type=int,    default=1,         help='Number of RNN layers')
-parser.add_argument('--rnnHiddenUnits',   type=int,    default=50,        help='Number of hidden units in RNN')
-parser.add_argument('--mlpLayersNumber',  type=int,    default=0,         help='Number MLP layers after RNN')
-parser.add_argument('--convolution',      type=int,    default=1,         help='Whether to use a conv. layer', choices=[0, 1])
-parser.add_argument('--convFilt',         type=int,    default=200,       help='Number of convolution kernels')
-parser.add_argument('--convFiltSize',     type=int,    default=3,         help='Size of convolution kernels')
-parser.add_argument('--learningRate',     type=float,  default=0.001,     help='Learning rate')
-parser.add_argument('--optimizer',        type=str,    default='rms',     help='Training optimizer',           choices=['rms', 'ada', 'sgd'])
-parser.add_argument('--earlyStopping',    type=int,    default=0,         help='Early stopping',               choices=[0, 1])
-parser.add_argument('--redLrOnPlat',      type=int,    default=0,         help='Reduce l_rate on plateau',     choices=[0, 1])
-parser.add_argument('--redLrMonitor',     type=str,    default='val_f1K', help='Metric for l_rate reduction')
-parser.add_argument('--redLrMonitorMode', type=str,    default='max',     help='Mode for l_rate reduction',    choices=['min', 'max'])
-parser.add_argument('--redLrPatience',    type=int,    default=10,        help='Patience before l_rate reduc')
-parser.add_argument('--redLrFactor',      type=float,  default=0.5,       help='Factor for each l_rate reduc')
+parser.add_argument('--seqLength',
+                    type=int,
+                    default=100,
+                    help='Length of sequences')
+parser.add_argument('--batchSize',
+                    type=int,
+                    default=200,
+                    help='Batch size')
+parser.add_argument('--epochs',
+                    type=int,
+                    default=100,
+                    help='Number of epochs')
+parser.add_argument('--separation',
+                    type=int,
+                    default=0,
+                    help='Separation between videos')
+parser.add_argument('--dropout',
+                    type=float,
+                    default=0.5,
+                    help='Dropout (0 to 1)')
+parser.add_argument('--rnnNumber',
+                    type=int,
+                    default=1,
+                    help='Number of RNN layers')
+parser.add_argument('--rnnHiddenUnits',
+                    type=int,
+                    default=50,
+                    help='Number of hidden units in RNN')
+parser.add_argument('--mlpLayersNumber',
+                    type=int,
+                    default=0,
+                    help='Number MLP layers after RNN')
+parser.add_argument('--convolution',
+                    type=int,
+                    default=1,
+                    help='Whether to use a conv. layer',
+                    choices=[0, 1])
+parser.add_argument('--convFilt',
+                    type=int,
+                    default=200,
+                    help='Number of convolution kernels')
+parser.add_argument('--convFiltSize',
+                    type=int,
+                    default=3,
+                    help='Size of convolution kernels')
+parser.add_argument('--learningRate',
+                    type=float,
+                    default=0.001,
+                    help='Learning rate')
+parser.add_argument('--optimizer',
+                    type=str,
+                    default='rms',
+                    help='Training optimizer',
+                    choices=['rms', 'ada', 'sgd'])
+parser.add_argument('--earlyStopping',
+                    type=int,
+                    default=0,
+                    help='Early stopping',
+                    choices=[0, 1])
+parser.add_argument('--redLrOnPlat',
+                    type=int,
+                    default=0,
+                    help='Reduce l_rate on plateau',
+                    choices=[0, 1])
+parser.add_argument('--redLrMonitor',
+                    type=str,
+                    default='val_f1K',
+                    help='Metric for l_rate reduction')
+parser.add_argument('--redLrMonitorMode',
+                    type=str,
+                    default='max',
+                    help='Mode for l_rate reduction',
+                    choices=['min', 'max'])
+parser.add_argument('--redLrPatience',
+                    type=int,
+                    default=10,
+                    help='Patience before l_rate reduc')
+parser.add_argument('--redLrFactor',
+                    type=float,
+                    default=0.5,
+                    help='Factor for each l_rate reduc')
 
 # save data and monitor best
-parser.add_argument('--saveModel',         type=str,    default='best',    help='Whether to save only best model, or all, or none', choices=['no', 'best', 'all'])
-parser.add_argument('--saveBestMonitor',   type=str,    default='val_f1K', help='What metric to decide best model')
-parser.add_argument('--saveBestMonMode',   type=str,    default='max',     help='Mode to define best',                              choices=['min', 'max'])
-parser.add_argument('--saveGlobalresults', type=str,    default='reports/corpora/DictaSign/recognitionUnique/global/globalUnique.dat', help='Where to save global results')
-parser.add_argument('--savePredictions',   type=str,    default='reports/corpora/DictaSign/recognitionUnique/predictions/',            help='Where to save predictions')
+parser.add_argument('--saveModel',
+                    type=str,
+                    default='best',
+                    help='Whether to save only best model, or all, or none',
+                    choices=['no', 'best', 'all'])
+parser.add_argument('--saveBestMonitor',
+                    type=str,
+                    default='val_f1K',
+                    help='What metric to decide best model')
+parser.add_argument('--saveBestMonMode',
+                    type=str,
+                    default='max',
+                    help='Mode to define best',
+                    choices=['min', 'max'])
+parser.add_argument('--saveGlobalresults',
+                    type=str,
+                    default='reports/corpora/DictaSign/recognitionUnique/global/globalUnique.dat',
+                    help='Where to save global results')
+parser.add_argument('--savePredictions',
+                    type=str,
+                    default='reports/corpora/DictaSign/recognitionUnique/predictions/',
+                    help='Where to save predictions')
 
 
 # Metrics
-parser.add_argument('--stepWolf',        type=float,  default=0.1,       help='Step between Wolf metric eval points',             choices=['rms', 'ada', 'sgd'])
+parser.add_argument('--stepWolf',
+                    type=float,
+                    default=0.1,
+                    help='Step between Wolf metric eval points',
+                    choices=['rms', 'ada', 'sgd'])
 
 args = parser.parse_args()
 
@@ -146,6 +347,12 @@ weightCorrection    = args.weightCorrection
 inputType           = args.inputType
 inputNormed         = bool(args.inputNormed)
 inputFeaturesFrames = args.inputFeaturesFrames
+imgWidth            = args.imgWidth
+imgHeight           = args.imgHeight
+cnnType             = args.cnnType
+cnnFirstTrainedLayer = args.cnnFirstTrainedLayer
+cnnReduceDim         = args.cnnReduceDim
+
 
 # Fine parameters
 seq_length          = args.seqLength
@@ -198,52 +405,57 @@ dataGlobal[outputName][timeString] = {}
 dataGlobal[outputName][timeString]['comment'] = comment
 
 dataGlobal[outputName][timeString]['params'] = {}
-dataGlobal[outputName][timeString]['params']['flsBinary']           = flsBinary
-dataGlobal[outputName][timeString]['params']['flsKeep']             = flsKeep
-dataGlobal[outputName][timeString]['params']['videoSplitMode']      = videoSplitMode
-dataGlobal[outputName][timeString]['params']['fractionValid']       = fractionValid
-dataGlobal[outputName][timeString]['params']['fractionTest']        = fractionTest
-dataGlobal[outputName][timeString]['params']['signerIndependent']   = signerIndependent
-dataGlobal[outputName][timeString]['params']['taskIndependent']     = taskIndependent
-dataGlobal[outputName][timeString]['params']['excludeTask9']        = excludeTask9
-dataGlobal[outputName][timeString]['params']['tasksTrain']          = tasksTrain
-dataGlobal[outputName][timeString]['params']['tasksValid']          = tasksValid
-dataGlobal[outputName][timeString]['params']['tasksTest']           = tasksTest
-dataGlobal[outputName][timeString]['params']['signersTrain']        = signersTrain
-dataGlobal[outputName][timeString]['params']['signersValid']        = signersValid
-dataGlobal[outputName][timeString]['params']['signersTest']         = signersTest
-dataGlobal[outputName][timeString]['params']['idxTrainBypass']      = idxTrainBypass
-dataGlobal[outputName][timeString]['params']['idxValidBypass']      = idxValidBypass
-dataGlobal[outputName][timeString]['params']['idxTestBypass']       = idxTestBypass
-dataGlobal[outputName][timeString]['params']['weightCorrection']    = weightCorrection
-dataGlobal[outputName][timeString]['params']['inputType']           = inputType
-dataGlobal[outputName][timeString]['params']['inputNormed']         = inputNormed
-dataGlobal[outputName][timeString]['params']['inputFeaturesFrames'] = inputFeaturesFrames
-dataGlobal[outputName][timeString]['params']['seq_length']          = seq_length
-dataGlobal[outputName][timeString]['params']['batch_size']          = batch_size
-dataGlobal[outputName][timeString]['params']['epochs']              = epochs
-dataGlobal[outputName][timeString]['params']['separation']          = separation
-dataGlobal[outputName][timeString]['params']['dropout']             = dropout
-dataGlobal[outputName][timeString]['params']['rnn_number']          = rnn_number
-dataGlobal[outputName][timeString]['params']['rnn_hidden_units']    = rnn_hidden_units
-dataGlobal[outputName][timeString]['params']['mlp_layers_number']   = mlp_layers_number
-dataGlobal[outputName][timeString]['params']['convolution']         = convolution
-dataGlobal[outputName][timeString]['params']['convFilt']            = convFilt
-dataGlobal[outputName][timeString]['params']['convFiltSize']        = convFiltSize
-dataGlobal[outputName][timeString]['params']['learning_rate']       = learning_rate
-dataGlobal[outputName][timeString]['params']['optimizer']           = optimizer
-dataGlobal[outputName][timeString]['params']['earlyStopping']       = earlyStopping
-dataGlobal[outputName][timeString]['params']['reduceLrOnPlateau']   = reduceLrOnPlateau
-dataGlobal[outputName][timeString]['params']['reduceLrMonitor']     = reduceLrMonitor
-dataGlobal[outputName][timeString]['params']['reduceLrMonitorMode'] = reduceLrMonitorMode
-dataGlobal[outputName][timeString]['params']['reduceLrPatience']    = reduceLrPatience
-dataGlobal[outputName][timeString]['params']['reduceLrFactor']      = reduceLrFactor
-dataGlobal[outputName][timeString]['params']['save']                = save
-dataGlobal[outputName][timeString]['params']['saveMonitor']         = saveMonitor
-dataGlobal[outputName][timeString]['params']['saveMonitorMode']     = saveMonitorMode
-dataGlobal[outputName][timeString]['params']['saveGlobalresults']   = saveGlobalresults
-dataGlobal[outputName][timeString]['params']['savePredictions']     = savePredictions
-dataGlobal[outputName][timeString]['params']['stepWolf']            = stepWolf
+dataGlobal[outputName][timeString]['params']['flsBinary']            = flsBinary
+dataGlobal[outputName][timeString]['params']['flsKeep']              = flsKeep
+dataGlobal[outputName][timeString]['params']['videoSplitMode']       = videoSplitMode
+dataGlobal[outputName][timeString]['params']['fractionValid']        = fractionValid
+dataGlobal[outputName][timeString]['params']['fractionTest']         = fractionTest
+dataGlobal[outputName][timeString]['params']['signerIndependent']    = signerIndependent
+dataGlobal[outputName][timeString]['params']['taskIndependent']      = taskIndependent
+dataGlobal[outputName][timeString]['params']['excludeTask9']         = excludeTask9
+dataGlobal[outputName][timeString]['params']['tasksTrain']           = tasksTrain
+dataGlobal[outputName][timeString]['params']['tasksValid']           = tasksValid
+dataGlobal[outputName][timeString]['params']['tasksTest']            = tasksTest
+dataGlobal[outputName][timeString]['params']['signersTrain']         = signersTrain
+dataGlobal[outputName][timeString]['params']['signersValid']         = signersValid
+dataGlobal[outputName][timeString]['params']['signersTest']          = signersTest
+dataGlobal[outputName][timeString]['params']['idxTrainBypass']       = idxTrainBypass
+dataGlobal[outputName][timeString]['params']['idxValidBypass']       = idxValidBypass
+dataGlobal[outputName][timeString]['params']['idxTestBypass']        = idxTestBypass
+dataGlobal[outputName][timeString]['params']['weightCorrection']     = weightCorrection
+dataGlobal[outputName][timeString]['params']['inputType']            = inputType
+dataGlobal[outputName][timeString]['params']['inputNormed']          = inputNormed
+dataGlobal[outputName][timeString]['params']['inputFeaturesFrames']  = inputFeaturesFrames
+dataGlobal[outputName][timeString]['params']['imgWidth']             = imgWidth
+dataGlobal[outputName][timeString]['params']['imgHeight']            = imgHeight
+dataGlobal[outputName][timeString]['params']['cnnType']              = cnnType
+dataGlobal[outputName][timeString]['params']['cnnFirstTrainedLayer'] = cnnFirstTrainedLayer
+dataGlobal[outputName][timeString]['params']['cnnReduceDim']         = cnnReduceDim
+dataGlobal[outputName][timeString]['params']['seq_length']           = seq_length
+dataGlobal[outputName][timeString]['params']['batch_size']           = batch_size
+dataGlobal[outputName][timeString]['params']['epochs']               = epochs
+dataGlobal[outputName][timeString]['params']['separation']           = separation
+dataGlobal[outputName][timeString]['params']['dropout']              = dropout
+dataGlobal[outputName][timeString]['params']['rnn_number']           = rnn_number
+dataGlobal[outputName][timeString]['params']['rnn_hidden_units']     = rnn_hidden_units
+dataGlobal[outputName][timeString]['params']['mlp_layers_number']    = mlp_layers_number
+dataGlobal[outputName][timeString]['params']['convolution']          = convolution
+dataGlobal[outputName][timeString]['params']['convFilt']             = convFilt
+dataGlobal[outputName][timeString]['params']['convFiltSize']         = convFiltSize
+dataGlobal[outputName][timeString]['params']['learning_rate']        = learning_rate
+dataGlobal[outputName][timeString]['params']['optimizer']            = optimizer
+dataGlobal[outputName][timeString]['params']['earlyStopping']        = earlyStopping
+dataGlobal[outputName][timeString]['params']['reduceLrOnPlateau']    = reduceLrOnPlateau
+dataGlobal[outputName][timeString]['params']['reduceLrMonitor']      = reduceLrMonitor
+dataGlobal[outputName][timeString]['params']['reduceLrMonitorMode']  = reduceLrMonitorMode
+dataGlobal[outputName][timeString]['params']['reduceLrPatience']     = reduceLrPatience
+dataGlobal[outputName][timeString]['params']['reduceLrFactor']       = reduceLrFactor
+dataGlobal[outputName][timeString]['params']['save']                 = save
+dataGlobal[outputName][timeString]['params']['saveMonitor']          = saveMonitor
+dataGlobal[outputName][timeString]['params']['saveMonitorMode']      = saveMonitorMode
+dataGlobal[outputName][timeString]['params']['saveGlobalresults']    = saveGlobalresults
+dataGlobal[outputName][timeString]['params']['savePredictions']      = savePredictions
+dataGlobal[outputName][timeString]['params']['stepWolf']             = stepWolf
 
 
 
@@ -325,7 +537,12 @@ model = get_model([outputName],[nClasses],[1],
                     optimizer=optimizer,
                     metrics=metrics,
                     features_number=features_number,
-                    features_type=inputFeaturesFrames)
+                    features_type=inputFeaturesFrames,
+                    img_width=imgWidth,
+                    img_height=imgHeight,
+                    cnnType=cnnType,
+                    cnnFirstTrainedLayer=cnnFirstTrainedLayer,
+                    cnnReduceDim=cnnReduceDim)
 
 history = train_model(model,
             features_train,
@@ -345,7 +562,9 @@ history = train_model(model,
             reduceLrMonitorMode=reduceLrMonitorMode,
             reduceLrPatience=reduceLrPatience,
             reduceLrFactor=reduceLrFactor,
-            features_type=inputFeaturesFrames)
+            features_type=inputFeaturesFrames,
+            img_width=imgWidth,
+            img_height=imgHeight)
 
 
 

@@ -34,13 +34,18 @@ else:
     sys.exit('Tensorflow version should be 1.X or 2.X')
 
 
-def generator(features, features_type, annot, batch_size, seq_length, output_form, output_class_weights):
+def generator(features,
+              features_type,
+              annot, batch_size,
+              seq_length,
+              output_form,
+              output_class_weights,
+              img_width,
+              img_height):
     """
     Generator function for batch training models
     features: [preprocessed features (numpy array (1, time_steps, nb_features)), images_path (list of strings)]
     """
-    img_width = 224
-    img_height = 224
 
     if features_type == 'frames':
         total_length_round = (len(features[1])//seq_length)*seq_length
@@ -191,7 +196,9 @@ def train_model(model,
                 reduceLrMonitor='val_loss',
                 reduceLrMonitorMode='min',
                 reduceLrPatience=7,
-                reduceLrFactor=0.8):
+                reduceLrFactor=0.8,
+                img_width=224,
+                img_height=224):
     """
         Trains a keras model.
 
@@ -263,7 +270,9 @@ def train_model(model,
                                          batch_size,
                                          seq_length,
                                          output_form,
-                                         output_class_weights),
+                                         output_class_weights,
+                                         img_width,
+                                         img_height),
                                epochs=epochs,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
                                validation_data=generator(features_valid,
@@ -272,7 +281,9 @@ def train_model(model,
                                                          batch_size,
                                                          seq_length,
                                                          output_form,
-                                                         output_class_weights),
+                                                         output_class_weights,
+                                                         img_width,
+                                                         img_height),
                                validation_steps=1,
                                callbacks=callbacksPerso)
 
