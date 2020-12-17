@@ -492,7 +492,7 @@ def get_data_concatenated(corpus,
                           frames_path_before_video='/localHD/DictaSign/convert/img/DictaSign_lsf_',
                           empty_image_path='/localHD/DictaSign/convert/img/white.jpg'):
     """
-        For returning concatenated features and annotations for a set of videos (e.g. train set...).
+        For returning concatenated features and annotations for a set of videos (e.g. train set...)
             e.g. features_2_train, annot_2_train = get_data_concatenated('NCSLGR',
                                                                          'sign_types',
                                                                          ['PT', 'DS', 'fls'],
