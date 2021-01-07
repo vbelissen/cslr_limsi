@@ -9,7 +9,7 @@ if v0 == '2':
     import tensorflow.keras.backend as K
     from tensorflow.keras import optimizers
     from tensorflow.keras.callbacks import TensorBoard
-    from tensorflow.keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Input, Dense, Conv1D, Dropout, GlobalAveragePooling1D, multiply, Flatten
+    from tensorflow.keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Input, Dense, Conv1D, Dropout, GlobalAveragePooling1D, multiply, Flatten, concatenate
     from tensorflow.python.keras.layers.core import *
     from tensorflow.keras.models import *
     from tensorflow.keras.utils import to_categorical, plot_model
@@ -207,6 +207,9 @@ def get_model(output_names,
             features_number: number of features (int)
             features_type: 'features' (1D vector of features), 'frames' (for a CNN processing) or 'both'
             img_height and img_width: size of CNN input
+            cnnType: 'resnet', 'vgg' or 'mobilenet'
+            cnnFirstTrainedLayer: index of first trainable layer in CNN (int)
+            cnnReduceDim: if greater than 0, size of CNN flattened output is reduced to cnnReduceDim
             print_summary (bool)
 
         Output: A Keras model
@@ -263,17 +266,18 @@ def get_model(output_names,
             for layer in cnnBackbone.layers[cnnFirstTrainedLayer:]:
                layer.trainable = True
 
-        for i, layer in enumerate(cnnBackbone.layers):
-            print(i, layer.name, layer.trainable)
+        #for i, layer in enumerate(cnnBackbone.layers):
+        #    print(i, layer.name, layer.trainable)
 
     if features_type == 'features':
         input_transfo = input_transfo_features
     elif features_type == 'frames':
         input_transfo = input_transfo_frames
     elif features_type == 'both':
-        input_transfo = merge([input_transfo_features, input_transfo_frames],
-                        name='merge_features_frames',
-                        mode='concat')
+        if v0 == '2':
+            input_transfo = concatenate([input_transfo_features, input_transfo_frames], name='merge_features_frames')
+        else:
+            input_transfo = merge([input_transfo_features, input_transfo_frames], name='merge_features_frames', mode='concat')
     else:
         sys.exit('Invalid features type')
 

@@ -220,7 +220,7 @@ def get_features_videos(corpus,
         key_features_idx = features_dict[key]
         key_features_number = key_features_idx.size
         if key_features_number > 0:
-            key_features = np.load(parent + 'data/processed/' + corpus + '/' + key + '.npy', encoding='latin1')
+            key_features = np.load(parent + 'data/processed/' + corpus + '/' + key + '.npy', encoding='latin1', allow_pickle=True)
             index_vid_tmp = 0
             for vid_idx in video_indices:
                 features[index_vid_tmp][0, :, features_number_idx:features_number_idx+key_features_number] = key_features[vid_idx][:, key_features_idx]
@@ -243,18 +243,22 @@ def get_sequence_features(corpus,
                            preloaded_features=None,
                            from_notebook=False):
     """
-        For returning features for a sequence.
+        Function returning features for a sequence.
 
         Inputs:
             corpus (string)
             output_weights: list of weights for each_output
             vid_idx (int): which video
             img_start_idx (int): which start image
-            features_dict: a dictionary indication which features to keep
-                e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
+            features_dict: a dictionary indicating which features to keep
+                e.g.: {'features_HS':np.arange(0, 420),
+                       'features_HS_norm':np.array([]),
+                       'raw':np.array([]),
+                       'raw_norm':np.array([]),
+                       '2Dfeatures':np.array([]),
+                       '2Dfeatures_norm':np.array([])}}
             time_steps: length of sequences (int)
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
-            preloaded_annotations: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
             from_notebook: if notebook script, data is in parent folder
 
         Outputs:
@@ -527,6 +531,10 @@ def get_data_concatenated(corpus,
             from_notebook: if notebook script, data is in parent folder
             return_idx_trueData: if True, returns a binary vector with 0 where separations are
             features_type: 'features', 'frames', 'both'
+            frames_path_before_video: video frames are supposed to be in folders
+                                      like '/localHD/DictaSign/convert/img/DictaSign_lsf_S7_T2_A10',
+                                      then frames_path_before_video='/localHD/DictaSign/convert/img/DictaSign_lsf_'
+            empty_image_path: path of a white frame
 
         Outputs:
             X: [a numpy array [1, total_time_steps, features_number] for features,
@@ -713,13 +721,33 @@ def signerRefToSignerIdxDictaSign(signerRef):
 def signerIdxToSignerRefDictaSign(signerIdx):
     return signerRefsDictaSign[signerIdx]
 
-def getVideoIndicesSplitDictaSign(tasksTrain, tasksValid, tasksTest, signersTrain, signersValid, signersTest, signerIndependent, taskIndependent, excludeTask9, videoSplitMode, fractionValid, fractionTest, checkSplits=False, checkSets=False):
+def getVideoIndicesSplitDictaSign(tasksTrain=[],
+                                  tasksValid=[],
+                                  tasksTest=[],
+                                  signersTrain=[],
+                                  signersValid=[],
+                                  signersTest=[],
+                                  signerIndependent=False,
+                                  taskIndependent=False,
+                                  excludeTask9=False,
+                                  videoSplitMode='auto',
+                                  fractionValid=0.2,
+                                  fractionTest=0.2,
+                                  checkSplits=False,
+                                  checkSets=False,
+                                  from_notebook=False):
     if videoSplitMode == 'manual':
         idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSignManual([tasksTrain,tasksValid,tasksTest],
                                                                           [signersTrain,signersValid,signersTest],
-                                                                          excludeTask9)
+                                                                          excludeTask9,
+                                                                          from_notebook)
     elif videoSplitMode == 'auto':
-        idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, excludeTask9, fractionValid, fractionTest)
+        idxTrain, idxValid, idxTest = getVideoIndicesSplitDictaSignAuto(signerIndependent,
+                                                                        taskIndependent,
+                                                                        excludeTask9,
+                                                                        fractionValid,
+                                                                        fractionTest,
+                                                                        from_notebook)
     else:
         sys.exit('videoSplitMode should be either manual or auto')
 
