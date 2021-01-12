@@ -18,340 +18,157 @@ else:
 # 16 signers:
 signerRefsDictaSign = np.array(['A11','B15','A2','B0','A1','B14','A9','B17','A6','B13','A10','B16','A7','B4','A3','B5'])
 
-def get_raw_annotation_from_file(corpus, from_notebook=False):
+def categorical_conversion_seq(data, nonZeroCategories=[1]):
     """
-        Gets raw annotation from data file
+        Converting annotations of one type to categorical values (for a sequence or a video).
 
         Inputs:
-            corpus: 'DictaSign' or 'NCSLGR'
-            from_notebook: True if used in Jupyter notebook
+            data: a numpy array of annotations [time_steps, 1]
+            nonZeroCategories: list of meaningful annotation categories
 
         Outputs:
-            Annotation data
+            converted_data: categorical values of annotations [1, time_steps, categories]
     """
-    if from_notebook:
-        parent = '../'
-    else:
-        parent = ''
+    nonZeroCategories_number = len(nonZeroCategories)
+    if nonZeroCategories_number > 1:
+        mask_class_garbage = np.ones(data.shape).astype(bool)
+        for i_c in range(1, nonZeroCategories_number):
+            mask_class_garbage *= (data != nonZeroCategories[i_c - 1])
+        data[mask_class_garbage] = 0
+        for i_c in range(1, nonZeroCategories_number):
+            data[data == nonZeroCategories[i_c - 1]] = i_c
+    converted_data = np.zeros((1, data.shape[0], nonZeroCategories_number+1))
+    converted_data[0, :, :] = to_categorical(data, nonZeroCategories_number+1)
+    return converted_data
 
-    annotation_raw = np.load(parent + 'data/processed/' + corpus + '/annotations.npz', encoding='latin1', allow_pickle=True)
 
-    return annotation_raw
-
-def get_raw_annotation_type_video(corpus, type, video_index, provided_annotation=None, from_notebook=False):
+def binary_conversion_seq(data):
     """
-        Gets raw annotation from data file or from provided data,
-        for a given annotation type and a given video
+        Converting annotations of one type, with different values, to binary values (for a sequence or a video).
 
         Inputs:
-            corpus: 'DictaSign' or 'NCSLGR'
-            type:
+            data: a numpy array of annotations [time_steps, 1] or [time_steps]
+
+        Outputs:
+            converted_data: categorical values of annotations [1, time_steps, 1]
+    """
+    time_steps = data.shape[0]
+    converted_data = np.zeros((1, time_steps, 1))
+    converted_data[0, :, 0] = (data > 0).reshape(time_steps)
+    return converted_data.astype(float)
+
+
+def categorical_conversion_videos(data, nonZeroCategories=[1], video_indices=None):
+    """
+        Converting annotations of one type to categorical values (for all videos).
+
+        Inputs:
+            data: a list of numpy array of annotations (for each video)
+            nonZeroCategories: list of meaningful annotation categories
+            video_indices: list or numpy array of wanted videos
+
+        Outputs:
+            data_copy: list of categorical values of annotations
+    """
+    data_copy = []
+    video_number = len(data)
+    if video_indices is None:
+        range_idx = range(video_number)
+    else:
+        range_idx = video_indices
+    for i_video in range_idx:
+        data_copy.append(categorical_conversion_seq(data[i_video], nonZeroCategories))
+    return data_copy
+
+
+def get_annotations_videos_sign_types_binary(corpus, output_names_final, output_names_original, video_indices=np.arange(94), from_notebook=False):
+    """
+        Gets all wanted annotations, in the form of a list of video annotations of sign types.
+            e.g.: get_annotations_videos_sign_types_binary('NCSLGR',
+            ['Pointing', 'Classifiers'],
+            [['IX_1p', 'IX_2p', 'IX_3p', 'IX_loc'], ['DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']],
+            np.arange(10))
+
+        Inputs:
+            corpus (string): 'DictaSign' or 'NCSLGR'
+            output_names_final: list of outputs (strings) corresponding to the desired output_categories
+            output_names_original: original names that are used to compose final outputs
                 DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
                 NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
-            video_index: integer
-            from_notebook: True if used in Jupyter notebook
+            video_indices: list or numpy array of wanted videos
+            from_notebook: if notebook script, data is in parent folder
 
         Outputs:
-            Annotation data
+            annotations (lists (videos) of numpy arrays)
     """
+
     if from_notebook:
         parent = '../'
     else:
         parent = ''
 
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
-
+    final_number = len(output_names_final)
+    video_annotations = []
+    video_number = len(video_indices)
+    annotation_raw = np.load(parent + 'data/processed/' + corpus + '/annotations.npz', encoding='latin1', allow_pickle=True)
     if corpus == 'DictaSign':
         string_prefix = 'dataBrut_'
     else:
         string_prefix = ''
+    for i_vid in range(video_number):
+        vid_idx = video_indices[i_vid]
+        video_length = annotation_raw[string_prefix+output_names_original[0][0]][vid_idx].shape[0]
+        current_video_annotations = np.zeros((1, video_length, final_number+1))
+        for i_final_output in range(final_number):
+            original_number = len(output_names_original[i_final_output])
+            for i_original_output in range(original_number):
+                current_video_annotations[0, :, i_final_output+1] += binary_conversion_seq(annotation_raw[string_prefix+output_names_original[i_final_output][i_original_output]][vid_idx]).reshape(video_length)
+        current_video_annotations = (current_video_annotations > 0)
+        current_video_annotations[0, :, 0] = 1 - (np.sum(current_video_annotations[0, :, 1:], axis=1)>0)
+        video_annotations.append(current_video_annotations.astype(float))
+    return video_annotations
 
-    return provided_annotation[string_prefix+type][video_index]
-
-def concatenate_annotations(corpus, type, video_indices, separation=0, provided_annotation=None, from_notebook=False):
+def get_annotations_videos_categories(corpus, output_names, output_categories, output_assemble=[], video_indices=np.arange(94), from_notebook=False):
     """
-        Concatenates annotations of one type for several videos
+        Gets all wanted annotations, in the form of a list of different categories, each of which is a list of video annotations.
+            e.g.: get_annotations_videos_categories('DictaSign', ['fls', 'DS'], [[41891,43413,43422,42992],[1]], video_indices=np.arange(10))
+                  get_annotations_videos_categories('NCSLGR',['PT', 'DS', 'fls'], [[1], [1], [1]], output_assemble=[['IX_1p', 'IX_2p', 'IX_3p'], [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL'], ['lexical_with_ns_not_fs', 'fingerspelling', 'fingerspelled_loan_signs']], video_indices=np.arange(10))
 
         Inputs:
-            corpus: 'DictaSign' or 'NCSLGR'
-            type:
+            corpus (string): 'DictaSign' or 'NCSLGR'
+            output_names: list of outputs (strings)
                 DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
                 NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
-            video_indices: list/array of integers
-            separation: (integer) frames to separate videos
-            from_notebook: True if used in Jupyter notebook
+                if output_assemble =! [] and binary category, names are not really used
+            output_categories: list of lists of meaningful annotation categories for each output
+            output_assemble: used only if output_form: 'mixed'. List of lists of original names that can be assembled to compose final outputs, only considered if binary annotation category
+            video_indices: list or numpy array of wanted videos
+            from_notebook: if notebook script, data is in parent folder
 
         Outputs:
-            Concatenated data, shape (1, time_steps, 1)
+            annotations (list (categories) of lists (videos) of numpy arrays)
     """
 
-    video_indices = list(video_indices)
-    N_videos = len(video_indices)
-    if N_videos == 0:
-        sys.exit('At least one video index is required')
+    if from_notebook:
+        parent = '../'
+    else:
+        parent = ''
 
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
+    annotations = []
+    output_number = len(output_names)
+    annotation_raw = np.load(parent + 'data/processed/' + corpus + '/annotations.npz', encoding='latin1', allow_pickle=True)
+    if corpus == 'DictaSign':
+        string_prefix = 'dataBrut_'
+    else:
+        string_prefix = ''
+    for i_output in range(output_number):
+        if output_assemble != [] and len(output_categories[i_output]) == 1:
+            annotations.append(get_annotations_videos_sign_types_binary(corpus, [output_names[i_output]], [output_assemble[i_output]], video_indices, from_notebook))
+        else:
+            annotations.append(categorical_conversion_videos(annotation_raw[string_prefix+output_names[i_output]], output_categories[i_output], video_indices))
+    return annotations
 
-    total_time_steps = 0
-    for i_v in video_indices:
-        temp = get_raw_annotation_type_video(corpus, type, i_v, provided_annotation, from_notebook)
-        total_time_steps += temp.shape[0]
-        total_time_steps += separation
 
-    output = np.zeros((1,total_time_steps, 1))
-    temp_index = 0
-    for i_v in video_indices:
-        temp = get_raw_annotation_type_video(corpus, type, i_v, provided_annotation, from_notebook)
-        temp_length = temp.shape[0]
-        output[0,temp_index:temp_index+temp_length,0] = temp[:,0]
-        temp_index += temp_length
-        temp_index += separation
-
-    return output
-
-def concatenate_fuse_annotations(corpus, types, video_indices, separation=0, provided_annotation=None, from_notebook=False):
-    """
-        Concatenates and fuse annotations of several type for several videos
-        #Types are assumed to be binary
-
-        Inputs:
-            corpus: 'DictaSign' or 'NCSLGR'
-            types:
-                DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
-                NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
-            video_indices: list/array of integers
-            from_notebook: True if used in Jupyter notebook
-
-        Outputs:
-            Concatenated fused data, shape (1, time_steps, 1)
-    """
-
-    video_indices = list(video_indices)
-    N_videos = len(video_indices)
-    if N_videos == 0:
-        sys.exit('At least one video index is required')
-
-    types = list(types)
-    N_types = len(types)
-    if N_types == 0:
-        sys.exit('At least one annotation type is required')
-
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
-
-    total_time_steps = concatenate_annotations(corpus, types[0], video_indices, separation, provided_annotation, from_notebook).shape[1]
-
-    output = np.zeros((1, total_time_steps, N_types))
-    for i_t in range(N_types):
-        t = types[i_t]
-        temp = concatenate_annotations(corpus, t, video_indices, separation, provided_annotation, from_notebook)
-        output[:,:,i_t] = temp[:,:,0]
-
-    #m = np.min(output)
-    #M = np.max(output)
-
-    #if m<0 or M>1:
-    #    sys.exit('Annotation types are expected to be binary for fusion')
-
-    return (np.sum(output,axis=2).reshape(1, total_time_steps, 1)>0).astype(float)
-
-def concatenate_binarize_annotations(corpus, type, nonZero, video_indices, separation=0, provided_annotation=None, from_notebook=False):
-    """
-        Concatenates and binarize annotations of one type for several videos
-
-        Inputs:
-            corpus: 'DictaSign' or 'NCSLGR'
-            type:
-                DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
-                NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
-            nonZero: 'all' (if anything other than 0 should be counted as 1)
-                      or a list of non-zero categories to count positively
-            video_indices: list/array of integers
-            from_notebook: True if used in Jupyter notebook
-
-        Outputs:
-            Concatenated binarized data, shape (1, time_steps, 1)
-    """
-
-    video_indices = list(video_indices)
-    N_videos = len(video_indices)
-    if N_videos == 0:
-        sys.exit('At least one video index is required')
-
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
-
-    output = concatenate_annotations(corpus, type, video_indices, separation, provided_annotation, from_notebook)
-
-    if nonZero!='all':
-        N_nonZero = len(nonZero)
-        mask_class_garbage = np.ones(output.shape).astype(bool)
-        for i_c in range(N_nonZero):
-            mask_class_garbage *= (output != nonZero[i_c])
-        output[mask_class_garbage] = 0
-
-    return (output>0).astype(float)
-
-def concatenate_categorize_annotations(corpus, type, nonZero, video_indices, separation=0, provided_annotation=None, from_notebook=False):
-    """
-        Concatenates and make categorical annotations of one type for several videos
-
-        Inputs:
-            corpus: 'DictaSign' or 'NCSLGR'
-            type:
-                DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
-                NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
-            nonZero: a list of non-zero categories to count positively
-            video_indices: list/array of integers
-            from_notebook: True if used in Jupyter notebook
-
-        Outputs:
-            Concatenated categorical data, shape (1, time_steps, C+1) where C is the number of nonZero categories
-    """
-
-    video_indices = list(video_indices)
-    N_videos = len(video_indices)
-    if N_videos == 0:
-        sys.exit('At least one video index is required')
-
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
-
-    output_raw = concatenate_annotations(corpus, type, video_indices, separation, provided_annotation, from_notebook)
-    output_binary = concatenate_binarize_annotations(corpus, type, nonZero, video_indices, separation, provided_annotation, from_notebook)
-
-    C = len(nonZero)
-    if C==0:
-        sys.exit('At least one non-zero value is required')
-
-    output_raw[output_binary==0]=0
-
-    for i_C in range(1,C+1):
-        output_raw[output_raw==nonZero[i_C-1]] = i_C
-
-    return to_categorical(output_raw, C+1)
-
-def get_concatenated_sign_types(corpus, types, nonZero, video_indices, separation=0, provided_annotation=None, from_notebook=False):
-    """
-        Concatenates and returns a matrix of sign types
-
-        Inputs:
-            corpus: 'DictaSign' or 'NCSLGR'
-            types: a list of lists of types to regroup
-                DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
-                NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
-            nonZero: a list lists of non-zero categories to count positively
-                     if anything other than 0 is counted positive, choose []
-            video_indices: list/array of integers
-            from_notebook: True if used in Jupyter notebook
-
-        Outputs:
-            Concatenated categorical data, shape (1, time_steps, C+1) where C is the number of major types
-
-            e.g.1 : types = [['DS'], ['PT']], nonZeros = [[], []]
-            e.g.2 : types = [['PT_PRO1', 'PT_PRO2', 'PT_PRO3'], ['fls']], nonZeros = [[], [41891,43413,42495,42093]]
-            e.g.3 : types = [['PT_PRO1', 'PT_PRO2', 'PT_PRO3'], ['fls']], nonZeros = [[], []]
-
-    """
-
-    video_indices = list(video_indices)
-    N_videos = len(video_indices)
-    if N_videos == 0:
-        sys.exit('At least one video index is required')
-
-    types = list(types)
-    N_types = len(types)
-    if N_types == 0:
-        sys.exit('At least one annotation type is required')
-
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
-
-    tmp = concatenate_annotations(corpus, types[0][0], video_indices, separation, provided_annotation, from_notebook)
-
-    output = np.zeros((1, tmp.shape[1], N_types+1))
-
-    for i_t in range(N_types):
-        if len(types[i_t])==0:
-            sys.exit('There should be at least one annotation category per type')
-        elif len(types[i_t])>1:
-            if len(nonZero[i_t])>0:
-                sys.exit('Grouping several annotation types with non-binary annotation is ambiguous')
-            else: # len(nonZero[i_t])==0
-                output[0,:,i_t+1] = concatenate_fuse_annotations(corpus, types[i_t], video_indices, separation, provided_annotation, from_notebook)[0,:,0]
-        else: # len(types[i_t])==1
-            if len(nonZero[i_t])>0:
-                output[0,:,i_t+1] = concatenate_binarize_annotations(corpus, types[i_t][0], nonZero[i_t], video_indices, separation, provided_annotation, from_notebook)[0,:,0]
-            else: # len(nonZero[i_t])==0:
-                output[0,:,i_t+1] = concatenate_binarize_annotations(corpus, types[i_t][0], 'all', video_indices, separation, provided_annotation, from_notebook)[0,:,0]
-
-    output[0,:,0] = (1-(np.sum(output,axis=2)>0)).astype(bool)
-
-    return output
-
-def get_concatenated_mixed(corpus, types, nonZero, binary, video_indices, separation=0, provided_annotation=None, from_notebook=False):
-    """
-        Concatenates and returns a list of outputs, binary or categorical
-
-        Inputs:
-            corpus: 'DictaSign' or 'NCSLGR'
-            types: a list of lists of types to regroup
-                DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
-                NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
-            nonZero: a list lists of non-zero categories to count positively
-                     if anything other than 0 is counted positive, choose []
-            binary: list of True/False
-            video_indices: list/array of integers
-            from_notebook: True if used in Jupyter notebook
-
-        Outputs:
-            Concatenated categorical data, shape (1, time_steps, C+1) where C is the number of major types
-
-            e.g.1 : types = [['DS'], ['PT']], nonZeros = [[], []], binary=[True, True]
-            e.g.2 : types = [['PT_PRO1', 'PT_PRO2', 'PT_PRO3'], ['fls']], nonZeros = [[], [41891,43413,42495,42093]], binary=[True, True]
-            e.g.2b : types = [['PT_PRO1', 'PT_PRO2', 'PT_PRO3'], ['fls']], nonZeros = [[], [41891,43413,42495,42093]], binary=[True, False]
-            e.g.3 : types = [['PT_PRO1', 'PT_PRO2', 'PT_PRO3'], ['fls']], nonZeros = [[], []], binary=[True, True]
-
-    """
-
-    video_indices = list(video_indices)
-    N_videos = len(video_indices)
-    if N_videos == 0:
-        sys.exit('At least one video index is required')
-
-    types = list(types)
-    N_types = len(types)
-    if N_types == 0:
-        sys.exit('At least one annotation type is required')
-
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
-
-    tmp = concatenate_annotations(corpus, types[0][0], video_indices, separation, provided_annotation, from_notebook)
-
-    output_list = []
-    for i_t in range(N_types):
-        if len(types[i_t])==0:
-            sys.exit('There should be at least one annotation category per type')
-        elif len(types[i_t])>1:
-            if len(nonZero[i_t])>0 or not binary[i_t]:
-                sys.exit('Grouping several annotation types with non-binary annotation is ambiguous')
-            else: # len(nonZero[i_t])==0 and binary[i_t]:
-                output_list.append(concatenate_fuse_annotations(corpus, types[i_t], video_indices, separation, provided_annotation, from_notebook))
-        else: # len(types[i_t])==1
-            if len(nonZero[i_t])>0:
-                if binary[i_t]:
-                    output_list.append(to_categorical(concatenate_binarize_annotations(corpus, types[i_t][0], nonZero[i_t], video_indices, separation, provided_annotation, from_notebook),2))
-                else: # not binary[i_t]:
-                    output_list.append(concatenate_categorize_annotations(corpus, types[i_t][0], nonZero[i_t], video_indices, separation, provided_annotation, from_notebook))
-            else: # len(nonZero[i_t])==0
-                if binary[i_t]:
-                    output_list.append(to_categorical(concatenate_binarize_annotations(corpus, types[i_t][0], 'all', video_indices, separation, provided_annotation, from_notebook),2))
-                else: # not binary[i_t]:
-                    sys.exit('Non-binary categorical output requires at least one nonZero value')
-    return output_list
 
 def get_features_videos(corpus,
                         features_dict={'features_HS':np.arange(0, 420),
@@ -468,23 +285,23 @@ def get_sequence_features(corpus,
             key_features_idx = features_dict[key]
             key_features_number = key_features_idx.size
             if key_features_number > 0:
-                key_features = np.load(parent + 'data/processed/' + corpus + '/' + key + '.npy', encoding='latin1', allow_pickle=True)[vid_idx]
-                X[0, :, features_number_idx:features_number_idx+key_features_number] = key_features[img_start_idx:img_start_idx + time_steps, key_features_idx]
+                key_features = np.load(parent + 'data/processed/' + corpus + '/' + key + '.npy', encoding='latin1')[vid_idx]
+                X[0, img_start_idx:img_start_idx + time_steps, features_number_idx:features_number_idx+key_features_number] = key_features[img_start_idx:img_start_idx + time_steps, key_features_idx]
                 features_number_idx += key_features_number
     else:
-        X[0, :, :] = preloaded_features[vid_idx][0, img_start_idx:img_start_idx+time_steps, :]
+        X[0, img_start_idx:img_start_idx+time_steps, :] = preloaded_features[vid_idx][0, img_start_idx:img_start_idx+time_steps, :]
 
     return X
 
-def get_sequence_annotations_mixed(corpus,
-                                   types,
-                                   nonZero,
-                                   binary,
-                                   video_index,
-                                   img_start_idx=0,
-                                   time_steps=100,
-                                   provided_annotation=None,
-                                   from_notebook=False):
+def get_sequence_annotations_categories(corpus,
+                                       output_names,
+                                       output_categories,
+                                       vid_idx=0,
+                                       img_start_idx=0,
+                                       time_steps=100,
+                                       strides=1,
+                                       preloaded_annotations=None,
+                                       from_notebook=False):
     """
         For returning annotations for a sequence, in the form of a list of different categories.
             e.g.: get_sequence_annotations_categories('DictaSign',
@@ -492,7 +309,8 @@ def get_sequence_annotations_mixed(corpus,
                                          [[41891,43413,43422,42992],[1]],
                                          vid_idx=17,
                                          img_start_idx=258,
-                                         time_steps=100)
+                                         time_steps=100,
+                                         strides=1)
 
         Inputs:
             output_names: list of outputs (strings)
@@ -500,6 +318,7 @@ def get_sequence_annotations_mixed(corpus,
             vid_idx (int): which video
             img_start_idx (int): which start image
             time_steps: length of sequences (int)
+            strides: size of convolution strides
             preloaded_annotations: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
             from_notebook: if notebook script, data is in parent folder
 
@@ -507,29 +326,42 @@ def get_sequence_annotations_mixed(corpus,
             Y: a list, comprising annotations
     """
 
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
+    if from_notebook:
+        parent = '../'
+    else:
+        parent = ''
 
+    if corpus == 'DictaSign':
+        string_prefix = 'dataBrut_'
+    else:
+        string_prefix = ''
 
-    Y = get_concatenated_mixed(corpus, types, nonZero, binary, video_indices=[video_index], separation=0, provided_annotation=provided_annotation, from_notebook=from_notebook)
+    Y = []
 
-    N_types = len(types)
-
-    for i_t in range(N_types):
-        Y[i_t] = Y[i_t][:,img_start_idx:img_start_idx+time_steps,:]
+    output_number = len(output_names)
+    if preloaded_annotations is None:
+        annotation_output = np.load(parent + 'data/processed/' + corpus + '/annotations.npz', encoding='latin1', allow_pickle=True)
+    for i_output in range(output_number):
+        output_classes = len(output_categories[i_output])+1
+        if preloaded_annotations is None:
+            Y.append(categorical_conversion_seq(annotation_output[string_prefix+output_names[i_output]][vid_idx][img_start_idx:img_start_idx + time_steps, :], nonZeroCategories=output_categories[i_output]).reshape(1, time_steps, output_classes))
+        else:
+            Y.append(preloaded_annotations[i_output][vid_idx][0, img_start_idx:img_start_idx+time_steps, :].reshape(1, time_steps, output_classes))
+        if strides > 1:
+            Y[-1] = np.roll(Y[-1], -int(strides / 2), axis=1)[:, ::strides, :]
 
     return Y
 
 
-def get_sequence_annotations_sign_types(corpus,
-                                        types,
-                                        nonZero,
-                                        video_index,
-                                        img_start_idx=0,
-                                        time_steps=100,
-                                        separation=0,
-                                        provided_annotation=None,
-                                        from_notebook=False):
+def get_sequence_annotations_sign_types_binary(corpus,
+                                               output_names_final,
+                                               output_names_original,
+                                               vid_idx=0,
+                                               img_start_idx=0,
+                                               time_steps=100,
+                                               strides=1,
+                                               preloaded_annotations=None,
+                                               from_notebook=False):
     """
         For returning annotations for a sequence, in the form of a list of different categories, each of which is a list of video annotations.
             e.g.: get_sequence_annotations('DictaSign',
@@ -537,7 +369,8 @@ def get_sequence_annotations_sign_types(corpus,
                                          [[41891,43413,43422,42992],[1]],
                                          vid_idx=17,
                                          img_start_idx=258,
-                                         time_steps=100)
+                                         time_steps=100,
+                                         strides=1)
 
         Inputs:
             corpus (string)
@@ -548,40 +381,46 @@ def get_sequence_annotations_sign_types(corpus,
             vid_idx (int): which video
             img_start_idx (int): which start image
             time_steps: length of sequences (int)
+            strides: size of convolution strides
             preloaded_annotations: if annotations are already loaded, in the format of a list (for each video)
             from_notebook: if notebook script, data is in parent folder
 
         Outputs:
             Y: an annotation array
     """
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
 
-    Y = get_concatenated_sign_types(corpus, types, nonZero, [video_index], 0, provided_annotation, from_notebook)
+    if corpus == 'DictaSign':
+        string_prefix = 'dataBrut_'
+    else:
+        string_prefix = ''
 
-    return Y[:, img_start_idx:img_start_idx+time_steps, :]
+    if preloaded_annotations is None:
+        Y = get_annotations_videos_sign_types_binary(corpus, output_names_final, output_names_original, [vid_idx], from_notebook)[0]
+    else:
+        Y = preloaded_annotations[vid_idx]
+
+    output_classes = Y.shape[2]
+
+    return Y[0, img_start_idx:img_start_idx+time_steps, :].reshape(1, time_steps, output_classes)
 
 
 def get_sequence(corpus,
-                 output_form,
-                 types,
-                 nonZero,
-                 binary,
-                 video_index,
-                 img_start_idx,
-                 features_dict={'features_HS':np.arange(0, 420),
-                                'features_HS_norm':np.array([]),
-                                'raw':np.array([]),
-                                'raw_norm':np.array([]),
-                                '2Dfeatures':np.array([]),
-                                '2Dfeatures_norm':np.array([])},
-                 time_steps=100,
-                 preloaded_features=None,
-                 provided_annotation=None,
-                 features_type='features',
-                 frames_path_before_video='/localHD/DictaSign/convert/img/DictaSign_lsf_',
-                 empty_image_path='/localHD/DictaSign/convert/img/white.jpg',
-                 from_notebook=False):
+                   output_form,
+                   output_names_final,
+                   output_categories_or_names_original,
+                   vid_idx=0,
+                   img_start_idx=0,
+                   features_dict={'features_HS':np.arange(0, 420),
+                                  'features_HS_norm':np.array([]),
+                                  'raw':np.array([]),
+                                  'raw_norm':np.array([]),
+                                  '2Dfeatures':np.array([]),
+                                  '2Dfeatures_norm':np.array([])},
+                   time_steps=100,
+                   strides=1,
+                   preloaded_features=None,
+                   preloaded_annotations=None,
+                   from_notebook=False):
     """
         For returning features and annotations for a sequence.
 
@@ -598,6 +437,7 @@ def get_sequence(corpus,
             features_dict: a dictionary indication which features to keep
                 e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
             time_steps: length of sequences (int)
+            strides: size of convolution strides
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
             preloaded_annotations: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
             from_notebook: if notebook script, data is in parent folder
@@ -607,67 +447,39 @@ def get_sequence(corpus,
             Y: array or list, comprising annotations
     """
 
-    if from_notebook:
-        parent = '../'
-    else:
-        parent = ''
-
-    list_videos = np.load(parent + 'data/processed/' + corpus + '/list_videos.npy')
-
-
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
-
-    if features_type == 'features' or features_type == 'both':
-        X_features = get_sequence_features(corpus,
-                              video_index,
-                              img_start_idx,
-                              features_dict,
-                              time_steps,
-                              preloaded_features,
-                              from_notebook)
-    else:
-        X_features = np.array([])
-
-    X_frames = np.repeat('',time_steps).astype('<U100')
-
-    if features_type == 'frames' or features_type == 'both':
-        tmp_vid       = np.repeat(frames_path_before_video + list_videos[video_index] + '_front/', time_steps)
-        tmp_frames    = np.char.zfill((np.arange(time_steps)+1+img_start_idx).astype('<U5'),5)
-        tmp_extension = np.repeat('.jpg', time_steps)
-        X_frames = np.core.defchararray.add(np.core.defchararray.add(tmp_vid, tmp_frames), tmp_extension)
-
+    X = get_sequence_features(corpus, vid_idx, img_start_idx, features_dict, time_steps, strides, preloaded_features, from_notebook)
     if output_form == 'mixed':
-        Y = get_sequence_annotations_mixed(corpus=corpus,
-                                           types=types,
-                                           nonZero=nonZero,
-                                           binary=binary,
-                                           video_index=video_index,
-                                           img_start_idx=img_start_idx,
-                                           time_steps=time_steps,
-                                           provided_annotation=provided_annotation,
-                                           from_notebook=from_notebook)
+        Y = get_sequence_annotations_categories(corpus,
+                                                output_names_final,
+                                                output_categories_or_names_original,
+                                                vid_idx,
+                                                img_start_idx,
+                                                time_steps,
+                                                strides,
+                                                preloaded_annotations,
+                                                rom_notebook)
+        #if len(Y) == 1:
+        #    Y = Y[0]
     elif output_form == 'sign_types':
-        Y = get_sequence_annotations_sign_types(corpus=corpus,
-                                                types=types,
-                                                nonZero=nonZero,
-                                                video_index=video_index,
-                                                img_start_idx=img_start_idx,
-                                                time_steps=time_steps,
-                                                provided_annotation=provided_annotation,
-                                                from_notebook=from_notebook)
+        Y = get_sequence_annotations_sign_types_binary(corpus,
+                                                       output_names_final,
+                                                       output_categories_or_names_original,
+                                                       vid_idx,
+                                                       img_start_idx,
+                                                       time_steps,
+                                                       strides,
+                                                       preloaded_annotations,
+                                                       from_notebook)
     else:
         sys.exit('Invalid output form')
 
-    return [X_features, X_frames], Y
-
+    return X, Y
 
 def get_data_concatenated(corpus,
                           output_form,
-                          types,
-                          nonZero,
-                          binary,
-                          video_indices,
+                          output_names_final,
+                          output_categories_or_names_original,
+                          output_assemble=[],
                           features_dict={'features_HS':np.arange(0, 420),
                                          'features_HS_norm':np.array([]),
                                          'raw':np.array([]),
@@ -675,7 +487,8 @@ def get_data_concatenated(corpus,
                                          '2Dfeatures':np.array([]),
                                          '2Dfeatures_norm':np.array([])},
                           preloaded_features=None,
-                          provided_annotation=None,
+                          preloaded_annotations=None,
+                          video_indices=np.arange(10),
                           separation=100,
                           from_notebook=False,
                           return_idx_trueData=False,
@@ -686,36 +499,33 @@ def get_data_concatenated(corpus,
         For returning concatenated features and annotations for a set of videos (e.g. train set...)
             e.g. features_2_train, annot_2_train = get_data_concatenated('NCSLGR',
                                                                          'sign_types',
+                                                                         ['PT', 'DS', 'fls'],
                                                                          [['IX_1p', 'IX_2p', 'IX_3p'],
                                                                           [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL'],
-                                                                          ['lexical_with_ns_not_fs', 'fingerspelling', 'fingerspelled_loan_signs']],
-                                                                         )
+                                                                          ['lexical_with_ns_not_fs', 'fingerspelling', 'fingerspelled_loan_signs']])
                  features_1_train, annot_1_train = get_data_concatenated('DictaSign',
                                                                          'mixed',
-                                                                         [['PT'], ['DS'], ['fls']],
-                                                                         [[1], [1], [41891,43413,43422,42992]],
-                                                                         [True, True, False]
-                                                                         )
+                                                                         ['PT', 'DS', 'fls'],
+                                                                         [[1], [1], [41891,43413,43422,42992]])
                  features_3_train, annot_3_train = get_data_concatenated('NCSLGR',
                                                                          'mixed',
-                                                                         [['IX_1p', 'IX_2p', 'IX_3p'],
-                                                                          [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL'],
-                                                                          ['lexical_with_ns_not_fs', 'fingerspelling', 'fingerspelled_loan_signs']]
-                                                                         )
+                                                                         ['PT', 'DS', 'fls'], [[1], [1], [1]],
+                                                                         output_assemble=[['IX_1p', 'IX_2p', 'IX_3p'],
+                                                                                          [ 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL'], ['lexical_with_ns_not_fs', 'fingerspelling', 'fingerspelled_loan_signs']])
 
         Inputs:
             corpus (string)
             output_form: 'mixed' if different and separated Outputs
                          'sign_types' if annotation is only a binary matrix of sign types
-            output_categories_original: list of lists of original names that are used to compose final outputs
-            true_values: if left empty, all nonzero values are kept. Otherwise,
-                         you must provide a list of lists of values to consider nonzero
-            binary_output: only considered when output_form=mixed
-                           It's a list indicating whether the values should be categorical or binary
+            output_names_final: list of outputs (strings)
+            output_categories_or_names_original:
+                if output_form: 'mixed': list of lists of meaningful annotation categories for each output
+                if output_form: 'sign_types': list of lists of original names that are used to compose final outputs
+            output_assemble: used only if output_form: 'mixed'. List of lists of original names that can be assembled to compose final outputs, only considered if binary annotation category
             features_dict: a dictionary indication which features to keep
                 e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
-            provided_annotation: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
+            preloaded_annotations: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
             video_indices: numpy array for a list of videos
             separation: in order to separate consecutive videos
             from_notebook: if notebook script, data is in parent folder
@@ -732,49 +542,45 @@ def get_data_concatenated(corpus,
             Y: array or list, comprising annotations
     """
 
-    if provided_annotation is None:
-        provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
-
-    if output_form == 'mixed':
-        Y = get_concatenated_mixed(corpus,
-                                   types,
-                                   nonZero,
-                                   binary,
-                                   video_indices,
-                                   separation,
-                                   provided_annotation,
-                                   from_notebook)
-
-    elif output_form == 'sign_types':
-        Y = get_concatenated_sign_types(corpus,
-                                        types,
-                                        nonZero,
-                                        video_indices,
-                                        separation,
-                                        provided_annotation,
-                                        from_notebook)
-    else:
-        sys.exit('Invalid output form')
-
     if from_notebook:
         parent = '../'
     else:
         parent = ''
 
-    list_videos = np.load(parent + 'data/processed/' + corpus + '/list_videos.npy')
+    list_videos = np.load(parent+'data/processed/DictaSign/list_videos.npy')
 
-    # Getting video lengths:
     video_number = video_indices.size
     video_lengths = np.zeros(video_number, dtype=int)
     total_length = 0
-    for i_vid in range(video_number):
-        tmp = get_raw_annotation_type_video(corpus, types[0][0], video_indices[i_vid], provided_annotation, from_notebook)
-        video_lengths[i_vid] = tmp.shape[0]
-        total_length += video_lengths[i_vid]
-        total_length += separation
 
     if preloaded_features is None and features_type != 'frames':
         preloaded_features = get_features_videos(corpus, features_dict, video_indices, from_notebook)
+    if preloaded_annotations is None:
+        if output_form == 'mixed':
+            preloaded_annotations = get_annotations_videos_categories(corpus,
+                                                                      output_names_final,
+                                                                      output_categories_or_names_original,
+                                                                      output_assemble,
+                                                                      video_indices,
+                                                                      from_notebook)
+            for i_vid in range(video_number):
+                vid_idx = video_indices[i_vid]
+                video_lengths[i_vid] = preloaded_annotations[0][i_vid].shape[1]
+                total_length += video_lengths[i_vid]
+                total_length += separation
+        elif output_form == 'sign_types':
+            preloaded_annotations = get_annotations_videos_sign_types_binary(corpus,
+                                                                             output_names_final,
+                                                                             output_categories_or_names_original,
+                                                                             video_indices,
+                                                                             from_notebook)
+            for i_vid in range(video_number):
+                vid_idx = video_indices[i_vid]
+                video_lengths[i_vid] = preloaded_annotations[i_vid].shape[1]
+                total_length += video_lengths[i_vid]
+                total_length += separation
+        else: sys.exit('Invalid output form')
+
 
     if features_type == 'features' or features_type == 'both':
         features_number = preloaded_features[0].shape[2]
@@ -785,6 +591,15 @@ def get_data_concatenated(corpus,
     X_frames = np.repeat('',total_length).astype('<U100')
 
     idx_trueData = np.zeros(total_length)
+
+    output_number = len(output_names_final)
+    if output_form == 'mixed':
+        Y = []
+        for i_output in range(output_number):
+            output_classes = len(output_categories_or_names_original[i_output]) + 1
+            Y.append(np.zeros((1, total_length, output_classes)))
+    else:
+        Y = np.zeros((1, total_length, output_number + 1))
 
     img_start_idx = 0
     for i_vid in range(video_number):
@@ -798,6 +613,13 @@ def get_data_concatenated(corpus,
             X_frames[img_start_idx:img_start_idx + video_lengths[i_vid]] = np.core.defchararray.add(np.core.defchararray.add(tmp_vid, tmp_frames), tmp_extension)
             X_frames[img_start_idx + video_lengths[i_vid]:img_start_idx + video_lengths[i_vid]+separation] = empty_image_path
         idx_trueData[img_start_idx:img_start_idx+video_lengths[i_vid]] = 1
+        if output_form == 'mixed':
+            for i_output in range(output_number):
+                Y[i_output][0, img_start_idx:img_start_idx + video_lengths[i_vid], :] = preloaded_annotations[i_output][i_vid][0, :, :]
+                Y[i_output][0, img_start_idx + video_lengths[i_vid]:img_start_idx + video_lengths[i_vid]+separation, 0] = 1
+        else:
+            Y[0, img_start_idx:img_start_idx + video_lengths[i_vid], :] = preloaded_annotations[i_vid][0, :, :]
+            Y[0, img_start_idx + video_lengths[i_vid]:img_start_idx + video_lengths[i_vid]+separation, 0] = 1
         img_start_idx += video_lengths[i_vid]
         img_start_idx += separation
 
@@ -806,12 +628,10 @@ def get_data_concatenated(corpus,
     else:
         return [X_features, X_frames], Y
 
+
 def getVideoIndicesSplitNCSLGR(fractionValid=0.10,
                                fractionTest=0.05,
-                               videosToDelete=['dorm_prank_1053_small_0_1.mov',
-                                               'DSP_DeadDog.mov',
-                                               'DSP_Immigrants.mov',
-                                               'DSP_Trip.mov'],
+                               videosToDelete=['dorm_prank_1053_small_0_1.mov', 'DSP_DeadDog.mov', 'DSP_Immigrants.mov', 'DSP_Trip.mov'],
                                lengthCriterion=300,
                                includeLong=True,
                                includeShort=True,
@@ -940,10 +760,7 @@ def getVideoIndicesSplitDictaSign(tasksTrain=[],
 
     return idxTrain, idxValid, idxTest
 
-def getVideoIndicesSplitDictaSignManual(tasksSplit,
-                                        signersSplit,
-                                        excludeTask9,
-                                        from_notebook=False):#sessionsSplit,
+def getVideoIndicesSplitDictaSignManual(tasksSplit, signersSplit, excludeTask9, from_notebook=False):#sessionsSplit,
     """
         Train/valid/test split for DictaSign
         Returns intersection of tasks and signers
@@ -1040,12 +857,7 @@ def getVideoIndicesSplitDictaSignManual(tasksSplit,
 
     return idxTrain.astype(int), idxValid.astype(int), idxTest.astype(int)
 
-def getVideoIndicesSplitDictaSignAuto(signerIndependent,
-                                      taskIndependent,
-                                      excludeTask9,
-                                      fractionValid,
-                                      fractionTest,
-                                      from_notebook=False):
+def getVideoIndicesSplitDictaSignAuto(signerIndependent, taskIndependent, excludeTask9, fractionValid, fractionTest, from_notebook=False):
 
     if signerIndependent and taskIndependent:
         print('Attention, not all videos can be used if SI and TI setting are simultaneous')

@@ -481,34 +481,38 @@ else:
                                                                 checkSets=True)
 
 
-if outputName=='fls' and not flsBinary:
-    output_form='mixed'
-    output_categories_or_names_original=[flsKeep]
+if outputName=='fls':
+    nonZeros=flsKeep
+    if not flsBinary:
+        output_form='mixed'
+    else:
+        output_form='sign_types'
 else:
+    nonZeros=[]
     output_form='sign_types'
-    output_categories_or_names_original=[[outputName]]
+
 features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
-                                                    output_names_final=[outputName],
-                                                    output_categories_or_names_original=output_categories_or_names_original,
+                                                    types=[outputName],
+                                                    nonZero=[nonZeros],
+                                                    binary=[False],
                                                     video_indices=idxTrain,
-                                                    separation=separation,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames)
 features_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
-                                                    output_names_final=[outputName],
-                                                    output_categories_or_names_original=output_categories_or_names_original,
+                                                    types=[outputName],
+                                                    nonZero=[nonZeros],
+                                                    binary=[False],
                                                     video_indices=idxValid,
-                                                    separation=separation,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames)
 features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
-                                                    output_names_final=[outputName],
-                                                    output_categories_or_names_original=output_categories_or_names_original,
+                                                    types=[outputName],
+                                                    nonZero=[nonZeros],
+                                                    binary=[False],
                                                     video_indices=idxTest,
-                                                    separation=separation,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames)
 
