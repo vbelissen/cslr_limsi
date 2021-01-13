@@ -345,7 +345,7 @@ def get_concatenated_mixed(corpus, types, nonZero, binary, video_indices, separa
             if len(nonZero[i_t])>0 or not binary[i_t]:
                 sys.exit('Grouping several annotation types with non-binary annotation is ambiguous')
             else: # len(nonZero[i_t])==0 and binary[i_t]:
-                output_list.append(concatenate_fuse_annotations(corpus, types[i_t], video_indices, separation, provided_annotation, from_notebook))
+                output_list.append(to_categorical(concatenate_fuse_annotations(corpus, types[i_t], video_indices, separation, provided_annotation, from_notebook),2))
         else: # len(types[i_t])==1
             if len(nonZero[i_t])>0:
                 if binary[i_t]:
