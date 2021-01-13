@@ -22,6 +22,9 @@ The original data (video + annotation):
 * [Dicta-Sign-LSF-v2](https://www.ortolang.fr/market/corpora/dicta-sign-lsf-v2/)
 * [NCSLGR](https://www.bu.edu/asllrp/ncslgr.html)
 
+Data in usable format (simply uncompress the zip in cslr_limsi/):
+* https://drive.google.com/file/d/1byTR9zx8FSwC5CjBRf498l84z5DnxHz4/view?usp=sharing
+
 ## Citation
 If you find the project helpful, please cite:
 ```

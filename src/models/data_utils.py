@@ -49,6 +49,7 @@ def get_raw_annotation_type_video(corpus, type, video_index, provided_annotation
                 DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
                 NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
             video_index: integer
+            provided_annotation: raw annotation data (not needed)
             from_notebook: True if used in Jupyter notebook
 
         Outputs:
@@ -80,6 +81,7 @@ def concatenate_annotations(corpus, type, video_indices, separation=0, provided_
                 NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
             video_indices: list/array of integers
             separation: (integer) frames to separate videos
+            provided_annotation: raw annotation data (not needed)
             from_notebook: True if used in Jupyter notebook
 
         Outputs:
@@ -122,6 +124,8 @@ def concatenate_fuse_annotations(corpus, types, video_indices, separation=0, pro
                 DictaSign: subset of ['fls' (with different categories), 'PT', 'PT_PRO1', 'PT_PRO2', 'PT_PRO3', 'PT_LOC', 'PT_DET', 'PT_LBUOY', 'PT_BUOY', 'DS', 'DSA', 'DSG', 'DSL', 'DSM', 'DSS', 'DST', 'DSX', 'FBUOY', 'N', 'FS']
                 NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
             video_indices: list/array of integers
+            separation: (integer) frames to separate videos
+            provided_annotation: raw annotation data (not needed)
             from_notebook: True if used in Jupyter notebook
 
         Outputs:
@@ -149,12 +153,6 @@ def concatenate_fuse_annotations(corpus, types, video_indices, separation=0, pro
         temp = concatenate_annotations(corpus, t, video_indices, separation, provided_annotation, from_notebook)
         output[:,:,i_t] = temp[:,:,0]
 
-    #m = np.min(output)
-    #M = np.max(output)
-
-    #if m<0 or M>1:
-    #    sys.exit('Annotation types are expected to be binary for fusion')
-
     return (np.sum(output,axis=2).reshape(1, total_time_steps, 1)>0).astype(float)
 
 def concatenate_binarize_annotations(corpus, type, nonZero, video_indices, separation=0, provided_annotation=None, from_notebook=False):
@@ -169,6 +167,8 @@ def concatenate_binarize_annotations(corpus, type, nonZero, video_indices, separ
             nonZero: 'all' (if anything other than 0 should be counted as 1)
                       or a list of non-zero categories to count positively
             video_indices: list/array of integers
+            separation: (integer) frames to separate videos
+            provided_annotation: raw annotation data (not needed)
             from_notebook: True if used in Jupyter notebook
 
         Outputs:
@@ -205,6 +205,8 @@ def concatenate_categorize_annotations(corpus, type, nonZero, video_indices, sep
                 NCSLGR: subset of ['other', 'lexical_with_ns_not_fs' (only 0/1), 'fingerspelling', 'fingerspelled_loan_signs', 'IX_1p', 'IX_2p', 'IX_3p', 'IX_loc', 'POSS', 'SELF', 'gesture', 'part_indef', 'DCL', 'LCL', 'SCL', 'BCL', 'ICL', 'BPCL', 'PCL']
             nonZero: a list of non-zero categories to count positively
             video_indices: list/array of integers
+            separation: (integer) frames to separate videos
+            provided_annotation: raw annotation data (not needed)
             from_notebook: True if used in Jupyter notebook
 
         Outputs:
@@ -245,6 +247,8 @@ def get_concatenated_sign_types(corpus, types, nonZero, video_indices, separatio
             nonZero: a list lists of non-zero categories to count positively
                      if anything other than 0 is counted positive, choose []
             video_indices: list/array of integers
+            separation: (integer) frames to separate videos
+            provided_annotation: raw annotation data (not needed)
             from_notebook: True if used in Jupyter notebook
 
         Outputs:
@@ -304,6 +308,8 @@ def get_concatenated_mixed(corpus, types, nonZero, binary, video_indices, separa
                      if anything other than 0 is counted positive, choose []
             binary: list of True/False
             video_indices: list/array of integers
+            separation: (integer) frames to separate videos
+            provided_annotation: raw annotation data (not needed)
             from_notebook: True if used in Jupyter notebook
 
         Outputs:
@@ -430,7 +436,6 @@ def get_sequence_features(corpus,
 
         Inputs:
             corpus (string)
-            output_weights: list of weights for each_output
             vid_idx (int): which video
             img_start_idx (int): which start image
             features_dict: a dictionary indicating which features to keep
@@ -440,7 +445,7 @@ def get_sequence_features(corpus,
                        'raw_norm':np.array([]),
                        '2Dfeatures':np.array([]),
                        '2Dfeatures_norm':np.array([])}}
-            time_steps: length of sequences (int)
+            time_steps: length of sequence (int)
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
             from_notebook: if notebook script, data is in parent folder
 
@@ -500,7 +505,7 @@ def get_sequence_annotations_mixed(corpus,
             vid_idx (int): which video
             img_start_idx (int): which start image
             time_steps: length of sequences (int)
-            preloaded_annotations: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
+            provided_annotation: raw annotation data (not needed)
             from_notebook: if notebook script, data is in parent folder
 
         Outputs:
@@ -527,7 +532,6 @@ def get_sequence_annotations_sign_types(corpus,
                                         video_index,
                                         img_start_idx=0,
                                         time_steps=100,
-                                        separation=0,
                                         provided_annotation=None,
                                         from_notebook=False):
     """
@@ -548,7 +552,7 @@ def get_sequence_annotations_sign_types(corpus,
             vid_idx (int): which video
             img_start_idx (int): which start image
             time_steps: length of sequences (int)
-            preloaded_annotations: if annotations are already loaded, in the format of a list (for each video)
+            provided_annotation: raw annotation data (not needed)
             from_notebook: if notebook script, data is in parent folder
 
         Outputs:
@@ -599,7 +603,7 @@ def get_sequence(corpus,
                 e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
             time_steps: length of sequences (int)
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
-            preloaded_annotations: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
+            provided_annotation: raw annotation data (not needed)
             from_notebook: if notebook script, data is in parent folder
 
         Outputs:
@@ -666,8 +670,8 @@ def get_data_concatenated(corpus,
                           output_form,
                           types,
                           nonZero,
-                          binary,
-                          video_indices,
+                          binary=[],
+                          video_indices=np.arange(10),
                           features_dict={'features_HS':np.arange(0, 420),
                                          'features_HS_norm':np.array([]),
                                          'raw':np.array([]),
@@ -707,15 +711,15 @@ def get_data_concatenated(corpus,
             corpus (string)
             output_form: 'mixed' if different and separated Outputs
                          'sign_types' if annotation is only a binary matrix of sign types
-            output_categories_original: list of lists of original names that are used to compose final outputs
-            true_values: if left empty, all nonzero values are kept. Otherwise,
-                         you must provide a list of lists of values to consider nonzero
-            binary_output: only considered when output_form=mixed
-                           It's a list indicating whether the values should be categorical or binary
+            types: a list of lists of original names that are used to compose final outputs
+            nonZero: a list of lists of nonzero values to consider
+                     if 4 outputs with all nonZero values should be considered, nonZero=[[],[],[],[]]
+            binary: only considered when output_form=mixed
+                           It's a list (True/False) indicating whether the values should be categorical or binary
             features_dict: a dictionary indication which features to keep
                 e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
-            provided_annotation: if annotations are already loaded, in the format of a list of lists (for each output type, each video), categorical values
+            provided_annotation: raw annotation data (not needed)
             video_indices: numpy array for a list of videos
             separation: in order to separate consecutive videos
             from_notebook: if notebook script, data is in parent folder
