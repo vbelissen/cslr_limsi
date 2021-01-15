@@ -588,12 +588,20 @@ for config in ['valid', 'test']:
     if config == 'valid':
         print('Validation set')
         nRound_valid=annot_valid[0].shape[1]//seq_length
-        timestepsRound_valid = nRound_valid *seq_length
-        predict_valid = model.predict(features_valid[:,:timestepsRound_valid,:].reshape(-1, seq_length, features_valid.shape[2])).reshape(1, timestepsRound_valid, nClasses)
-        predict_valid = predict_valid[0]
+        timestepsRound_valid = nRound_valid*seq_length
+        predict_valid = model_predictions(model=model,
+                                          features=[features_valid[0][:,:timestepsRound_valid,:], features_valid[1][:,:timestepsRound_valid,:]],
+                                          features_type=inputFeaturesFrames,
+                                          seq_length=seq_length,
+                                          img_width=imgWidth,
+                                          img_height=imgHeight,
+                                          cnnType=cnnType,
+                                          batch_size=0)
+        predict_valid = predict_valid.reshape(1, timestepsRound_valid, nClasses)
+        #predict_valid = predict_valid[0]
         acc = framewiseAccuracy(annot_valid[0][0,:nRound_valid *seq_length,:],predict_valid[:nRound_valid *seq_length,:],True,True)
-        frameP, frameR, frameF1 = framewisePRF1(annot_valid[0][0,:nRound_valid *seq_length,:], predict_valid[:nRound_valid *seq_length,:], True, True)
-        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0][0,:nRound_valid*seq_length,:], predict_valid[:nRound_valid *seq_length,:], True, True, step=stepWolf)
+        frameP, frameR, frameF1 = framewisePRF1(annot_valid[0][0,:nRound_valid *seq_length,:], predict_valid[0,:nRound_valid *seq_length,:], True, True)
+        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0][0,:nRound_valid*seq_length,:], predict_valid[0,:nRound_valid *seq_length,:], True, True, step=stepWolf)
         nameHistoryAppend = 'val_'
     else:
         print('Test set')

@@ -16,6 +16,11 @@ if v0 == '2':
     from tensorflow.keras.applications.resnet50 import ResNet50
     from tensorflow.keras.applications.vgg16 import VGG16
     from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
+    from tensorflow.keras.preprocessing.image import load_img, img_to_array
+    from tensorflow.keras.applications.resnet50 import preprocess_input as preprocess_input_ResNet50
+    from tensorflow.keras.applications.vgg16 import preprocess_input as preprocess_input_VGG16
+    from tensorflow.keras.applications.mobilenet import preprocess_input as preprocess_input_MobileNet
+
 elif v0 == '1':
     #For tensorflow 1.2.0
     import keras.backend as K
@@ -28,6 +33,10 @@ elif v0 == '1':
     from keras.applications.resnet50 import ResNet50
     from keras.applications.vgg16 import VGG16
     from keras.applications.mobilenet import MobileNet
+    from keras.preprocessing.image import load_img, img_to_array
+    from keras.applications.resnet50 import preprocess_input as preprocess_input_ResNet50
+    from keras.applications.vgg16 import preprocess_input as preprocess_input_VGG16
+    from keras.applications.mobilenet import preprocess_input as preprocess_input_MobileNet
 
 
 else:
@@ -387,3 +396,93 @@ def get_model(output_names,
     if print_summary:
         model.summary()
     return model
+
+def model_predictions(model,
+                      features,
+                      features_type,
+                      seq_length,
+                      img_width=224,
+                      img_height=224,
+                      cnnType='resnet',
+                      batch_size=0):
+    '''
+    Used to make predictions, especially useful when input
+    is mixed with both preprocessed features and frames
+
+    Inputs:
+        model: a Keras model
+        features : [X_features, X_frames]
+                   X_features: a numpy array [1, total_time_steps, features_number]
+                   X_frames: a list of frame paths
+        features_type: 'features', 'frames' or 'both'
+        seq_length
+        batch_size: if  0, predictions are sequence per sequence
+                    if >0, predictions are run by batches
+
+    Outputs:
+        predictions
+    '''
+
+    N_categories = [2]
+    N_outputs = len(N_categories)
+
+    if features_type == 'frames':
+        total_length_round = (len(features[1])//seq_length)*seq_length
+    elif features_type == 'features' or features_type == 'both':
+        total_length_round = (features[0].shape[1]//seq_length)*seq_length
+        feature_number = features[0].shape[2]
+    else:
+        sys.exit('Wrong features type')
+
+    if features_type == 'features' or features_type == 'both':
+        X_features = features[0][:,:total_length_round,:].reshape(-1, seq_length, feature_number)
+    if features_type == 'frames' or features_type == 'both':
+        X_frames = np.zeros((1, total_length_round, img_width, img_height, 3))
+        for iFrame in range(total_length_round):
+            if cnnType=='resnet':
+                X_frames[0, iFrame, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame],  target_size=(img_width, img_height))))
+            elif cnnType=='vgg':
+                X_frames[0, iFrame, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame],     target_size=(img_width, img_height))))
+            elif cnnType=='mobilenet':
+                X_frames[0, iFrame, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+            else:
+                sys.exit('Invalid CNN network model')
+        X_frames = X_frames.reshape(-1, seq_length, img_width, img_height, 3)
+
+    batch_size_time = np.min([batch_size*seq_length, total_length_round])
+
+
+    if batch_size == 0:
+        if features_type == 'features':
+            output = model.predict(X_features)
+        elif features_type == 'frames':
+            output = model.predict(X_frames)
+        else: #features_type == 'both':
+            output = model.predict([X_features, X_frames])
+    else:
+        output = [np.zeros((1, total_length_round, N_categories[i])) for i in range(N_outputs)]
+
+        N_full_batches = batch_size_time//(batch_size*seq_length)
+
+        for i_batch in range(N_full_batches):
+            if features_type == 'features':
+                pred = model.predict(X_features[i_batch*batch_size:(i_batch+1)*batch_size, :, :])
+            elif features_type == 'frames':
+                pred = model.predict(X_frames[i_batch*batch_size:(i_batch+1)*batch_size, :, :, :, :])
+            else:#features_type == 'both':
+                pred = model.predict([X_features[i_batch*batch_size:(i_batch+1)*batch_size, :, :],
+                                      X_frames[i_batch*batch_size:(i_batch+1)*batch_size, :, :, :, :]])
+            for i_out in range(N_outputs):
+                output[i_out][0,i_batch*batch_size*seq_length:(i_batch+1)*batch_size*seq_length,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
+        if features_type == 'features':
+            pred = model.predict(X_features[N_full_batches*batch_size:, :, :])
+        elif features_type == 'frames':
+            pred = model.predict(X_frames[N_full_batches*batch_size:, :, :, :, :])
+        else:#features_type == 'both':
+            pred = model.predict([X_features[N_full_batches*batch_size:, :, :],
+                                  X_frames[N_full_batches*batch_size:, :, :, :, :]])
+        output[i_out][0,N_full_batches*batch_size*seq_length:,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
+
+    for i_out in range(N_outputs):
+        output[i_out] = output[i_out].reshape(-1, seq_length, N_categories[i_out])
+    return output

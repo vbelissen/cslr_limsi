@@ -42,7 +42,8 @@ else:
 
 def generator(features,
               features_type,
-              annot, batch_size,
+              annot,
+              batch_size,
               seq_length,
               output_form,
               output_class_weights,
