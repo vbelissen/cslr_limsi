@@ -590,7 +590,7 @@ for config in ['valid', 'test']:
         nRound_valid=annot_valid[0].shape[1]//seq_length
         timestepsRound_valid = nRound_valid*seq_length
         predict_valid = model_predictions(model=model,
-                                          features=[features_valid[0][:,:timestepsRound_valid,:], features_valid[1][:,:timestepsRound_valid,:]],
+                                          features=[features_valid[0][:,:timestepsRound_valid,:], features_valid[1][:timestepsRound_valid]],
                                           features_type=inputFeaturesFrames,
                                           seq_length=seq_length,
                                           img_width=imgWidth,
