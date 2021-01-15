@@ -644,11 +644,11 @@ for config in ['valid', 'test']:
     for margin in [0, 12, 25, 50]:
         print('margin = ' + str(margin))
         if config == 'valid':
-            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],predict_valid[:nRound_valid*seq_length,:],True,True,margin)
-            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],predict_valid[:nRound_valid*seq_length,:],True,True,margin)
+            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],predict_valid[0,:nRound_valid*seq_length,:],True,True,margin)
+            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],predict_valid[0,:nRound_valid*seq_length,:],True,True,margin)
         else:
-            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True,margin)
-            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True,margin)
+            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],predict_test[0,:nRound_test*seq_length,:],True,True,margin)
+            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],predict_test[0,:nRound_test*seq_length,:],True,True,margin)
         print('P, R, F1 (middleUnit): ' + str(middleUnitP) + ', ' + str(middleUnitR) + ', ' + str(middleUnitF1))
         print('P, R, F1 (marginUnit): ' + str(marginUnitP) + ', ' + str(marginUnitR) + ', ' + str(marginUnitF1))
         dataGlobal[outputName][timeString]['results'][config]['middleUnitP'][margin]  = middleUnitP
