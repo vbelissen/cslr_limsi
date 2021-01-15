@@ -607,11 +607,19 @@ for config in ['valid', 'test']:
         print('Test set')
         nRound_test=annot_test[0].shape[1]//seq_length
         timestepsRound_test = nRound_test*seq_length
-        predict_test = model.predict(features_test[:,:timestepsRound_test,:].reshape(-1, seq_length, features_test.shape[2])).reshape(1, timestepsRound_test, nClasses)
-        predict_test = predict_test[0]
-        acc = framewiseAccuracy(annot_test[0][0,:nRound_test*seq_length,:],predict_test[:nRound_test*seq_length,:],True,True)
-        frameP, frameR, frameF1 = framewisePRF1(annot_test[0][0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True)
-        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0][0,:nRound_test*seq_length,:], predict_test[:nRound_test*seq_length,:], True, True, step=stepWolf)
+        predict_test = model_predictions(model=model,
+                                          features=[features_test[0][:,:timestepsRound_test,:], features_test[1][:timestepsRound_test]],
+                                          features_type=inputFeaturesFrames,
+                                          seq_length=seq_length,
+                                          img_width=imgWidth,
+                                          img_height=imgHeight,
+                                          cnnType=cnnType,
+                                          batch_size=0)
+        predict_test = predict_test.reshape(1, timestepsRound_test, nClasses)
+        #predict_test = predict_test[0]
+        acc = framewiseAccuracy(annot_test[0][0,:nRound_test*seq_length,:],predict_test[0,:nRound_test *seq_length,:],True,True)
+        frameP, frameR, frameF1 = framewisePRF1(annot_test[0][0,:nRound_test *seq_length,:], predict_test[0,:nRound_test *seq_length,:], True, True)
+        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0][0,:nRound_test*seq_length,:], predict_test[0,:nRound_test *seq_length,:], True, True, step=stepWolf)
         nameHistoryAppend =  ''
 
     print('Framewise accuracy: ' + str(acc))
@@ -644,11 +652,27 @@ for config in ['valid', 'test']:
     for margin in [0, 12, 25, 50]:
         print('margin = ' + str(margin))
         if config == 'valid':
-            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],predict_valid[0,:nRound_valid*seq_length,:],True,True,margin)
-            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],predict_valid[0,:nRound_valid*seq_length,:],True,True,margin)
+            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],
+                                                                    predict_valid[0,:nRound_valid*seq_length,:],
+                                                                    True,
+                                                                    True,
+                                                                    margin)
+            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],
+                                                                    predict_valid[0,:nRound_valid*seq_length,:],
+                                                                    True,
+                                                                    True,
+                                                                    margin)
         else:
-            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],predict_test[0,:nRound_test*seq_length,:],True,True,margin)
-            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],predict_test[0,:nRound_test*seq_length,:],True,True,margin)
+            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],
+                                                                    predict_test[0,:nRound_test*seq_length,:],
+                                                                    True,
+                                                                    True,
+                                                                    margin)
+            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],
+                                                                    predict_test[0,:nRound_test*seq_length,:],
+                                                                    True,
+                                                                    True,
+                                                                    margin)
         print('P, R, F1 (middleUnit): ' + str(middleUnitP) + ', ' + str(middleUnitR) + ', ' + str(middleUnitF1))
         print('P, R, F1 (marginUnit): ' + str(marginUnitP) + ', ' + str(marginUnitR) + ', ' + str(marginUnitF1))
         dataGlobal[outputName][timeString]['results'][config]['middleUnitP'][margin]  = middleUnitP
