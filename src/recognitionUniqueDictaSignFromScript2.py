@@ -599,7 +599,7 @@ for config in ['valid', 'test']:
                                           batch_size=0)
         predict_valid = predict_valid.reshape(1, timestepsRound_valid, nClasses)
         #predict_valid = predict_valid[0]
-        acc = framewiseAccuracy(annot_valid[0][0,:nRound_valid *seq_length,:],predict_valid[:nRound_valid *seq_length,:],True,True)
+        acc = framewiseAccuracy(annot_valid[0][0,:nRound_valid*seq_length,:],predict_valid[0,:nRound_valid *seq_length,:],True,True)
         frameP, frameR, frameF1 = framewisePRF1(annot_valid[0][0,:nRound_valid *seq_length,:], predict_valid[0,:nRound_valid *seq_length,:], True, True)
         pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0][0,:nRound_valid*seq_length,:], predict_valid[0,:nRound_valid *seq_length,:], True, True, step=stepWolf)
         nameHistoryAppend = 'val_'
