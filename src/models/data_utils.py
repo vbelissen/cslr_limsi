@@ -623,13 +623,13 @@ def get_sequence(corpus,
         provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
 
     if features_type == 'features' or features_type == 'both':
-        X_features = get_sequence_features(corpus,
-                              video_index,
-                              img_start_idx,
-                              features_dict,
-                              time_steps,
-                              preloaded_features,
-                              from_notebook)
+        X_features = get_sequence_features(corpus=corpus,
+                              video_index=video_index,
+                              img_start_idx=img_start_idx,
+                              features_dict=features_dict,
+                              time_steps=time_steps,
+                              preloaded_features=preloaded_features,
+                              from_notebook=from_notebook)
     else:
         X_features = np.array([])
 
@@ -740,23 +740,23 @@ def get_data_concatenated(corpus,
         provided_annotation = get_raw_annotation_from_file(corpus, from_notebook)
 
     if output_form == 'mixed':
-        Y = get_concatenated_mixed(corpus,
-                                   types,
-                                   nonZero,
-                                   binary,
-                                   video_indices,
-                                   separation,
-                                   provided_annotation,
-                                   from_notebook)
+        Y = get_concatenated_mixed(corpus=corpus,
+                                   types=types,
+                                   nonZero=nonZero,
+                                   binary=binary,
+                                   video_indices=video_indices,
+                                   separation=separation,
+                                   provided_annotation=provided_annotation,
+                                   from_notebook=from_notebook)
 
     elif output_form == 'sign_types':
-        Y = get_concatenated_sign_types(corpus,
-                                        types,
-                                        nonZero,
-                                        video_indices,
-                                        separation,
-                                        provided_annotation,
-                                        from_notebook)
+        Y = get_concatenated_sign_types(corpus=corpus,
+                                        types=types,
+                                        nonZero=nonZero,
+                                        video_indices=video_indices,
+                                        separation=separation,
+                                        provided_annotation=provided_annotation,
+                                        from_notebook=from_notebook)
     else:
         sys.exit('Invalid output form')
 
