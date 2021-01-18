@@ -517,9 +517,9 @@ features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     features_type=inputFeaturesFrames)
 
 
-nClasses = annot_train[0].shape[2]
+nClasses = annot_train.shape[2]
 
-classWeightsCorrected, _ = weightVectorImbalancedDataOneHot(annot_train[0][0, :, :])
+classWeightsCorrected, _ = weightVectorImbalancedDataOneHot(annot_train[0, :, :])
 classWeightsNotCorrected = np.ones(nClasses)
 classWeightFinal         = weightCorrection*classWeightsCorrected + (1-weightCorrection)*classWeightsNotCorrected
 
