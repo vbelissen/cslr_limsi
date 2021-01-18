@@ -524,7 +524,6 @@ classWeightsCorrected, _ = weightVectorImbalancedDataOneHot(annot_train[0, :, :]
 classWeightsNotCorrected = np.ones(nClasses)
 classWeightFinal         = weightCorrection*classWeightsCorrected + (1-weightCorrection)*classWeightsNotCorrected
 
-print(classWeightFinal)
 
 model = get_model([outputName],[nClasses],[1],
                     dropout=dropout,
