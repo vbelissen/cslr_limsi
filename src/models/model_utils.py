@@ -500,7 +500,7 @@ def model_predictions(model,
                 for i_out in range(N_outputs):
                     output[i_out][0,i_frame_start:i_frame_end,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
             else:
-                output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, N_categories[i_out])
+                output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, N_categories[0])
 
 
         # Last (incomplete) batch:
@@ -538,6 +538,6 @@ def model_predictions(model,
             for i_out in range(N_outputs):
                 output[i_out] = output[i_out].reshape(-1, seq_length, N_categories[i_out])
         else:
-            output = output.reshape(-1, seq_length, N_categories[i_out])
+            output = output.reshape(-1, seq_length, N_categories[0])
 
     return output
