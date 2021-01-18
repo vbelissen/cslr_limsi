@@ -472,12 +472,12 @@ def model_predictions(model,
 
         # Full batches:
         for i_batch in range(N_full_batches):
+            i_seq_start   = i_batch*batch_size
+            i_seq_end     = (i_batch+1)*batch_size
+            i_frame_start = i_seq_start*seq_length
+            i_frame_end   = i_seq_end*seq_length
             if features_type == 'frames' or features_type == 'both':
                 X_frames_batch = np.zeros((1, batch_size*seq_length, img_width, img_height, 3))
-                i_seq_start   = i_batch*batch_size
-                i_seq_end     = (i_batch+1)*batch_size
-                i_frame_start = i_seq_start*seq_length
-                i_frame_end   = i_seq_end*seq_length
                 for iFrame in range(i_frame_start, i_frame_end):
                     if cnnType=='resnet':
                         X_frames_batch[0, iFrame-i_frame_start, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame],  target_size=(img_width, img_height))))
@@ -504,12 +504,12 @@ def model_predictions(model,
 
 
         # Last (incomplete) batch:
+        i_seq_start   = N_full_batches*batch_size
+        i_seq_end     = total_length_round//seq_length
+        i_frame_start = i_seq_start*seq_length
+        i_frame_end   = i_seq_end*seq_length
         if features_type == 'frames' or features_type == 'both':
             X_frames_batch = np.zeros((1, remainding_length, img_width, img_height, 3))
-            i_seq_start   = N_full_batches*batch_size
-            i_seq_end     = total_length_round//seq_length
-            i_frame_start = i_seq_start*seq_length
-            i_frame_end   = i_seq_end*seq_length
             for iFrame in range(i_frame_start, i_frame_end):
                 if cnnType=='resnet':
                     X_frames_batch[0, iFrame-i_frame_start, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame],  target_size=(img_width, img_height))))
