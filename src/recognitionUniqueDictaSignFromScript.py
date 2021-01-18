@@ -516,8 +516,7 @@ features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames)
 
-print(annot_train[0].shape)
-print(np.sum(annot_train[0],axis=1))
+print(np.sum(annot_train,axis=1))
 
 
 nClasses = annot_train.shape[2]
