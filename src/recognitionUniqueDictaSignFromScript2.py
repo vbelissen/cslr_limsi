@@ -618,13 +618,13 @@ for config in ['valid', 'test']:
         nRound_test = annot_test[0].shape[1]//seq_length
         timestepsRound_test = nRound_test*seq_length
         predict_test = model_predictions(model=model,
-                                          features=[features_test[0][:,:timestepsRound_test,:], features_test[1][:timestepsRound_test]],
-                                          features_type=inputFeaturesFrames,
-                                          seq_length=seq_length,
-                                          img_width=imgWidth,
-                                          img_height=imgHeight,
-                                          cnnType=cnnType,
-                                          batch_size=0)
+                                         features=[features_test[0][:,:timestepsRound_test,:], features_test[1][:timestepsRound_test]],
+                                         features_type=inputFeaturesFrames,
+                                         seq_length=seq_length,
+                                         img_width=imgWidth,
+                                         img_height=imgHeight,
+                                         cnnType=cnnType,
+                                         batch_size=0)
         predict_test = predict_test.reshape(1, timestepsRound_test, nClasses)
         #predict_test = predict_test[0]
         acc = framewiseAccuracy(annot_test[0][0,:nRound_test*seq_length,:],

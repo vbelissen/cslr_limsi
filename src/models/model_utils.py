@@ -436,53 +436,108 @@ def model_predictions(model,
 
     if features_type == 'features' or features_type == 'both':
         X_features = features[0][:,:total_length_round,:].reshape(-1, seq_length, feature_number)
-    if features_type == 'frames' or features_type == 'both':
-        X_frames = np.zeros((1, total_length_round, img_width, img_height, 3))
-        for iFrame in range(total_length_round):
-            if cnnType=='resnet':
-                X_frames[0, iFrame, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame],  target_size=(img_width, img_height))))
-            elif cnnType=='vgg':
-                X_frames[0, iFrame, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame],     target_size=(img_width, img_height))))
-            elif cnnType=='mobilenet':
-                X_frames[0, iFrame, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
-            else:
-                sys.exit('Invalid CNN network model')
-        X_frames = X_frames.reshape(-1, seq_length, img_width, img_height, 3)
 
-    batch_size_time = np.min([batch_size*seq_length, total_length_round])
+    #batch_size_time = np.min([batch_size*seq_length, total_length_round])
 
 
     if batch_size == 0:
+        if features_type == 'frames' or features_type == 'both':
+            X_frames = np.zeros((1, total_length_round, img_width, img_height, 3))
+            for iFrame in range(total_length_round):
+                if cnnType=='resnet':
+                    X_frames[0, iFrame, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame],  target_size=(img_width, img_height))))
+                elif cnnType=='vgg':
+                    X_frames[0, iFrame, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame],     target_size=(img_width, img_height))))
+                elif cnnType=='mobilenet':
+                    X_frames[0, iFrame, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                else:
+                    sys.exit('Invalid CNN network model')
+            X_frames = X_frames.reshape(-1, seq_length, img_width, img_height, 3)
+
         if features_type == 'features':
             output = model.predict(X_features)
         elif features_type == 'frames':
             output = model.predict(X_frames)
         else: #features_type == 'both':
             output = model.predict([X_features, X_frames])
+
     else:
-        output = [np.zeros((1, total_length_round, N_categories[i])) for i in range(N_outputs)]
+        if N_outputs > 1:
+            output = [np.zeros((1, total_length_round, N_categories[i])) for i in range(N_outputs)]
+        else:
+            output = np.zeros((1, total_length_round, N_categories[0]))
 
-        N_full_batches = batch_size_time//(batch_size*seq_length)
+        N_full_batches = total_length_round//(batch_size*seq_length)
+        remainding_length = total_length_round - N_full_batches*batch_size*seq_length
 
+        # Full batches:
         for i_batch in range(N_full_batches):
-            if features_type == 'features':
-                pred = model.predict(X_features[i_batch*batch_size:(i_batch+1)*batch_size, :, :])
-            elif features_type == 'frames':
-                pred = model.predict(X_frames[i_batch*batch_size:(i_batch+1)*batch_size, :, :, :, :])
-            else:#features_type == 'both':
-                pred = model.predict([X_features[i_batch*batch_size:(i_batch+1)*batch_size, :, :],
-                                      X_frames[i_batch*batch_size:(i_batch+1)*batch_size, :, :, :, :]])
-            for i_out in range(N_outputs):
-                output[i_out][0,i_batch*batch_size*seq_length:(i_batch+1)*batch_size*seq_length,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
-        if features_type == 'features':
-            pred = model.predict(X_features[N_full_batches*batch_size:, :, :])
-        elif features_type == 'frames':
-            pred = model.predict(X_frames[N_full_batches*batch_size:, :, :, :, :])
-        else:#features_type == 'both':
-            pred = model.predict([X_features[N_full_batches*batch_size:, :, :],
-                                  X_frames[N_full_batches*batch_size:, :, :, :, :]])
-        output[i_out][0,N_full_batches*batch_size*seq_length:,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
+            if features_type == 'frames' or features_type == 'both':
+                X_frames_batch = np.zeros((1, batch_size*seq_length, img_width, img_height, 3))
+                i_seq_start   = i_batch*batch_size
+                i_seq_end     = (i_batch+1)*batch_size
+                i_frame_start = i_seq_start*seq_length
+                i_frame_end   = i_seq_end*seq_length
+                for iFrame in range(i_frame_start, i_frame_end):
+                    if cnnType=='resnet':
+                        X_frames_batch[0, iFrame-i_frame_start, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame],  target_size=(img_width, img_height))))
+                    elif cnnType=='vgg':
+                        X_frames_batch[0, iFrame-i_frame_start, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame],     target_size=(img_width, img_height))))
+                    elif cnnType=='mobilenet':
+                        X_frames_batch[0, iFrame-i_frame_start, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                    else:
+                        sys.exit('Invalid CNN network model')
+                X_frames_batch = X_frames_batch.reshape(-1, seq_length, img_width, img_height, 3)
 
-    for i_out in range(N_outputs):
-        output[i_out] = output[i_out].reshape(-1, seq_length, N_categories[i_out])
+            if features_type == 'features':
+                pred = model.predict(X_features[i_seq_start:i_seq_end, :, :])
+            elif features_type == 'frames':
+                pred = model.predict(X_frames_batch)
+            else:#features_type == 'both':
+                pred = model.predict([X_features[i_seq_start:i_seq_end, :, :],
+                                      X_frames_batch])
+            if N_outputs > 1:
+                for i_out in range(N_outputs):
+                    output[i_out][0,i_frame_start:i_frame_end,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
+            else:
+                output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, N_categories[i_out])
+
+
+        # Last (incomplete) batch:
+        if features_type == 'frames' or features_type == 'both':
+            X_frames_batch = np.zeros((1, remainding_length, img_width, img_height, 3))
+            i_seq_start   = N_full_batches*batch_size
+            i_seq_end     = total_length_round//seq_length
+            i_frame_start = i_seq_start*seq_length
+            i_frame_end   = i_seq_end*seq_length
+            for iFrame in range(i_frame_start, i_frame_end):
+                if cnnType=='resnet':
+                    X_frames_batch[0, iFrame-i_frame_start, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame],  target_size=(img_width, img_height))))
+                elif cnnType=='vgg':
+                    X_frames_batch[0, iFrame-i_frame_start, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame],     target_size=(img_width, img_height))))
+                elif cnnType=='mobilenet':
+                    X_frames_batch[0, iFrame-i_frame_start, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                else:
+                    sys.exit('Invalid CNN network model')
+            X_frames_batch = X_frames_batch.reshape(-1, seq_length, img_width, img_height, 3)
+
+        if features_type == 'features':
+            pred = model.predict(X_features[i_seq_start:, :, :])
+        elif features_type == 'frames':
+            pred = model.predict(X_frames_batch)
+        else:#features_type == 'both':
+            pred = model.predict([X_features[i_seq_start:, :, :],
+                                  X_frames_batch])
+        if N_outputs > 1:
+            for i_out in range(N_outputs):
+                output[i_out][0,i_frame_start:i_frame_end,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
+        else:
+            output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, N_categories[i_out])
+
+        if N_outputs > 1:
+            for i_out in range(N_outputs):
+                output[i_out] = output[i_out].reshape(-1, seq_length, N_categories[i_out])
+        else:
+            output = output.reshape(-1, seq_length, N_categories[i_out])
+
     return output
