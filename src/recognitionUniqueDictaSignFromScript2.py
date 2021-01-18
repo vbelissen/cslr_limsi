@@ -328,28 +328,28 @@ flsKeep    = args.flsKeep#[]
 comment    = args.comment#[]
 
 # Training global setting
-videoSplitMode      = args.videoSplitMode
-fractionValid       = args.fractionValid
-fractionTest        = args.fractionTest
-signerIndependent   = bool(args.signerIndependent)#False
-taskIndependent     = bool(args.taskIndependent)
-excludeTask9        = bool(args.excludeTask9)
-tasksTrain          = args.tasksTrain#[2,3,4,5,6,7,8]
-tasksValid          = args.tasksValid#[9]
-tasksTest           = args.tasksTest#[7] # session 7
-signersTrain        = args.signersTrain#[2,3,4,5,6,7,8]
-signersValid        = args.signersValid#[9]
-signersTest         = args.signersTest#[7] # session 7
-idxTrainBypass      = args.idxTrainBypass
-idxValidBypass      = args.idxValidBypass
-idxTestBypass       = args.idxTestBypass
-weightCorrection    = args.weightCorrection
-inputType           = args.inputType
-inputNormed         = bool(args.inputNormed)
-inputFeaturesFrames = args.inputFeaturesFrames
-imgWidth            = args.imgWidth
-imgHeight           = args.imgHeight
-cnnType             = args.cnnType
+videoSplitMode       = args.videoSplitMode
+fractionValid        = args.fractionValid
+fractionTest         = args.fractionTest
+signerIndependent    = bool(args.signerIndependent)#False
+taskIndependent      = bool(args.taskIndependent)
+excludeTask9         = bool(args.excludeTask9)
+tasksTrain           = args.tasksTrain#[2,3,4,5,6,7,8]
+tasksValid           = args.tasksValid#[9]
+tasksTest            = args.tasksTest#[7] # session 7
+signersTrain         = args.signersTrain#[2,3,4,5,6,7,8]
+signersValid         = args.signersValid#[9]
+signersTest          = args.signersTest#[7] # session 7
+idxTrainBypass       = args.idxTrainBypass
+idxValidBypass       = args.idxValidBypass
+idxTestBypass        = args.idxTestBypass
+weightCorrection     = args.weightCorrection
+inputType            = args.inputType
+inputNormed          = bool(args.inputNormed)
+inputFeaturesFrames  = args.inputFeaturesFrames
+imgWidth             = args.imgWidth
+imgHeight            = args.imgHeight
+cnnType              = args.cnnType
 cnnFirstTrainedLayer = args.cnnFirstTrainedLayer
 cnnReduceDim         = args.cnnReduceDim
 
@@ -388,9 +388,10 @@ metrics      = ['acc',  f1K,   precisionK,   recallK]
 metricsNames = ['acc', 'f1K', 'precisionK', 'recallK']
 
 timeString = str(round(time.time()/10))
-saveBestName='recognitionUniqueDictaSign_'+outputName+'_'+timeString
+saveBestName = 'recognitionUniqueDictaSign_'+outputName+'_'+timeString
 
-features_dict, features_number = getFeaturesDict(inputType=inputType, inputNormed=inputNormed)
+features_dict, features_number = getFeaturesDict(inputType=inputType,
+                                                 inputNormed=inputNormed)
 
 if path.exists(saveGlobalresults):
     dataGlobal = pickle.load(open(saveGlobalresults, 'rb'))
@@ -481,14 +482,14 @@ else:
                                                                 checkSets=True)
 
 
-if outputName=='fls' :
-    binary=flsBinary
-    nonZeros=flsKeep
-    if len(flsKeep)==0 and not flsBinary:
+if outputName == 'fls' :
+    binary = flsBinary
+    nonZeros = flsKeep
+    if len(flsKeep) == 0 and not flsBinary:
         sys.exit('Can not get categorical output if non-zero categories are not listed')
 else:
-    binary=True
-    nonZeros=[]
+    binary = True
+    nonZeros = []
 
 features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     output_form='mixed',
@@ -527,51 +528,50 @@ classWeightFinal         = weightCorrection*classWeightsCorrected + (1-weightCor
 
 
 
-model = get_model([outputName],[nClasses],[1],
-                    dropout=dropout,
-                    rnn_number=rnn_number,
-                    rnn_hidden_units=rnn_hidden_units,
-                    mlp_layers_number=mlp_layers_number,
-                    conv=convolution,
-                    conv_filt=convFilt,
-                    conv_ker=convFiltSize,
-                    time_steps=seq_length,
-                    learning_rate=learning_rate,
-                    optimizer=optimizer,
-                    metrics=metrics,
-                    features_number=features_number,
-                    features_type=inputFeaturesFrames,
-                    img_width=imgWidth,
-                    img_height=imgHeight,
-                    cnnType=cnnType,
-                    cnnFirstTrainedLayer=cnnFirstTrainedLayer,
-                    cnnReduceDim=cnnReduceDim)
+model = get_model([outputName],
+                  [nClasses],
+                  [1],
+                  dropout=dropout,
+                  rnn_number=rnn_number,
+                  rnn_hidden_units=rnn_hidden_units,
+                  mlp_layers_number=mlp_layers_number,
+                  conv=convolution,
+                  conv_filt=convFilt,
+                  conv_ker=convFiltSize,
+                  time_steps=seq_length,
+                  learning_rate=learning_rate,
+                  optimizer=optimizer,
+                  metrics=metrics,
+                  features_number=features_number,
+                  features_type=inputFeaturesFrames,
+                  img_width=imgWidth,
+                  img_height=imgHeight,
+                  cnnType=cnnType,
+                  cnnFirstTrainedLayer=cnnFirstTrainedLayer,
+                  cnnReduceDim=cnnReduceDim)
 
 history = train_model(model,
-            features_train,
-            annot_train,
-            features_valid,
-            annot_valid,
-            output_class_weights=[classWeightFinal],
-            batch_size=batch_size,
-            epochs=epochs,
-            seq_length=seq_length,
-            save=save,
-            saveMonitor=saveMonitor,
-            saveMonitorMode=saveMonitorMode,
-            saveBestName=saveBestName,
-            reduceLrOnPlateau=reduceLrOnPlateau,
-            reduceLrMonitor=reduceLrMonitor,
-            reduceLrMonitorMode=reduceLrMonitorMode,
-            reduceLrPatience=reduceLrPatience,
-            reduceLrFactor=reduceLrFactor,
-            features_type=inputFeaturesFrames,
-            img_width=imgWidth,
-            img_height=imgHeight,
-            cnnType=cnnType)
-
-
-
+                      features_train,
+                      annot_train,
+                      features_valid,
+                      annot_valid,
+                      output_class_weights=[classWeightFinal],
+                      batch_size=batch_size,
+                      epochs=epochs,
+                      seq_length=seq_length,
+                      save=save,
+                      saveMonitor=saveMonitor,
+                      saveMonitorMode=saveMonitorMode,
+                      saveBestName=saveBestName,
+                      reduceLrOnPlateau=reduceLrOnPlateau,
+                      reduceLrMonitor=reduceLrMonitor,
+                      reduceLrMonitorMode=reduceLrMonitorMode,
+                      reduceLrPatience=reduceLrPatience,
+                      reduceLrFactor=reduceLrFactor,
+                      features_type=inputFeaturesFrames,
+                      img_width=imgWidth,
+                      img_height=imgHeight,
+                      cnnType=cnnType)
 
 
 # Results
@@ -587,7 +587,7 @@ for config in ['valid', 'test']:
     dataGlobal[outputName][timeString]['results'][config] = {}
     if config == 'valid':
         print('Validation set')
-        nRound_valid=annot_valid[0].shape[1]//seq_length
+        nRound_valid = annot_valid[0].shape[1]//seq_length
         timestepsRound_valid = nRound_valid*seq_length
         predict_valid = model_predictions(model=model,
                                           features=[features_valid[0][:,:timestepsRound_valid,:], features_valid[1][:timestepsRound_valid]],
@@ -599,13 +599,23 @@ for config in ['valid', 'test']:
                                           batch_size=0)
         predict_valid = predict_valid.reshape(1, timestepsRound_valid, nClasses)
         #predict_valid = predict_valid[0]
-        acc = framewiseAccuracy(annot_valid[0][0,:nRound_valid*seq_length,:],predict_valid[0,:nRound_valid *seq_length,:],True,True)
-        frameP, frameR, frameF1 = framewisePRF1(annot_valid[0][0,:nRound_valid *seq_length,:], predict_valid[0,:nRound_valid *seq_length,:], True, True)
-        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0][0,:nRound_valid*seq_length,:], predict_valid[0,:nRound_valid *seq_length,:], True, True, step=stepWolf)
+        acc = framewiseAccuracy(annot_valid[0][0,:nRound_valid*seq_length,:],
+                                predict_valid[0,:nRound_valid*seq_length,:],
+                                True,
+                                True)
+        frameP, frameR, frameF1 = framewisePRF1(annot_valid[0][0,:nRound_valid*seq_length,:],
+                                                predict_valid[0,:nRound_valid*seq_length,:],
+                                                True,
+                                                True)
+        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0][0,:nRound_valid*seq_length,:],
+                                                                       predict_valid[0,:nRound_valid*seq_length,:],
+                                                                       True,
+                                                                       True,
+                                                                       step=stepWolf)
         nameHistoryAppend = 'val_'
     else:
         print('Test set')
-        nRound_test=annot_test[0].shape[1]//seq_length
+        nRound_test = annot_test[0].shape[1]//seq_length
         timestepsRound_test = nRound_test*seq_length
         predict_test = model_predictions(model=model,
                                           features=[features_test[0][:,:timestepsRound_test,:], features_test[1][:timestepsRound_test]],
@@ -617,9 +627,19 @@ for config in ['valid', 'test']:
                                           batch_size=0)
         predict_test = predict_test.reshape(1, timestepsRound_test, nClasses)
         #predict_test = predict_test[0]
-        acc = framewiseAccuracy(annot_test[0][0,:nRound_test*seq_length,:],predict_test[0,:nRound_test *seq_length,:],True,True)
-        frameP, frameR, frameF1 = framewisePRF1(annot_test[0][0,:nRound_test *seq_length,:], predict_test[0,:nRound_test *seq_length,:], True, True)
-        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0][0,:nRound_test*seq_length,:], predict_test[0,:nRound_test *seq_length,:], True, True, step=stepWolf)
+        acc = framewiseAccuracy(annot_test[0][0,:nRound_test*seq_length,:],
+                                predict_test[0,:nRound_test*seq_length,:],
+                                True,
+                                True)
+        frameP, frameR, frameF1 = framewisePRF1(annot_test[0][0,:nRound_test*seq_length,:],
+                                                predict_test[0,:nRound_test*seq_length,:],
+                                                True,
+                                                True)
+        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0][0,:nRound_test*seq_length,:],
+                                                                       predict_test[0,:nRound_test*seq_length,:],
+                                                                       True,
+                                                                       True,
+                                                                       step=stepWolf)
         nameHistoryAppend =  ''
 
     print('Framewise accuracy: ' + str(acc))
@@ -682,5 +702,12 @@ for config in ['valid', 'test']:
         dataGlobal[outputName][timeString]['results'][config]['marginUnitR'][margin]  = marginUnitR
         dataGlobal[outputName][timeString]['results'][config]['marginUnitF1'][margin] = marginUnitF1
 
-pickle.dump(dataGlobal, open(saveGlobalresults,'wb'), protocol=pickle.HIGHEST_PROTOCOL)
-np.savez(savePredictions+saveBestName, true=annot_test[0][0,:timestepsRound_test,:], pred=predict_test, idxTest=idxTest, separation=separation)
+pickle.dump(dataGlobal,
+            open(saveGlobalresults,'wb'),
+            protocol=pickle.HIGHEST_PROTOCOL)
+
+np.savez(savePredictions+saveBestName,
+         true=annot_test[0][0,:timestepsRound_test,:],
+         pred=predict_test,
+         idxTest=idxTest,
+         separation=separation)
