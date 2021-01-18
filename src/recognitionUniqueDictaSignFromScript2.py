@@ -624,7 +624,7 @@ for config in ['valid', 'test']:
                                          img_width=imgWidth,
                                          img_height=imgHeight,
                                          cnnType=cnnType,
-                                         batch_size=200)
+                                         batch_size=batch_size)
         predict_test = predict_test.reshape(1, timestepsRound_test, nClasses)
         #predict_test = predict_test[0]
         acc = framewiseAccuracy(annot_test[0][0,:nRound_test*seq_length,:],
