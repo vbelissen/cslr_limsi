@@ -532,7 +532,7 @@ def model_predictions(model,
             for i_out in range(N_outputs):
                 output[i_out][0,i_frame_start:i_frame_end,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
         else:
-            output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, N_categories[i_out])
+            output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, N_categories[0])
 
         if N_outputs > 1:
             for i_out in range(N_outputs):
