@@ -104,12 +104,13 @@ def generator(features,
 
     while True:
         # Random start
+        annot_copy=np.copy(annot)
         random_ini = np.random.randint(0, total_length_round)
         end = random_ini + batch_size_time
         end_modulo = np.mod(end, total_length_round)
 
-        print(np.sum(annot,axis=1))
-        print(annot.shape)
+        print(np.sum(annot_copy,axis=1))
+        print(annot_copy.shape)
         # Fill in batch features
         if features_type == 'features' or features_type == 'both':
             batch_features = batch_features.reshape(1, batch_size_time, feature_number)
@@ -186,10 +187,10 @@ def generator(features,
         elif output_form == 'sign_types':
             batch_labels = batch_labels.reshape(1, batch_size_time, labels_shape)
             if end <= total_length_round:
-                batch_labels = annot[0, random_ini:end, :].reshape(-1, seq_length, labels_shape)
+                batch_labels = annot_copy[0, random_ini:end, :].reshape(-1, seq_length, labels_shape)
             else:
-                batch_labels[0, :(total_length_round - random_ini), :] = annot[0, random_ini:total_length_round, :]
-                batch_labels[0, (total_length_round - random_ini):, :] = annot[0, 0:end_modulo, :]
+                batch_labels[0, :(total_length_round - random_ini), :] = annot_copy[0, random_ini:total_length_round, :]
+                batch_labels[0, (total_length_round - random_ini):, :] = annot_copy[0, 0:end_modulo, :]
                 batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
 
         if output_class_weights != []:
