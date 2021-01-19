@@ -55,7 +55,7 @@ def generator(features,
     features: [preprocessed features (numpy array (1, time_steps, nb_features)), images_path (list of strings)]
     """
 
-    annot_copy=np.copy(annot)
+    annot_copy=np.copy(annot[0])
     features_copy = np.copy(features[0])
 
     if features_type == 'frames':
@@ -112,7 +112,7 @@ def generator(features,
         end_modulo = np.mod(end, total_length_round)
 
 
-        print(np.sum(np.abs(annot - annot_copy)))
+        print(np.sum(np.abs(annot[0] - annot_copy)))
         print(np.sum(np.abs(features[0] - features_copy)))
 
         # Fill in batch features
