@@ -110,6 +110,7 @@ def generator(features,
 
         print(len(annot))
         print(np.sum(annot[0],axis=1))
+        print(annot[0].shape)
         # Fill in batch features
         if features_type == 'features' or features_type == 'both':
             batch_features = batch_features.reshape(1, batch_size_time, feature_number)
