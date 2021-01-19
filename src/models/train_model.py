@@ -119,10 +119,10 @@ def generator(features,
         if features_type == 'features' or features_type == 'both':
             batch_features = batch_features.reshape(1, batch_size_time, feature_number)
             if end <= total_length_round:
-                batch_features = features[0][0, random_ini:end, :].reshape(-1, seq_length, feature_number)
+                batch_features = np.copy(features[0][0, random_ini:end, :]).reshape(-1, seq_length, feature_number)
             else:
-                batch_features[0, :(total_length_round - random_ini), :] = features[0][0, random_ini:total_length_round, :]
-                batch_features[0, (total_length_round - random_ini):, :] = features[0][0, 0:end_modulo, :]
+                batch_features[0, :(total_length_round - random_ini), :] = np.copy(features[0][0, random_ini:total_length_round, :])
+                batch_features[0, (total_length_round - random_ini):, :] = np.copy(features[0][0, 0:end_modulo, :])
                 batch_features = batch_features.reshape(-1, seq_length, feature_number)
         if features_type == 'frames' or features_type == 'both':
             batch_frames = batch_frames.reshape(1, batch_size_time, img_width, img_height, 3)
