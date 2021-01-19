@@ -55,9 +55,6 @@ def generator(features,
     features: [preprocessed features (numpy array (1, time_steps, nb_features)), images_path (list of strings)]
     """
 
-    annot_copy=np.copy(annot[0])
-    features_copy = np.copy(features[0])
-
     if features_type == 'frames':
         total_length_round = (len(features[1])//seq_length)*seq_length
     elif features_type == 'features' or features_type == 'both':
@@ -110,11 +107,6 @@ def generator(features,
         random_ini = np.random.randint(0, total_length_round)
         end = random_ini + batch_size_time
         end_modulo = np.mod(end, total_length_round)
-
-        annot[0] = annot[0]*1.0
-        features[0] = features[0]*1.0
-        #print(np.sum(np.abs(annot[0] - annot_copy)))
-        #print(np.sum(np.abs(features[0] - features_copy)))
 
         # Fill in batch features
         if features_type == 'features' or features_type == 'both':
