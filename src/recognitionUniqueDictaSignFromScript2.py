@@ -483,43 +483,53 @@ else:
 
 
 if outputName == 'fls' :
+    nKept = len(flsKeep)
     binary = flsBinary
-    nonZeros = flsKeep
-    if len(flsKeep) == 0 and not flsBinary:
+    if nKept == 0 and not flsBinary:
         sys.exit('Can not get categorical output if non-zero categories are not listed')
+    if flsBinary:
+        selected_outputs = [['fls']]
+        nonZeros = [flsKeep]
+    else:
+        selected_outputs = []
+        nonZeros = []
+        for iKept in range(nKept):
+            selected_outputs.append(['fls'])
+            nonZeros.append([flsKeep[iKept]])
 else:
+    selected_outputs = [[outputName]]
     binary = True
-    nonZeros = []
+    nonZeros = [[]]
 
 features_train, annot_train = get_data_concatenated(corpus=corpus,
-                                                    output_form='mixed',
-                                                    types=[[outputName]],
-                                                    nonZero=[nonZeros],
+                                                    output_form='sign_types',
+                                                    types=selected_outputs,
+                                                    nonZero=nonZeros,
                                                     binary=[binary],
                                                     video_indices=idxTrain,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames)
 features_valid, annot_valid = get_data_concatenated(corpus=corpus,
-                                                    output_form='mixed',
-                                                    types=[[outputName]],
-                                                    nonZero=[nonZeros],
+                                                    output_form='sign_types',
+                                                    types=selected_outputs,
+                                                    nonZero=nonZeros,
                                                     binary=[binary],
                                                     video_indices=idxValid,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames)
 features_test, annot_test   = get_data_concatenated(corpus=corpus,
-                                                    output_form='mixed',
-                                                    types=[[outputName]],
-                                                    nonZero=[nonZeros],
+                                                    output_form='sign_types',
+                                                    types=selected_outputs,
+                                                    nonZero=nonZeros,
                                                     binary=[binary],
                                                     video_indices=idxTest,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames)
 
 
-nClasses = annot_train[0].shape[2]
+nClasses = annot_train.shape[2]
 
-classWeightsCorrected, _ = weightVectorImbalancedDataOneHot(annot_train[0][0, :, :])
+classWeightsCorrected, _ = weightVectorImbalancedDataOneHot(annot_train[0, :, :])
 classWeightsNotCorrected = np.ones(nClasses)
 classWeightFinal         = weightCorrection*classWeightsCorrected + (1-weightCorrection)*classWeightsNotCorrected
 
@@ -583,7 +593,7 @@ for config in ['valid', 'test']:
     dataGlobal[outputName][timeString]['results'][config] = {}
     if config == 'valid':
         print('Validation set')
-        nRound_valid = annot_valid[0].shape[1]//seq_length
+        nRound_valid = annot_valid.shape[1]//seq_length
         timestepsRound_valid = nRound_valid*seq_length
         predict_valid = model_predictions(model=model,
                                           features=[features_valid[0][:,:timestepsRound_valid,:], features_valid[1][:timestepsRound_valid]],
@@ -595,15 +605,15 @@ for config in ['valid', 'test']:
                                           batch_size=0)
         predict_valid = predict_valid.reshape(1, timestepsRound_valid, nClasses)
         #predict_valid = predict_valid[0]
-        acc = framewiseAccuracy(annot_valid[0][0,:nRound_valid*seq_length,:],
+        acc = framewiseAccuracy(annot_valid[0,:nRound_valid*seq_length,:],
                                 predict_valid[0,:nRound_valid*seq_length,:],
                                 True,
                                 True)
-        frameP, frameR, frameF1 = framewisePRF1(annot_valid[0][0,:nRound_valid*seq_length,:],
+        frameP, frameR, frameF1 = framewisePRF1(annot_valid[0,:nRound_valid*seq_length,:],
                                                 predict_valid[0,:nRound_valid*seq_length,:],
                                                 True,
                                                 True)
-        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0][0,:nRound_valid*seq_length,:],
+        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_valid[0,:nRound_valid*seq_length,:],
                                                                        predict_valid[0,:nRound_valid*seq_length,:],
                                                                        True,
                                                                        True,
@@ -611,7 +621,7 @@ for config in ['valid', 'test']:
         nameHistoryAppend = 'val_'
     else:
         print('Test set')
-        nRound_test = annot_test[0].shape[1]//seq_length
+        nRound_test = annot_test.shape[1]//seq_length
         timestepsRound_test = nRound_test*seq_length
         predict_test = model_predictions(model=model,
                                          features=[features_test[0][:,:timestepsRound_test,:], features_test[1][:timestepsRound_test]],
@@ -623,15 +633,15 @@ for config in ['valid', 'test']:
                                          batch_size=batch_size)
         predict_test = predict_test.reshape(1, timestepsRound_test, nClasses)
         #predict_test = predict_test[0]
-        acc = framewiseAccuracy(annot_test[0][0,:nRound_test*seq_length,:],
+        acc = framewiseAccuracy(annot_test[0,:nRound_test*seq_length,:],
                                 predict_test[0,:nRound_test*seq_length,:],
                                 True,
                                 True)
-        frameP, frameR, frameF1 = framewisePRF1(annot_test[0][0,:nRound_test*seq_length,:],
+        frameP, frameR, frameF1 = framewisePRF1(annot_test[0,:nRound_test*seq_length,:],
                                                 predict_test[0,:nRound_test*seq_length,:],
                                                 True,
                                                 True)
-        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0][0,:nRound_test*seq_length,:],
+        pStarTp, pStarTr, rStarTp, rStarTr, fStarTp, fStarTr = prfStar(annot_test[0,:nRound_test*seq_length,:],
                                                                        predict_test[0,:nRound_test*seq_length,:],
                                                                        True,
                                                                        True,
@@ -668,23 +678,23 @@ for config in ['valid', 'test']:
     for margin in [0, 12, 25, 50]:
         print('margin = ' + str(margin))
         if config == 'valid':
-            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],
+            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_valid[0,:nRound_valid*seq_length,:],
                                                                     predict_valid[0,:nRound_valid*seq_length,:],
                                                                     True,
                                                                     True,
                                                                     margin)
-            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0][0,:nRound_valid*seq_length,:],
+            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_valid[0,:nRound_valid*seq_length,:],
                                                                     predict_valid[0,:nRound_valid*seq_length,:],
                                                                     True,
                                                                     True,
                                                                     margin)
         else:
-            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],
+            middleUnitP, middleUnitR, middleUnitF1 = middleUnitPRF1(annot_test[0,:nRound_test*seq_length,:],
                                                                     predict_test[0,:nRound_test*seq_length,:],
                                                                     True,
                                                                     True,
                                                                     margin)
-            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0][0,:nRound_test*seq_length,:],
+            marginUnitP, marginUnitR, marginUnitF1 = marginUnitPRF1(annot_test[0,:nRound_test*seq_length,:],
                                                                     predict_test[0,:nRound_test*seq_length,:],
                                                                     True,
                                                                     True,
@@ -703,7 +713,7 @@ pickle.dump(dataGlobal,
             protocol=pickle.HIGHEST_PROTOCOL)
 
 np.savez(savePredictions+saveBestName,
-         true=annot_test[0][0,:timestepsRound_test,:],
+         true=annot_test[0,:timestepsRound_test,:],
          pred=predict_test,
          idxTest=idxTest,
          separation=separation)
