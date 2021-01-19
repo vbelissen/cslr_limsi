@@ -56,6 +56,7 @@ def generator(features,
     """
 
     annot_copy=np.copy(annot)
+    features_copy = np.copy(features[0])
 
     if features_type == 'frames':
         total_length_round = (len(features[1])//seq_length)*seq_length
@@ -112,6 +113,7 @@ def generator(features,
 
 
         print(np.sum(np.abs(annot - annot_copy)))
+        print(np.sum(np.abs(features[0] - features_copy)))
 
         # Fill in batch features
         if features_type == 'features' or features_type == 'both':
