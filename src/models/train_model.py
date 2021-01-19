@@ -117,7 +117,7 @@ def generator(features,
         if output_form == 'mixed':
             annot_copy = []
             for i_label_cat in range(len(annot)):
-                annot_copy.append(np.copy(annot[i_label_cat]))
+                annot_copy = np.copy(annot[i_label_cat])
                 #print(np.sum(annot_copy[i_label_cat],axis=1))
                 #print(annot_copy[i_label_cat].shape)
         elif output_form == 'sign_types':
@@ -193,10 +193,10 @@ def generator(features,
             for i_label_cat in range(labels_number):
                 batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(1, batch_size_time, labels_shape[i_label_cat])
                 if end <= total_length_round:
-                    batch_labels[i_label_cat] = annot_copy[i_label_cat][0, random_ini:end, :].reshape(-1, seq_length, labels_shape[i_label_cat])
+                    batch_labels[i_label_cat] = annot_copy[0, random_ini:end, :].reshape(-1, seq_length, labels_shape[i_label_cat])
                 else:
-                    batch_labels[i_label_cat][0, :(total_length_round - random_ini), :] = annot_copy[i_label_cat][0, random_ini:total_length_round, :]
-                    batch_labels[i_label_cat][0, (total_length_round - random_ini):, :] = annot_copy[i_label_cat][0, 0:end_modulo, :]
+                    batch_labels[i_label_cat][0, :(total_length_round - random_ini), :] = annot_copy[0, random_ini:total_length_round, :]
+                    batch_labels[i_label_cat][0, (total_length_round - random_ini):, :] = annot_copy[0, 0:end_modulo, :]
                     batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(-1, seq_length, labels_shape[i_label_cat])
         elif output_form == 'sign_types':
             batch_labels = batch_labels.reshape(1, batch_size_time, labels_shape)
