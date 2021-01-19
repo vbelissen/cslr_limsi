@@ -163,18 +163,18 @@ def generator(features,
                 for i_label_cat in range(labels_number):
                     batch_labels_weight[i_label_cat] = batch_labels_weight[i_label_cat].reshape(1, batch_size_time)
                     if end <= total_length_round:
-                        batch_labels_weight[i_label_cat] = annot_labels_weight[i_label_cat][0, random_ini:end].reshape(-1, seq_length)
+                        batch_labels_weight[i_label_cat] = np.copy(annot_labels_weight[i_label_cat][0, random_ini:end]).reshape(-1, seq_length)
                     else:
-                        batch_labels_weight[i_label_cat][0, :(total_length_round - random_ini)] = annot_labels_weight[i_label_cat][0, random_ini:total_length_round]
-                        batch_labels_weight[i_label_cat][0, (total_length_round - random_ini):] = annot_labels_weight[i_label_cat][0, 0:end_modulo]
+                        batch_labels_weight[i_label_cat][0, :(total_length_round - random_ini)] = np.copy(annot_labels_weight[i_label_cat][0, random_ini:total_length_round])
+                        batch_labels_weight[i_label_cat][0, (total_length_round - random_ini):] = np.copy(annot_labels_weight[i_label_cat][0, 0:end_modulo])
                         batch_labels_weight[i_label_cat] = batch_labels_weight[i_label_cat].reshape(-1, seq_length)
             elif output_form == 'sign_types':
                 batch_labels_weight = batch_labels_weight.reshape(1, batch_size_time)
                 if end <= total_length_round:
-                    batch_labels_weight = annot_labels_weight[0, random_ini:end].reshape(-1, seq_length)
+                    batch_labels_weight = np.copy(annot_labels_weight[0, random_ini:end]).reshape(-1, seq_length)
                 else:
-                    batch_labels_weight[0, :(total_length_round - random_ini)] = annot_labels_weight[0, random_ini:total_length_round]
-                    batch_labels_weight[0, (total_length_round - random_ini):] = annot_labels_weight[0, 0:end_modulo]
+                    batch_labels_weight[0, :(total_length_round - random_ini)] = np.copy(annot_labels_weight[0, random_ini:total_length_round])
+                    batch_labels_weight[0, (total_length_round - random_ini):] = np.copy(annot_labels_weight[0, 0:end_modulo])
                     batch_labels_weight = batch_labels_weight.reshape(-1, seq_length)
 
 
@@ -183,18 +183,18 @@ def generator(features,
             for i_label_cat in range(labels_number):
                 batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(1, batch_size_time, labels_shape[i_label_cat])
                 if end <= total_length_round:
-                    batch_labels[i_label_cat] = annot[i_label_cat][0, random_ini:end, :].reshape(-1, seq_length, labels_shape[i_label_cat])
+                    batch_labels[i_label_cat] = np.copy(annot[i_label_cat][0, random_ini:end, :]).reshape(-1, seq_length, labels_shape[i_label_cat])
                 else:
-                    batch_labels[i_label_cat][0, :(total_length_round - random_ini), :] = annot[i_label_cat][0, random_ini:total_length_round, :]
-                    batch_labels[i_label_cat][0, (total_length_round - random_ini):, :] = annot[i_label_cat][0, 0:end_modulo, :]
+                    batch_labels[i_label_cat][0, :(total_length_round - random_ini), :] = np.copy(annot[i_label_cat][0, random_ini:total_length_round, :])
+                    batch_labels[i_label_cat][0, (total_length_round - random_ini):, :] = np.copy(annot[i_label_cat][0, 0:end_modulo, :])
                     batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(-1, seq_length, labels_shape[i_label_cat])
         elif output_form == 'sign_types':
             batch_labels = batch_labels.reshape(1, batch_size_time, labels_shape)
             if end <= total_length_round:
-                batch_labels = annot[0, random_ini:end, :].reshape(-1, seq_length, labels_shape)
+                batch_labels = np.copy(annot[0, random_ini:end, :]).reshape(-1, seq_length, labels_shape)
             else:
-                batch_labels[0, :(total_length_round - random_ini), :] = annot[0, random_ini:total_length_round, :]
-                batch_labels[0, (total_length_round - random_ini):, :] = annot[0, 0:end_modulo, :]
+                batch_labels[0, :(total_length_round - random_ini), :] = np.copy(annot[0, random_ini:total_length_round, :])
+                batch_labels[0, (total_length_round - random_ini):, :] = np.copy(annot[0, 0:end_modulo, :])
                 batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
 
         if output_class_weights != []:
