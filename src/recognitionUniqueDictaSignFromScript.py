@@ -491,6 +491,10 @@ else:
     nonZeros=[]
     output_form='sign_types'
 
+print(idxTrain)
+print(idxValid)
+print(idxTest)
+
 features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     output_form=output_form,
                                                     types=[[outputName]],

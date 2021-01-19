@@ -482,6 +482,10 @@ else:
                                                                 checkSets=True)
 
 
+print(idxTrain)
+print(idxValid)
+print(idxTest)
+
 if outputName == 'fls' :
     binary = flsBinary
     nonZeros = flsKeep
