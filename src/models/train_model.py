@@ -108,9 +108,8 @@ def generator(features,
         end = random_ini + batch_size_time
         end_modulo = np.mod(end, total_length_round)
 
-        print(len(annot))
-        print(np.sum(annot[0],axis=1))
-        print(annot[0].shape)
+        print(np.sum(annot,axis=1))
+        print(annot.shape)
         # Fill in batch features
         if features_type == 'features' or features_type == 'both':
             batch_features = batch_features.reshape(1, batch_size_time, feature_number)
