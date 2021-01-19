@@ -524,9 +524,9 @@ classWeightsNotCorrected = np.ones(nClasses)
 classWeightFinal         = weightCorrection*classWeightsCorrected + (1-weightCorrection)*classWeightsNotCorrected
 
 
-model = get_model([outputName],
-                  [nClasses],
-                  [1],
+model = get_model(output_names=[outputName],
+                  output_classes=[nClasses],
+                  output_weights=[1],
                   dropout=dropout,
                   rnn_number=rnn_number,
                   rnn_hidden_units=rnn_hidden_units,
@@ -546,11 +546,11 @@ model = get_model([outputName],
                   cnnFirstTrainedLayer=cnnFirstTrainedLayer,
                   cnnReduceDim=cnnReduceDim)
 
-history = train_model(model,
-                      features_train,
-                      annot_train,
-                      features_valid,
-                      annot_valid,
+history = train_model(model=model,
+                      features_train=features_train,
+                      annot_train=annot_train,
+                      features_valid=features_valid,
+                      annot_valid=annot_valid,
                       output_class_weights=[classWeightFinal],
                       batch_size=batch_size,
                       epochs=epochs,
