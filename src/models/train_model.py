@@ -120,11 +120,11 @@ def generator(features,
         if features_type == 'features' or features_type == 'both':
             batch_features = batch_features.reshape(1, batch_size_time, feature_number)
             if end <= total_length_round:
-                batch_features = np.copy(features[0][0, random_ini:end, :]).reshape(-1, seq_length, feature_number)
+                batch_features = np.copy(features[0][0, random_ini:end, :])
             else:
                 batch_features[0, :(total_length_round - random_ini), :] = np.copy(features[0][0, random_ini:total_length_round, :])
                 batch_features[0, (total_length_round - random_ini):, :] = np.copy(features[0][0, 0:end_modulo, :])
-                batch_features = batch_features.reshape(-1, seq_length, feature_number)
+            batch_features = batch_features.reshape(-1, seq_length, feature_number)
         if features_type == 'frames' or features_type == 'both':
             batch_frames = batch_frames.reshape(1, batch_size_time, img_width, img_height, 3)
             if end <= total_length_round:
@@ -164,19 +164,19 @@ def generator(features,
                 for i_label_cat in range(labels_number):
                     batch_labels_weight[i_label_cat] = batch_labels_weight[i_label_cat].reshape(1, batch_size_time)
                     if end <= total_length_round:
-                        batch_labels_weight[i_label_cat] = np.copy(annot_labels_weight[i_label_cat][0, random_ini:end]).reshape(-1, seq_length)
+                        batch_labels_weight[i_label_cat] = np.copy(annot_labels_weight[i_label_cat][0, random_ini:end])
                     else:
                         batch_labels_weight[i_label_cat][0, :(total_length_round - random_ini)] = np.copy(annot_labels_weight[i_label_cat][0, random_ini:total_length_round])
                         batch_labels_weight[i_label_cat][0, (total_length_round - random_ini):] = np.copy(annot_labels_weight[i_label_cat][0, 0:end_modulo])
-                        batch_labels_weight[i_label_cat] = batch_labels_weight[i_label_cat].reshape(-1, seq_length)
+                    batch_labels_weight[i_label_cat] = batch_labels_weight[i_label_cat].reshape(-1, seq_length)
             elif output_form == 'sign_types':
                 batch_labels_weight = batch_labels_weight.reshape(1, batch_size_time)
                 if end <= total_length_round:
-                    batch_labels_weight = np.copy(annot_labels_weight[0, random_ini:end]).reshape(-1, seq_length)
+                    batch_labels_weight = np.copy(annot_labels_weight[0, random_ini:end])
                 else:
                     batch_labels_weight[0, :(total_length_round - random_ini)] = np.copy(annot_labels_weight[0, random_ini:total_length_round])
                     batch_labels_weight[0, (total_length_round - random_ini):] = np.copy(annot_labels_weight[0, 0:end_modulo])
-                    batch_labels_weight = batch_labels_weight.reshape(-1, seq_length)
+                batch_labels_weight = batch_labels_weight.reshape(-1, seq_length)
 
 
         # Fill in batch annotations
@@ -184,19 +184,19 @@ def generator(features,
             for i_label_cat in range(labels_number):
                 batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(1, batch_size_time, labels_shape[i_label_cat])
                 if end <= total_length_round:
-                    batch_labels[i_label_cat] = np.copy(annot[i_label_cat][0, random_ini:end, :]).reshape(-1, seq_length, labels_shape[i_label_cat])
+                    batch_labels[i_label_cat] = np.copy(annot[i_label_cat][0, random_ini:end, :])
                 else:
                     batch_labels[i_label_cat][0, :(total_length_round - random_ini), :] = np.copy(annot[i_label_cat][0, random_ini:total_length_round, :])
                     batch_labels[i_label_cat][0, (total_length_round - random_ini):, :] = np.copy(annot[i_label_cat][0, 0:end_modulo, :])
-                    batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(-1, seq_length, labels_shape[i_label_cat])
+                batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(-1, seq_length, labels_shape[i_label_cat])
         elif output_form == 'sign_types':
             batch_labels = batch_labels.reshape(1, batch_size_time, labels_shape)
             if end <= total_length_round:
-                batch_labels = np.copy(annot[0, random_ini:end, :]).reshape(-1, seq_length, labels_shape)
+                batch_labels = np.copy(annot[0, random_ini:end, :])
             else:
                 batch_labels[0, :(total_length_round - random_ini), :] = np.copy(annot[0, random_ini:total_length_round, :])
                 batch_labels[0, (total_length_round - random_ini):, :] = np.copy(annot[0, 0:end_modulo, :])
-                batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
+            batch_labels = batch_labels.reshape(-1, seq_length, labels_shape)
 
         if output_class_weights != []:
             if features_type == 'features':
