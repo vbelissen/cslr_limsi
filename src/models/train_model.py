@@ -104,13 +104,22 @@ def generator(features,
 
     while True:
         # Random start
-        annot_copy=np.copy(annot)
+
         random_ini = np.random.randint(0, total_length_round)
         end = random_ini + batch_size_time
         end_modulo = np.mod(end, total_length_round)
 
-        print(np.sum(annot_copy,axis=1))
-        print(annot_copy.shape)
+        if output_form == 'mixed':
+            annot_copy = []
+            for i_label_cat in range(len(annot)):
+                annot_copy.append(np.copy(annot[i_label_cat]))
+                print(np.sum(annot_copy[i_label_cat],axis=1))
+                print(annot_copy[i_label_cat].shape)
+        elif output_form == 'sign_types':
+            annot_copy=np.copy(annot)
+            print(np.sum(annot_copy,axis=1))
+            print(annot_copy.shape)
+
         # Fill in batch features
         if features_type == 'features' or features_type == 'both':
             batch_features = batch_features.reshape(1, batch_size_time, feature_number)
@@ -179,10 +188,10 @@ def generator(features,
             for i_label_cat in range(labels_number):
                 batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(1, batch_size_time, labels_shape[i_label_cat])
                 if end <= total_length_round:
-                    batch_labels[i_label_cat] = annot[i_label_cat][0, random_ini:end, :].reshape(-1, seq_length, labels_shape[i_label_cat])
+                    batch_labels[i_label_cat] = annot_copy[i_label_cat][0, random_ini:end, :].reshape(-1, seq_length, labels_shape[i_label_cat])
                 else:
-                    batch_labels[i_label_cat][0, :(total_length_round - random_ini), :] = annot[i_label_cat][0, random_ini:total_length_round, :]
-                    batch_labels[i_label_cat][0, (total_length_round - random_ini):, :] = annot[i_label_cat][0, 0:end_modulo, :]
+                    batch_labels[i_label_cat][0, :(total_length_round - random_ini), :] = annot_copy[i_label_cat][0, random_ini:total_length_round, :]
+                    batch_labels[i_label_cat][0, (total_length_round - random_ini):, :] = annot_copy[i_label_cat][0, 0:end_modulo, :]
                     batch_labels[i_label_cat] = batch_labels[i_label_cat].reshape(-1, seq_length, labels_shape[i_label_cat])
         elif output_form == 'sign_types':
             batch_labels = batch_labels.reshape(1, batch_size_time, labels_shape)
