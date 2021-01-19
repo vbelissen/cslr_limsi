@@ -255,6 +255,8 @@ def train_model(model,
     else:
         sys.exit('Wrong annotation format')
 
+    print(output_form)
+    
     if output_form == 'mixed':
         annot_categories_number = len(annot_train)
 
