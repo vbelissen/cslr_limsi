@@ -41,6 +41,7 @@ else:
 
 
 def generator(features,
+              frames,
               features_type,
               annot,
               batch_size,
@@ -52,14 +53,17 @@ def generator(features,
               cnnType):
     """
     Generator function for batch training models
-    features: [preprocessed features (numpy array (1, time_steps, nb_features)), images_path (list of strings)]
+    features: preprocessed features (numpy array (1, time_steps, nb_features)),
+    frames : images_path (list of strings)]
     """
 
+    frames_copy = np.copy(frames)
+
     if features_type == 'frames':
-        total_length_round = (len(features[1])//seq_length)*seq_length
+        total_length_round = (len(frames_copy)//seq_length)*seq_length
     elif features_type == 'features' or features_type == 'both':
-        total_length_round = (features[0].shape[1]//seq_length)*seq_length
-        feature_number = features[0].shape[2]
+        total_length_round = (features.shape[1]//seq_length)*seq_length
+        feature_number = features.shape[2]
     else:
         sys.exit('Wrong features type')
 
@@ -113,51 +117,51 @@ def generator(features,
             annot_copy = []
             for i_label_cat in range(len(annot)):
                 annot_copy.append(np.copy(annot[i_label_cat]))
-                print(np.sum(annot_copy[i_label_cat],axis=1))
-                print(annot_copy[i_label_cat].shape)
+                #print(np.sum(annot_copy[i_label_cat],axis=1))
+                #print(annot_copy[i_label_cat].shape)
         elif output_form == 'sign_types':
             annot_copy=np.copy(annot)
-            print(np.sum(annot_copy,axis=1))
-            print(annot_copy.shape)
+            #print(np.sum(annot_copy,axis=1))
+            #print(annot_copy.shape)
 
         # Fill in batch features
         if features_type == 'features' or features_type == 'both':
             batch_features = batch_features.reshape(1, batch_size_time, feature_number)
             if end <= total_length_round:
-                batch_features = features[0][0, random_ini:end, :].reshape(-1, seq_length, feature_number)
+                batch_features = features[0, random_ini:end, :].reshape(-1, seq_length, feature_number)
             else:
-                batch_features[0, :(total_length_round - random_ini), :] = features[0][0, random_ini:total_length_round, :]
-                batch_features[0, (total_length_round - random_ini):, :] = features[0][0, 0:end_modulo, :]
+                batch_features[0, :(total_length_round - random_ini), :] = features[0, random_ini:total_length_round, :]
+                batch_features[0, (total_length_round - random_ini):, :] = features[0, 0:end_modulo, :]
                 batch_features = batch_features.reshape(-1, seq_length, feature_number)
         if features_type == 'frames' or features_type == 'both':
             batch_frames = batch_frames.reshape(1, batch_size_time, img_width, img_height, 3)
             if end <= total_length_round:
                 for iFrame in range(random_ini, end):
                     if cnnType=='resnet':
-                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(frames_copy[iFrame], target_size=(img_width, img_height))))
                     elif cnnType=='vgg':
-                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(frames_copy[iFrame], target_size=(img_width, img_height))))
                     elif cnnType=='mobilenet':
-                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(frames_copy[iFrame], target_size=(img_width, img_height))))
                     else:
                         sys.exit('Invalid CNN network model')
             else:
                 for iFrame in range(random_ini,total_length_round):
                     if cnnType=='resnet':
-                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(frames_copy[iFrame], target_size=(img_width, img_height))))
                     elif cnnType=='vgg':
-                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(frames_copy[iFrame], target_size=(img_width, img_height))))
                     elif cnnType=='mobilenet':
-                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame-random_ini, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(frames_copy[iFrame], target_size=(img_width, img_height))))
                     else:
                         sys.exit('Invalid CNN network model')
                 for iFrame in range(0, end_modulo):
                     if cnnType=='resnet':
-                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_ResNet50(img_to_array(load_img(frames_copy[iFrame], target_size=(img_width, img_height))))
                     elif cnnType=='vgg':
-                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_VGG16(img_to_array(load_img(frames_copy[iFrame], target_size=(img_width, img_height))))
                     elif cnnType=='mobilenet':
-                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(features[1][iFrame], target_size=(img_width, img_height))))
+                        batch_frames[0, iFrame+total_length_round-random_ini, :, :, :] = preprocess_input_MobileNet(img_to_array(load_img(frames_copy[iFrame], target_size=(img_width, img_height))))
                     else:
                         sys.exit('Invalid CNN network model')
             batch_frames = batch_frames.reshape(-1, seq_length, img_width, img_height, 3)
@@ -306,7 +310,8 @@ def train_model(model,
                                                 epsilon=1e-4,
                                                 mode=reduceLrMonitorMode))
 
-    hist = model.fit_generator(generator(features=features_train,
+    hist = model.fit_generator(generator(features=features_train[0],
+                                         frames=features_train[1],
                                          features_type=features_type,
                                          annot=annot_train,
                                          batch_size=batch_size,
@@ -318,7 +323,8 @@ def train_model(model,
                                          cnnType=cnnType),
                                epochs=epochs,
                                steps_per_epoch=np.ceil(time_steps_train/batch_size_time),
-                               validation_data=generator(features=features_valid,
+                               validation_data=generator(features=features_valid[0],
+                                                         frames=features_valid[1],
                                                          features_type=features_type,
                                                          annot=annot_valid,
                                                          batch_size=batch_size,
