@@ -108,6 +108,8 @@ def generator(features,
         end = random_ini + batch_size_time
         end_modulo = np.mod(end, total_length_round)
 
+        print(len(annot))
+        print(np.sum(annot[0],axis=1))
         # Fill in batch features
         if features_type == 'features' or features_type == 'both':
             batch_features = batch_features.reshape(1, batch_size_time, feature_number)
@@ -255,8 +257,6 @@ def train_model(model,
     else:
         sys.exit('Wrong annotation format')
 
-    print(output_form)
-    
     if output_form == 'mixed':
         annot_categories_number = len(annot_train)
 
