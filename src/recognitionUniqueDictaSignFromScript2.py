@@ -627,6 +627,7 @@ for config in ['valid', 'test']:
                                          features=[features_test[0][:,:timestepsRound_test,:], features_test[1][:timestepsRound_test]],
                                          features_type=inputFeaturesFrames,
                                          seq_length=seq_length,
+                                         categories_per_output=[nClasses],
                                          img_width=imgWidth,
                                          img_height=imgHeight,
                                          cnnType=cnnType,

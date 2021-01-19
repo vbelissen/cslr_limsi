@@ -401,6 +401,7 @@ def model_predictions(model,
                       features,
                       features_type,
                       seq_length,
+                      categories_per_output,
                       img_width=224,
                       img_height=224,
                       cnnType='resnet',
@@ -416,6 +417,7 @@ def model_predictions(model,
                    X_frames: a list of frame paths
         features_type: 'features', 'frames' or 'both'
         seq_length
+        categories_per_output: a list of number of categories for each output
         batch_size: if  0, predictions are sequence per sequence
                     if >0, predictions are run by batches
 
@@ -423,8 +425,7 @@ def model_predictions(model,
         predictions
     '''
 
-    N_categories = [2]
-    N_outputs = len(N_categories)
+    N_outputs = len(categories_per_output)
 
     if features_type == 'frames':
         total_length_round = (len(features[1])//seq_length)*seq_length
@@ -463,9 +464,9 @@ def model_predictions(model,
 
     else:
         if N_outputs > 1:
-            output = [np.zeros((1, total_length_round, N_categories[i])) for i in range(N_outputs)]
+            output = [np.zeros((1, total_length_round, categories_per_output[i])) for i in range(N_outputs)]
         else:
-            output = np.zeros((1, total_length_round, N_categories[0]))
+            output = np.zeros((1, total_length_round, categories_per_output[0]))
 
         N_full_batches = total_length_round//(batch_size*seq_length)
         remainding_length = total_length_round - N_full_batches*batch_size*seq_length
@@ -498,9 +499,9 @@ def model_predictions(model,
                                       X_frames_batch])
             if N_outputs > 1:
                 for i_out in range(N_outputs):
-                    output[i_out][0,i_frame_start:i_frame_end,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
+                    output[i_out][0,i_frame_start:i_frame_end,:] = pred[i_out].reshape(1, -1, categories_per_output[i_out])
             else:
-                output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, N_categories[0])
+                output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, categories_per_output[0])
 
 
         # Last (incomplete) batch:
@@ -530,14 +531,14 @@ def model_predictions(model,
                                   X_frames_batch])
         if N_outputs > 1:
             for i_out in range(N_outputs):
-                output[i_out][0,i_frame_start:i_frame_end,:] = pred[i_out].reshape(1, -1, N_categories[i_out])
+                output[i_out][0,i_frame_start:i_frame_end,:] = pred[i_out].reshape(1, -1, categories_per_output[i_out])
         else:
-            output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, N_categories[0])
+            output[0,i_frame_start:i_frame_end,:] = pred.reshape(1, -1, categories_per_output[0])
 
         if N_outputs > 1:
             for i_out in range(N_outputs):
-                output[i_out] = output[i_out].reshape(-1, seq_length, N_categories[i_out])
+                output[i_out] = output[i_out].reshape(-1, seq_length, categories_per_output[i_out])
         else:
-            output = output.reshape(-1, seq_length, N_categories[0])
+            output = output.reshape(-1, seq_length, categories_per_output[0])
 
     return output
