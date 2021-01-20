@@ -304,7 +304,11 @@ parser.add_argument('--savePredictions',
                     type=str,
                     default='reports/corpora/DictaSign/recognitionUnique/predictions/',
                     help='Where to save predictions')
-
+parser.add_argument('--fromNotebook',
+                    type=int,
+                    default=0,
+                    help='When the script is run from a jupyter notebook',
+                    choices=[0, 1])
 
 # Metrics
 parser.add_argument('--stepWolf',
@@ -381,6 +385,7 @@ saveMonitor       = args.saveBestMonitor
 saveMonitorMode   = args.saveBestMonMode
 saveGlobalresults = args.saveGlobalresults
 savePredictions   = args.savePredictions
+fromNotebook       = bool(args.fromNotebook)
 
 # Metrics
 stepWolf     = args.stepWolf#0.1
@@ -456,6 +461,7 @@ dataGlobal[outputName][timeString]['params']['saveMonitor']          = saveMonit
 dataGlobal[outputName][timeString]['params']['saveMonitorMode']      = saveMonitorMode
 dataGlobal[outputName][timeString]['params']['saveGlobalresults']    = saveGlobalresults
 dataGlobal[outputName][timeString]['params']['savePredictions']      = savePredictions
+dataGlobal[outputName][timeString]['params']['fromNotebook']         = fromNotebook
 dataGlobal[outputName][timeString]['params']['stepWolf']             = stepWolf
 
 
@@ -479,7 +485,8 @@ else:
                                                                 fractionValid,
                                                                 fractionTest,
                                                                 checkSplits=True,
-                                                                checkSets=True)
+                                                                checkSets=True,
+                                                                from_notebook=fromNotebook)
 
 
 if outputName == 'fls' :
@@ -508,7 +515,8 @@ features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     binary=[binary],
                                                     video_indices=idxTrain,
                                                     features_dict=features_dict,
-                                                    features_type=inputFeaturesFrames)
+                                                    features_type=inputFeaturesFrames,
+                                                    from_notebook=fromNotebook)
 features_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     output_form='sign_types',
                                                     types=selected_outputs,
@@ -516,7 +524,8 @@ features_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     binary=[binary],
                                                     video_indices=idxValid,
                                                     features_dict=features_dict,
-                                                    features_type=inputFeaturesFrames)
+                                                    features_type=inputFeaturesFrames,
+                                                    from_notebook=fromNotebook)
 features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     output_form='sign_types',
                                                     types=selected_outputs,
@@ -524,7 +533,8 @@ features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     binary=[binary],
                                                     video_indices=idxTest,
                                                     features_dict=features_dict,
-                                                    features_type=inputFeaturesFrames)
+                                                    features_type=inputFeaturesFrames,
+                                                    from_notebook=fromNotebook)
 
 
 nClasses = annot_train.shape[2]
