@@ -14,7 +14,7 @@ The training and testing scripts require:
 * Keras on top of Tensorflow (1.X or 2.X)
 
 ## Usage
-See tutorial: [Main tutorial](notebooks/Main tutorial.ipynb)
+See tutorial: [Main tutorial](notebooks/Main_tutorial.ipynb)
 
 
 ## Dataset
