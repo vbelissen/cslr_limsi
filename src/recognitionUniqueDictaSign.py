@@ -398,6 +398,7 @@ metrics      = ['acc',  f1K,   precisionK,   recallK]
 metricsNames = ['acc', 'f1K', 'precisionK', 'recallK']
 
 timeString = str(round(time.time()/10))
+saveBestName = 'recognitionUniqueDictaSign_'+outputName+'_'+timeString
 
 features_dict, features_number = getFeaturesDict(inputType=inputType,
                                                  inputNormed=inputNormed)
