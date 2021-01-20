@@ -393,7 +393,10 @@ metrics      = ['acc',  f1K,   precisionK,   recallK]
 metricsNames = ['acc', 'f1K', 'precisionK', 'recallK']
 
 timeString = str(round(time.time()/10))
-saveBestName = 'recognitionUniqueDictaSign_'+outputName+'_'+timeString
+if fromNotebook:
+    saveBestName = '../models/recognitionUniqueDictaSign_'+outputName+'_'+timeString
+else:
+    saveBestName = 'models/recognitionUniqueDictaSign_'+outputName+'_'+timeString
 
 features_dict, features_number = getFeaturesDict(inputType=inputType,
                                                  inputNormed=inputNormed)
@@ -491,7 +494,6 @@ else:
 
 if outputName == 'fls' :
     nKept = len(flsKeep)
-    binary = flsBinary
     if nKept == 0 and not flsBinary:
         sys.exit('Can not get categorical output if non-zero categories are not listed')
     if flsBinary:
@@ -505,14 +507,13 @@ if outputName == 'fls' :
             nonZeros.append([flsKeep[iKept]])
 else:
     selected_outputs = [[outputName]]
-    binary = True
     nonZeros = [[]]
 
 features_train, annot_train = get_data_concatenated(corpus=corpus,
                                                     output_form='sign_types',
                                                     types=selected_outputs,
                                                     nonZero=nonZeros,
-                                                    binary=[binary],
+                                                    binary=[],
                                                     video_indices=idxTrain,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames,
@@ -521,7 +522,7 @@ features_valid, annot_valid = get_data_concatenated(corpus=corpus,
                                                     output_form='sign_types',
                                                     types=selected_outputs,
                                                     nonZero=nonZeros,
-                                                    binary=[binary],
+                                                    binary=[],
                                                     video_indices=idxValid,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames,
@@ -530,7 +531,7 @@ features_test, annot_test   = get_data_concatenated(corpus=corpus,
                                                     output_form='sign_types',
                                                     types=selected_outputs,
                                                     nonZero=nonZeros,
-                                                    binary=[binary],
+                                                    binary=[],
                                                     video_indices=idxTest,
                                                     features_dict=features_dict,
                                                     features_type=inputFeaturesFrames,
