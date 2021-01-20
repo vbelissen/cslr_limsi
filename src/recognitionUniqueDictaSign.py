@@ -304,6 +304,10 @@ parser.add_argument('--savePredictions',
                     type=str,
                     default='reports/corpora/DictaSign/recognitionUnique/predictions/',
                     help='Where to save predictions')
+parser.add_argument('--saveModels',
+                    type=str,
+                    default='models/corpora/DictaSign/recognitionUnique/',
+                    help='Where to save predictions')
 parser.add_argument('--fromNotebook',
                     type=int,
                     default=0,
@@ -385,6 +389,7 @@ saveMonitor       = args.saveBestMonitor
 saveMonitorMode   = args.saveBestMonMode
 saveGlobalresults = args.saveGlobalresults
 savePredictions   = args.savePredictions
+saveModels        = args.saveModels
 fromNotebook       = bool(args.fromNotebook)
 
 # Metrics
@@ -393,10 +398,6 @@ metrics      = ['acc',  f1K,   precisionK,   recallK]
 metricsNames = ['acc', 'f1K', 'precisionK', 'recallK']
 
 timeString = str(round(time.time()/10))
-if fromNotebook:
-    saveBestName = '../models/recognitionUniqueDictaSign_'+outputName+'_'+timeString
-else:
-    saveBestName = 'models/recognitionUniqueDictaSign_'+outputName+'_'+timeString
 
 features_dict, features_number = getFeaturesDict(inputType=inputType,
                                                  inputNormed=inputNormed)
@@ -464,6 +465,7 @@ dataGlobal[outputName][timeString]['params']['saveMonitor']          = saveMonit
 dataGlobal[outputName][timeString]['params']['saveMonitorMode']      = saveMonitorMode
 dataGlobal[outputName][timeString]['params']['saveGlobalresults']    = saveGlobalresults
 dataGlobal[outputName][timeString]['params']['savePredictions']      = savePredictions
+dataGlobal[outputName][timeString]['params']['saveModels']           = saveModels
 dataGlobal[outputName][timeString]['params']['fromNotebook']         = fromNotebook
 dataGlobal[outputName][timeString]['params']['stepWolf']             = stepWolf
 
@@ -579,7 +581,7 @@ history = train_model(model=model,
                       save=save,
                       saveMonitor=saveMonitor,
                       saveMonitorMode=saveMonitorMode,
-                      saveBestName=saveBestName,
+                      saveBestName=saveModels+saveBestName,
                       reduceLrOnPlateau=reduceLrOnPlateau,
                       reduceLrMonitor=reduceLrMonitor,
                       reduceLrMonitorMode=reduceLrMonitorMode,
@@ -593,7 +595,7 @@ history = train_model(model=model,
 
 # Results
 print('Results')
-model.load_weights(saveBestName+'-best.hdf5')
+model.load_weights(saveModels+saveBestName+'-best.hdf5')
 dataGlobal[outputName][timeString]['results'] = {}
 dataGlobal[outputName][timeString]['results']['metrics'] = {}
 
