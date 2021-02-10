@@ -1234,49 +1234,72 @@ def getFeaturesDict(inputType, inputNormed):
         suffix='_norm'
     else:
         suffix=''
-    if inputType=='2Draw':
+    if inputType=='bodyFace_2D_raw_hands_OP':
         features_dict['raw'+suffix]         = np.sort(np.hstack([np.arange(0,14),np.arange(28,42),np.arange(42,42+68),np.arange(42+2*68,42+3*68)]))
         features_dict['features_HS'+suffix] = np.arange(122, 244)
-    elif inputType=='2Draw_HS':
+    elif inputType=='bodyFace_2D_raw_hands_OP_HS':
         features_dict['raw'+suffix]         = np.sort(np.hstack([np.arange(0,14),np.arange(28,42),np.arange(42,42+68),np.arange(42+2*68,42+3*68)]))
         features_dict['features_HS'+suffix] = np.arange(0, 244)
-    elif inputType=='2Draw_HS_noOP':
+    elif inputType=='bodyFace_2D_raw_hands_HS':
         features_dict['raw'+suffix]         = np.sort(np.hstack([np.arange(0,14),np.arange(28,42),np.arange(42,42+68),np.arange(42+2*68,42+3*68)]))
         features_dict['features_HS'+suffix] = np.arange(0, 122)
-    elif inputType=='2Draw_noHands':
+    elif inputType=='bodyFace_2D_raw_hands_None':
         features_dict['raw'+suffix]         = np.sort(np.hstack([np.arange(0,14),np.arange(28,42),np.arange(42,42+68),np.arange(42+2*68,42+3*68)]))
-    elif inputType=='2Dfeatures':
+    elif inputType=='bodyFace_2D_features_hands_OP':
         features_dict['2Dfeatures'+suffix]  = np.arange(0, 96)
         features_dict['features_HS'+suffix] = np.arange(122, 244)
-    elif inputType=='2Dfeatures_HS':
+    elif inputType=='bodyFace_2D_features_hands_OP_HS':
         features_dict['2Dfeatures'+suffix]  = np.arange(0, 96)
         features_dict['features_HS'+suffix] = np.arange(0, 244)
-    elif inputType=='2Dfeatures_HS_noOP':
+    elif inputType=='bodyFace_2D_features_hands_HS':
         features_dict['2Dfeatures'+suffix]  = np.arange(0, 96)
         features_dict['features_HS'+suffix] = np.arange(0, 122)
-    elif inputType=='2Dfeatures_noHands':
+    elif inputType=='bodyFace_2D_features_hands_None':
         features_dict['2Dfeatures'+suffix]  = np.arange(0, 96)
-    elif inputType=='3Draw':
+    elif inputType=='bodyFace_3D_raw_hands_OP':
         features_dict['raw'+suffix]         = np.arange(0, 246)
         features_dict['features_HS'+suffix] = np.arange(122, 244)
-    elif inputType=='3Draw_HS':
+    elif inputType=='bodyFace_3D_raw_hands_OP_HS':
         features_dict['raw'+suffix]         = np.arange(0, 246)
         features_dict['features_HS'+suffix] = np.arange(0, 244)
-    elif inputType=='3Draw_HS_noOP':
+    elif inputType=='bodyFace_3D_raw_hands_HS':
         features_dict['raw'+suffix]         = np.arange(0, 246)
         features_dict['features_HS'+suffix] = np.arange(0, 122)
-    elif inputType=='3Draw_noHands':
+    elif inputType=='bodyFace_3D_raw_hands_None':
         features_dict['raw'+suffix]         = np.arange(0, 246)
-    elif inputType=='3Dfeatures':
+    elif inputType=='bodyFace_3D_features_hands_OP':
         features_dict['features_HS'+suffix] = np.arange(122, 420)
-    elif inputType=='3Dfeatures_HS':
+    elif inputType=='bodyFace_3D_features_hands_OP_HS':
         features_dict['features_HS'+suffix] = np.arange(0, 420)
-    elif inputType=='3Dfeatures_HS_noOP':
+    elif inputType=='bodyFace_3D_features_hands_HS':
         features_dict['features_HS'+suffix] = np.sort(np.hstack([np.arange(0,122),np.arange(244,420)]))
-    elif inputType=='3Dfeatures_noHands':
+    elif inputType=='bodyFace_3D_features_hands_None':
         features_dict['features_HS'+suffix] = np.arange(244, 420)
 
 
     features_number = features_dict['features_HS'].size + features_dict['features_HS_norm'].size + features_dict['raw'].size + features_dict['raw_norm'].size + features_dict['2Dfeatures'].size + features_dict['2Dfeatures_norm'].size
 
     return features_dict, features_number
+
+def getFeaturesNumber(inputType):
+
+    N_features = {
+    'bodyFace_2D_raw_hands_None':       168,
+    'bodyFace_2D_features_hands_None':   93,
+    'bodyFace_2D_raw_hands_OP':         290,
+    'bodyFace_2D_features_hands_OP':    215,
+    'bodyFace_2D_raw_hands_HS':         290,
+    'bodyFace_2D_features_hands_HS':    215,
+    'bodyFace_2D_raw_hands_OP_HS':      412,
+    'bodyFace_2D_features_hands_OP_HS': 337,
+    'bodyFace_3D_raw_hands_None':       246,
+    'bodyFace_3D_features_hands_None':  176,
+    'bodyFace_3D_raw_hands_OP':         368,
+    'bodyFace_3D_features_hands_OP':    298,
+    'bodyFace_3D_raw_hands_HS':         368,
+    'bodyFace_3D_features_hands_HS':    298,
+    'bodyFace_3D_raw_hands_OP_HS':      490,
+    'bodyFace_3D_features_hands_OP_HS': 420
+    }
+
+    return N_features[inputType]

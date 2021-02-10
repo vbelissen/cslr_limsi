@@ -1,8 +1,8 @@
 #!/bin/bash
 
 OUTPUTS=("fls" "FS" "DS" "PT" "FBUOY")
-INPUT_TYPE=("2Draw_noHands" "2Dfeatures_noHands" "3Draw_noHands" "3Dfeatures_noHands")
-#INPUT_TYPE=("2Draw" "2Draw_HS" "2Draw_HS_noOP" "2Dfeatures" "2Dfeatures_HS" "2Dfeatures_HS_noOP" "3Draw" "3Draw_HS" "3Draw_HS_noOP" "3Dfeatures" "3Dfeatures_HS" "3Dfeatures_HS_noOP")
+INPUT_TYPE=("bodyFace_2D_raw_hands_None" "bodyFace_2D_features_hands_None" "bodyFace_3D_raw_hands_None" "bodyFace_3D_features_hands_None")
+#INPUT_TYPE=("bodyFace_2D_raw_hands_OP" "bodyFace_2D_raw_hands_OP_HS" "bodyFace_2D_raw_hands_HS" "bodyFace_2D_features_hands_OP" "bodyFace_2D_features_hands_OP_HS" "bodyFace_2D_features_hands_HS" "bodyFace_3D_raw_hands_OP" "bodyFace_3D_raw_hands_OP_HS" "bodyFace_3D_raw_hands_HS" "bodyFace_3D_features_hands_OP" "bodyFace_3D_features_hands_OP_HS" "bodyFace_3D_features_hands_HS")
 
 FIXED_SIGNERS_TRAIN="0 5 6 7 8 9 10 11 12 13 14 15"
 FIXED_SIGNERS_VALID="1 2"
