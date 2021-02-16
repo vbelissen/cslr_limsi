@@ -360,12 +360,9 @@ def get_concatenated_mixed(corpus, types, nonZero, binary, video_indices, separa
     return output_list
 
 def get_features_videos(corpus,
-                        features_dict={'features_HS':np.arange(0, 420),
-                                       'features_HS_norm':np.array([]),
-                                       'raw':np.array([]),
-                                       'raw_norm':np.array([]),
-                                       '2Dfeatures':np.array([]),
-                                       '2Dfeatures_norm':np.array([])},
+                        input_type='bodyFace_3D_features_hands_OP_HS',
+                        input_normed=True,
+                        input_type_format='old',
                         video_indices=np.arange(94),
                         from_notebook=False):
     """
@@ -373,8 +370,6 @@ def get_features_videos(corpus,
 
         Inputs:
             corpus (string)
-            features_dict: a dictionary indication which features to keep
-                e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
             video_indices: list or numpy array of wanted videos
             from_notebook: if notebook script, data is in parent folder
 
@@ -384,14 +379,25 @@ def get_features_videos(corpus,
 
     features = []
 
-    features_number = 0
-    for key in features_dict:
-        features_number += features_dict[key].size
+    if input_type_format == 'old':
+        features_dict, features_number = getFeaturesDict(input_type, input_normed)
+    elif input_type_format == 'cslr_limsi_features':
+        features_number = getFeaturesNumberCslrLimsiFeatures(input_type)
+    else:
+        sys.exit('Wrong input type format')
+
 
     if from_notebook:
         parent = '../'
     else:
         parent = ''
+
+    if input_normed:
+        suffix='_normalized'
+    else:
+        suffix=''
+
+    list_videos = np.load(parent + 'data/processed/' + corpus + '/list_videos.npy')
 
     if corpus == 'DictaSign':
         annotation_raw = np.load(parent + 'data/processed/DictaSign/annotations.npz', encoding='latin1', allow_pickle=True)['dataBrut_DS'] # for counting nb of images
@@ -404,17 +410,27 @@ def get_features_videos(corpus,
         time_steps = annotation_raw[vid_idx].shape[0]
         features.append(np.zeros((1, time_steps, features_number)))
 
-    features_number_idx = 0
-    for key in features_dict:
-        key_features_idx = features_dict[key]
-        key_features_number = key_features_idx.size
-        if key_features_number > 0:
-            key_features = np.load(parent + 'data/processed/' + corpus + '/' + key + '.npy', encoding='latin1', allow_pickle=True)
-            index_vid_tmp = 0
-            for vid_idx in video_indices:
-                features[index_vid_tmp][0, :, features_number_idx:features_number_idx+key_features_number] = key_features[vid_idx][:, key_features_idx]
-                index_vid_tmp += 1
-            features_number_idx += key_features_number
+    if input_type_format == 'old':
+        features_number_idx = 0
+        for key in features_dict:
+            key_features_idx = features_dict[key]
+            key_features_number = key_features_idx.size
+            if key_features_number > 0:
+                key_features = np.load(parent + 'data/processed/' + corpus + '/' + key + '.npy', encoding='latin1', allow_pickle=True)
+                index_vid_tmp = 0
+                for vid_idx in video_indices:
+                    features[index_vid_tmp][0, :, features_number_idx:features_number_idx+key_features_number] = key_features[vid_idx][:, key_features_idx]
+                    index_vid_tmp += 1
+                features_number_idx += key_features_number
+    elif input_type_format == 'cslr_limsi_features':
+        index_vid_tmp = 0
+        for vid_idx in video_indices:
+            if corpus == 'DictaSign':
+                vidName = 'DictaSign_lsf_' + list_videos[vid_idx] + '_front'
+            else:
+                vidName = list_videos[vid_idx]
+            features[index_vid_tmp][0, :, :] = np.load(parent + 'data/processed/' + corpus + '/' + vidName + '_' + input_type + suffix + '.npy', encoding='latin1', allow_pickle=True)
+            index_vid_tmp += 1
 
     return features
 
@@ -422,12 +438,9 @@ def get_features_videos(corpus,
 def get_sequence_features(corpus,
                            vid_idx=0,
                            img_start_idx=0,
-                           features_dict={'features_HS':np.arange(0, 420),
-                                          'features_HS_norm':np.array([]),
-                                          'raw':np.array([]),
-                                          'raw_norm':np.array([]),
-                                          '2Dfeatures':np.array([]),
-                                          '2Dfeatures_norm':np.array([])},
+                           input_type='bodyFace_3D_features_hands_OP_HS',
+                           input_normed=True,
+                           input_type_format='old',
                            time_steps=100,
                            preloaded_features=None,
                            from_notebook=False):
@@ -438,13 +451,6 @@ def get_sequence_features(corpus,
             corpus (string)
             vid_idx (int): which video
             img_start_idx (int): which start image
-            features_dict: a dictionary indicating which features to keep
-                e.g.: {'features_HS':np.arange(0, 420),
-                       'features_HS_norm':np.array([]),
-                       'raw':np.array([]),
-                       'raw_norm':np.array([]),
-                       '2Dfeatures':np.array([]),
-                       '2Dfeatures_norm':np.array([])}}
             time_steps: length of sequence (int)
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
             from_notebook: if notebook script, data is in parent folder
@@ -459,23 +465,34 @@ def get_sequence_features(corpus,
         parent = ''
 
     if preloaded_features is None:
-        features_number = 0
-        for key in features_dict:
-            features_number += features_dict[key].size
+        if input_type_format == 'old':
+            features_dict, features_number = getFeaturesDict(input_type, input_normed)
+        elif input_type_format == 'cslr_limsi_features':
+            features_number = getFeaturesNumberCslrLimsiFeatures(input_type)
+        else:
+            sys.exit('Wrong input type format')
+
     else:
         features_number = preloaded_features[vid_idx].shape[1]
 
     X = np.zeros((1, time_steps, features_number))
 
     if preloaded_features is None:
-        features_number_idx = 0
-        for key in features_dict:
-            key_features_idx = features_dict[key]
-            key_features_number = key_features_idx.size
-            if key_features_number > 0:
-                key_features = np.load(parent + 'data/processed/' + corpus + '/' + key + '.npy', encoding='latin1', allow_pickle=True)[vid_idx]
-                X[0, :, features_number_idx:features_number_idx+key_features_number] = key_features[img_start_idx:img_start_idx + time_steps, key_features_idx]
-                features_number_idx += key_features_number
+        if input_type_format == 'old':
+            features_number_idx = 0
+            for key in features_dict:
+                key_features_idx = features_dict[key]
+                key_features_number = key_features_idx.size
+                if key_features_number > 0:
+                    key_features = np.load(parent + 'data/processed/' + corpus + '/' + key + '.npy', encoding='latin1', allow_pickle=True)[vid_idx]
+                    X[0, :, features_number_idx:features_number_idx+key_features_number] = key_features[img_start_idx:img_start_idx + time_steps, key_features_idx]
+                    features_number_idx += key_features_number
+        elif input_type_format == 'cslr_limsi_features':
+            if corpus == 'DictaSign':
+                vidName = 'DictaSign_lsf_' + list_videos[vid_idx] + '_front'
+            else:
+                vidName = list_videos[vid_idx]
+            X[0, :, :] = np.load(parent + 'data/processed/' + corpus + '/' + vidName + '_' + input_type + suffix + '.npy', encoding='latin1', allow_pickle=True)[img_start_idx:img_start_idx + time_steps, :]
     else:
         X[0, :, :] = preloaded_features[vid_idx][0, img_start_idx:img_start_idx+time_steps, :]
 
@@ -573,12 +590,9 @@ def get_sequence(corpus,
                  binary,
                  video_index,
                  img_start_idx,
-                 features_dict={'features_HS':np.arange(0, 420),
-                                'features_HS_norm':np.array([]),
-                                'raw':np.array([]),
-                                'raw_norm':np.array([]),
-                                '2Dfeatures':np.array([]),
-                                '2Dfeatures_norm':np.array([])},
+                 input_type='bodyFace_3D_features_hands_OP_HS',
+                 input_normed=True,
+                 input_type_format='old',
                  time_steps=100,
                  preloaded_features=None,
                  provided_annotation=None,
@@ -599,8 +613,6 @@ def get_sequence(corpus,
                 if output_form: 'sign_types': list of lists of original names that are used to compose final outputs
             vid_idx (int): which video
             img_start_idx (int): which start image
-            features_dict: a dictionary indication which features to keep
-                e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
             time_steps: length of sequences (int)
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
             provided_annotation: raw annotation data (not needed)
@@ -626,7 +638,9 @@ def get_sequence(corpus,
         X_features = get_sequence_features(corpus=corpus,
                               video_index=video_index,
                               img_start_idx=img_start_idx,
-                              features_dict=features_dict,
+                              input_type=input_type,
+                              input_normed=input_normed,
+                              input_type_format=input_type_format,
                               time_steps=time_steps,
                               preloaded_features=preloaded_features,
                               from_notebook=from_notebook)
@@ -672,15 +686,12 @@ def get_data_concatenated(corpus,
                           nonZero,
                           binary=[],
                           video_indices=np.arange(10),
-                          features_dict={'features_HS':np.arange(0, 420),
-                                         'features_HS_norm':np.array([]),
-                                         'raw':np.array([]),
-                                         'raw_norm':np.array([]),
-                                         '2Dfeatures':np.array([]),
-                                         '2Dfeatures_norm':np.array([])},
                           preloaded_features=None,
                           provided_annotation=None,
                           separation=100,
+                          input_type='bodyFace_3D_features_hands_OP_HS',
+                          input_normed=False,
+                          input_type_format='old',
                           from_notebook=False,
                           return_idx_trueData=False,
                           features_type='features',
@@ -716,12 +727,14 @@ def get_data_concatenated(corpus,
                      if 4 outputs with all nonZero values should be considered, nonZero=[[],[],[],[]]
             binary: only considered when output_form=mixed
                            It's a list (True/False) indicating whether the values should be categorical or binary
-            features_dict: a dictionary indication which features to keep
-                e.g.: {'features_HS':np.arange(0, 420), 'features_HS_norm':np.array([]), 'raw':np.array([]), 'raw_norm':np.array([])}
             preloaded_features: if features are already loaded, in the format of a list (features for each video)
             provided_annotation: raw annotation data (not needed)
             video_indices: numpy array for a list of videos
             separation: in order to separate consecutive videos
+            input_type: one of 'bodyFace_2D_raw_hands_None', 'bodyFace_2D_features_hands_None', 'bodyFace_2D_raw_hands_OP', 'bodyFace_2D_features_hands_OP', 'bodyFace_2D_raw_hands_HS', 'bodyFace_2D_features_hands_HS', 'bodyFace_2D_raw_hands_OP_HS', 'bodyFace_2D_features_hands_OP_HS', 'bodyFace_3D_raw_hands_None', 'bodyFace_3D_features_hands_None', 'bodyFace_3D_raw_hands_OP', 'bodyFace_3D_features_hands_OP', 'bodyFace_3D_raw_hands_HS', 'bodyFace_3D_features_hands_HS', 'bodyFace_3D_raw_hands_OP_HS', 'bodyFace_3D_features_hands_OP_HS'
+            input_normed: whether features are normed
+            input_type_format: 'old' if features are stored in big files named features_HS, raw... containing data for all videos
+                               'cslr_limsi_features' if features are stored per video
             from_notebook: if notebook script, data is in parent folder
             return_idx_trueData: if True, returns a binary vector with 0 where separations are
             features_type: 'features', 'frames', 'both'
@@ -778,7 +791,7 @@ def get_data_concatenated(corpus,
         total_length += separation
 
     if preloaded_features is None and features_type != 'frames':
-        preloaded_features = get_features_videos(corpus, features_dict, video_indices, from_notebook)
+        preloaded_features = get_features_videos(corpus, input_type, input_normed, input_type_format, video_indices, from_notebook)
 
     if features_type == 'features' or features_type == 'both':
         features_number = preloaded_features[0].shape[2]
@@ -1281,7 +1294,7 @@ def getFeaturesDict(inputType, inputNormed):
 
     return features_dict, features_number
 
-def getFeaturesNumber(inputType):
+def getFeaturesNumberCslrLimsiFeatures(inputType):
 
     N_features = {
     'bodyFace_2D_raw_hands_None':       168,
