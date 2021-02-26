@@ -425,21 +425,21 @@ def get_features_videos(corpus,
     elif input_type_format == 'cslr_limsi_features':
         index_vid_tmp = 0
         for vid_idx in video_indices:
-            print(list_videos[vid_idx])
+            print('Loading features of video: ' + list_videos[vid_idx])
             if corpus == 'DictaSign':
                 vidName = 'DictaSign_lsf_' + list_videos[vid_idx] + '_front'
             else:
                 vidName = list_videos[vid_idx]
-            loaded_features = np.load(parent + 'data/processed/' + corpus + '/' + vidName + '_' + input_type + suffix + '.npy', encoding='latin1', allow_pickle=True)
+            loaded_features = np.load(parent + 'data/processed/' + corpus + '/' + vidName + '_' + input_type + suffix + '.npy', allow_pickle=True)
             time_steps = annotation_raw[vid_idx].shape[0]
             T_loaded_features = loaded_features.shape[0]
             if T_loaded_features > time_steps:
-                print('Be careful as there is a time difference of ' + str(T_loaded_features - time_steps) + ' frames between features and annotation')
+                print('Be careful as there appears to be a time difference of ' + str(T_loaded_features - time_steps) + ' frames between features and annotation')
                 print(time_steps)
                 print(T_loaded_features)
                 features[index_vid_tmp][0, :, :] = loaded_features[:time_steps, :]
             elif T_loaded_features < time_steps:
-                print('Be careful as there is a time difference of ' + str(T_loaded_features - time_steps) + ' frames between features and annotation')
+                print('Be careful as there appears to be a time difference of ' + str(T_loaded_features - time_steps) + ' frames between features and annotation')
                 print(time_steps)
                 print(T_loaded_features)
                 features[index_vid_tmp][0, :T_loaded_features, :] = loaded_features
