@@ -425,6 +425,7 @@ def get_features_videos(corpus,
     elif input_type_format == 'cslr_limsi_features':
         index_vid_tmp = 0
         for vid_idx in video_indices:
+            print(list_videos[vid_idx])
             if corpus == 'DictaSign':
                 vidName = 'DictaSign_lsf_' + list_videos[vid_idx] + '_front'
             else:
