@@ -431,6 +431,7 @@ def get_features_videos(corpus,
             else:
                 vidName = list_videos[vid_idx]
             loaded_features = np.load(parent + 'data/processed/' + corpus + '/' + vidName + '_' + input_type + suffix + '.npy', encoding='latin1', allow_pickle=True)
+            time_steps = annotation_raw[vid_idx].shape[0]
             T_loaded_features = loaded_features.shape[0]
             if T_loaded_features > time_steps:
                 print('Be careful as there is a time difference of ' + str(T_loaded_features - time_steps) + ' frames between features and annotation')
@@ -444,7 +445,7 @@ def get_features_videos(corpus,
                 features[index_vid_tmp][0, :T_loaded_features, :] = loaded_features
             else:
                 features[index_vid_tmp][0, :, :] = loaded_features
-            features[index_vid_tmp][0, :, :] = np.load(parent + 'data/processed/' + corpus + '/' + vidName + '_' + input_type + suffix + '.npy', encoding='latin1', allow_pickle=True)
+            #features[index_vid_tmp][0, :, :] = np.load(parent + 'data/processed/' + corpus + '/' + vidName + '_' + input_type + suffix + '.npy', encoding='latin1', allow_pickle=True)
             index_vid_tmp += 1
 
     return features
