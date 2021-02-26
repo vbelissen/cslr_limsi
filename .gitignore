@@ -77,6 +77,8 @@ target/
 
 # exclude data from source control by default
 /data/
+!data/processed/DictaSign/list_videos.npy
+!data/processed/DictaSign/length_videos.npy
 
 # Mac OS-specific storage files
 .DS_Store
